@@ -8,7 +8,15 @@ import { StatusBadgeComponent } from '../status-badge/status-badge.component';
   standalone: true,
   imports: [PointsBadgeComponent, StatusBadgeComponent],
   template: `
-    <div class="mini-card" [class.dragging]="isDragging()" (click)="cardClick.emit()">
+    <div
+      class="mini-card"
+      [class.dragging]="isDragging()"
+      tabindex="0"
+      role="button"
+      (click)="cardClick.emit()"
+      (keydown.enter)="cardClick.emit()"
+      (keydown.space)="cardClick.emit()"
+    >
       @if (miniature().imageUrl) {
         <div class="image-container">
           <img [src]="miniature().imageUrl" [alt]="miniature().name" />

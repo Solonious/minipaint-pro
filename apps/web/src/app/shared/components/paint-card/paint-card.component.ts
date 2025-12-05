@@ -30,7 +30,11 @@ const TYPE_LABELS: Record<string, string> = {
       class="paint-card"
       [class.owned]="paint().owned"
       [class.wishlist]="paint().wishlist"
+      tabindex="0"
+      role="button"
       (click)="cardClick.emit()"
+      (keydown.enter)="cardClick.emit()"
+      (keydown.space)="cardClick.emit()"
     >
       <div class="swatch" [style.background-color]="paint().colorHex">
         @if (paint().owned) {

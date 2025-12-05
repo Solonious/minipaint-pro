@@ -1,17 +1,109 @@
-.placeholder-content {
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+
+  @media (min-width: 1024px) {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-xl);
+  }
+}
+
+.header-text {
+  h1 {
+    margin: 0;
+    font-family: 'Cinzel', serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.02em;
+  }
+
+  .page-subtitle {
+    margin: var(--space-xs) 0 0;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+}
+
+.header-stats {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  background-color: var(--bg-card);
-  border: 1px dashed var(--border-dim);
-  border-radius: var(--radius-lg);
-  color: var(--text-secondary);
-  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-md);
+  min-width: 70px;
+
+  .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .stat-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+  }
+
+  &.progress .stat-value {
+    color: var(--gold);
+  }
 }
 
-.placeholder-icon {
-  font-size: 3rem;
-  color: var(--text-dim);
+.header-actions {
+  flex-shrink: 0;
+}
+
+.kanban-board {
+  display: flex;
+  gap: var(--space-md);
+  padding-bottom: var(--space-lg);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-dim) transparent;
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-dim);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--border-glow);
+  }
 }

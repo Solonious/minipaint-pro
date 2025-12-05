@@ -17,7 +17,14 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
   standalone: true,
   imports: [ProgressRingComponent, PointsBadgeComponent],
   template: `
-    <div class="army-card" (click)="cardClick.emit()">
+    <div
+      class="army-card"
+      tabindex="0"
+      role="button"
+      (click)="cardClick.emit()"
+      (keydown.enter)="cardClick.emit()"
+      (keydown.space)="cardClick.emit()"
+    >
       <div class="icon-section" [style.background-color]="army().colorHex || 'var(--bg-elevated)'">
         @if (army().iconEmoji) {
           <span class="emoji">{{ army().iconEmoji }}</span>

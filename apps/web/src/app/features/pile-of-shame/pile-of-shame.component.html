@@ -1,9 +1,55 @@
 <div class="page-header">
-  <h1>Pile of Shame</h1>
-  <p class="page-subtitle">Track your unpainted miniatures through the painting pipeline</p>
+  <div class="header-content">
+    <div class="header-text">
+      <h1>Pile of Shame</h1>
+      <p class="page-subtitle">Track your unpainted miniatures through the painting pipeline</p>
+    </div>
+    <div class="header-stats">
+      <div class="stat">
+        <span class="stat-value">{{ totalCount() }}</span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{{ completedCount() }}</span>
+        <span class="stat-label">Complete</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{{ totalPoints() }}</span>
+        <span class="stat-label">Points</span>
+      </div>
+      <div class="stat progress">
+        <span class="stat-value">{{ progressPercentage() }}%</span>
+        <span class="stat-label">Progress</span>
+      </div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <p-button
+      label="Add Miniature"
+      icon="pi pi-plus"
+      (onClick)="openAddDialog()"
+      pTooltip="Add a new miniature to your collection"
+      tooltipPosition="bottom"
+    />
+  </div>
 </div>
 
-<div class="placeholder-content">
-  <i class="pi pi-th-large placeholder-icon"></i>
-  <p>Kanban board coming soon...</p>
+<div class="kanban-board">
+  @for (config of statusConfigs; track config.status) {
+    <app-kanban-column
+      [config]="config"
+      [miniatures]="getMiniaturesByStatus(config.status)"
+      [connectedLists]="connectedListIds"
+      (cardClick)="openEditDialog($event)"
+      (itemDropped)="onDrop($event)"
+    />
+  }
 </div>
+
+<app-miniature-dialog
+  [visible]="dialogVisible()"
+  [miniature]="selectedMiniature()"
+  (visibleChange)="onDialogVisibleChange($event)"
+  (save)="onSave($event)"
+  (delete)="onDelete($event)"
+/>
