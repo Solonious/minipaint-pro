@@ -5,7 +5,9 @@ import {
   input,
   output,
   OnInit,
+  viewChild,
 } from '@angular/core';
+import { ColorPicker } from 'primeng/colorpicker';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
@@ -191,10 +193,12 @@ const FACTION_OPTIONS: FactionOption[] = [
             <label for="colorHex">Army Color</label>
             <div class="color-picker-wrapper">
               <p-colorPicker
+                #colorPicker
                 [(ngModel)]="formData.colorHex"
                 name="colorHex"
                 [inline]="false"
                 format="hex"
+                appendTo="body"
               />
               <span class="color-preview" [style.background-color]="formData.colorHex || 'var(--bg-elevated)'"></span>
             </div>
@@ -379,6 +383,8 @@ export class ArmyDialogComponent implements OnInit {
   save = output<CreateArmyDto | UpdateArmyDto>();
   delete = output<string>();
 
+  private readonly colorPicker = viewChild<ColorPicker>('colorPicker');
+
   readonly gameSystemOptions = GAME_SYSTEM_OPTIONS;
   readonly factionOptions = FACTION_OPTIONS;
 
@@ -444,6 +450,10 @@ export class ArmyDialogComponent implements OnInit {
   onVisibleChange(visible: boolean): void {
     if (!visible) {
       this.resetForm();
+      const picker = this.colorPicker();
+      if (picker) {
+        picker.overlayVisible = false;
+      }
     }
     this.visibleChange.emit(visible);
   }
