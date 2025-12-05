@@ -34,9 +34,51 @@ const GAME_SYSTEM_OPTIONS: GameSystemOption[] = [
   { label: 'Other', value: 'other' },
 ];
 
-const FACTION_EMOJIS = [
-  '⚔️', '🛡️', '🔥', '💀', '🦅', '🐺', '🐉', '👽',
-  '🤖', '🧙', '🏛️', '⭐', '☠️', '🌙', '🦁', '🐍',
+interface FactionOption {
+  label: string;
+  value: string;
+  iconId: string;
+  category: 'imperium' | 'chaos' | 'xenos' | 'chapter';
+}
+
+const FACTION_OPTIONS: FactionOption[] = [
+  // Imperium
+  { label: 'Space Marines', value: 'Space Marines', iconId: 'adeptus-astartes', category: 'imperium' },
+  { label: 'Astra Militarum', value: 'Astra Militarum', iconId: 'astra-militarum', category: 'imperium' },
+  { label: 'Adeptus Mechanicus', value: 'Adeptus Mechanicus', iconId: 'adeptus-mechanicus', category: 'imperium' },
+  { label: 'Adeptus Custodes', value: 'Adeptus Custodes', iconId: 'adeptus-custodes', category: 'imperium' },
+  { label: 'Sisters of Battle', value: 'Sisters of Battle', iconId: 'sisters-of-battle', category: 'imperium' },
+  { label: 'Imperial Knights', value: 'Imperial Knights', iconId: 'imperial-knights', category: 'imperium' },
+  { label: 'Inquisition', value: 'Inquisition', iconId: 'inquisition', category: 'imperium' },
+  { label: 'Imperial Agents', value: 'Imperial Agents', iconId: 'imperial-aquila', category: 'imperium' },
+  // Space Marine Chapters
+  { label: 'Ultramarines', value: 'Ultramarines', iconId: 'ultramarines', category: 'chapter' },
+  { label: 'Blood Angels', value: 'Blood Angels', iconId: 'blood-angels', category: 'chapter' },
+  { label: 'Dark Angels', value: 'Dark Angels', iconId: 'dark-angels', category: 'chapter' },
+  { label: 'Space Wolves', value: 'Space Wolves', iconId: 'space-wolves', category: 'chapter' },
+  { label: 'Imperial Fists', value: 'Imperial Fists', iconId: 'imperial-fists', category: 'chapter' },
+  { label: 'Iron Hands', value: 'Iron Hands', iconId: 'iron-hands', category: 'chapter' },
+  { label: 'Raven Guard', value: 'Raven Guard', iconId: 'raven-guard', category: 'chapter' },
+  { label: 'Salamanders', value: 'Salamanders', iconId: 'salamanders', category: 'chapter' },
+  { label: 'White Scars', value: 'White Scars', iconId: 'white-scars', category: 'chapter' },
+  // Chaos
+  { label: 'Chaos Space Marines', value: 'Chaos Space Marines', iconId: 'chaos', category: 'chaos' },
+  { label: 'Black Legion', value: 'Black Legion', iconId: 'black-legion', category: 'chaos' },
+  { label: 'Death Guard', value: 'Death Guard', iconId: 'death-guard', category: 'chaos' },
+  { label: 'Thousand Sons', value: 'Thousand Sons', iconId: 'thousand-sons', category: 'chaos' },
+  { label: 'World Eaters', value: 'World Eaters', iconId: 'world-eaters', category: 'chaos' },
+  { label: "Emperor's Children", value: "Emperor's Children", iconId: 'emperors-children', category: 'chaos' },
+  { label: 'Chaos Knights', value: 'Chaos Knights', iconId: 'chaos-knights', category: 'chaos' },
+  { label: 'Chaos Daemons', value: 'Chaos Daemons', iconId: 'chaos-daemons', category: 'chaos' },
+  // Xenos
+  { label: 'Orks', value: 'Orks', iconId: 'orks', category: 'xenos' },
+  { label: 'Aeldari', value: 'Aeldari', iconId: 'aeldari', category: 'xenos' },
+  { label: 'Drukhari', value: 'Drukhari', iconId: 'drukhari', category: 'xenos' },
+  { label: 'Tyranids', value: 'Tyranids', iconId: 'tyranids', category: 'xenos' },
+  { label: 'Necrons', value: 'Necrons', iconId: 'necrons', category: 'xenos' },
+  { label: "T'au Empire", value: "T'au Empire", iconId: 'tau', category: 'xenos' },
+  { label: 'Genestealer Cults', value: 'Genestealer Cults', iconId: 'genestealer-cults', category: 'xenos' },
+  { label: 'Leagues of Votann', value: 'Leagues of Votann', iconId: 'leagues-of-votann', category: 'xenos' },
 ];
 
 @Component({
@@ -78,14 +120,42 @@ const FACTION_EMOJIS = [
         <div class="form-row">
           <div class="form-field">
             <label for="faction">Faction *</label>
-            <input
-              pInputText
+            <p-select
               id="faction"
               [(ngModel)]="formData.faction"
               name="faction"
-              placeholder="e.g., Space Marines"
-              required
-            />
+              [options]="factionOptions"
+              optionLabel="label"
+              optionValue="value"
+              [filter]="true"
+              filterPlaceholder="Search factions..."
+              placeholder="Select faction"
+              (ngModelChange)="onFactionChange($event)"
+              styleClass="faction-select"
+            >
+              <ng-template #selectedItem let-selected>
+                @if (selected) {
+                  <div class="faction-option">
+                    <img
+                      [src]="'assets/icons/factions/' + selected.iconId + '.svg'"
+                      [alt]="selected.label"
+                      class="faction-option-icon"
+                    />
+                    <span>{{ selected.label }}</span>
+                  </div>
+                }
+              </ng-template>
+              <ng-template #item let-option>
+                <div class="faction-option">
+                  <img
+                    [src]="'assets/icons/factions/' + option.iconId + '.svg'"
+                    [alt]="option.label"
+                    class="faction-option-icon"
+                  />
+                  <span>{{ option.label }}</span>
+                </div>
+              </ng-template>
+            </p-select>
           </div>
 
           <div class="form-field">
@@ -130,29 +200,19 @@ const FACTION_EMOJIS = [
           </div>
         </div>
 
-        <div class="form-field">
-          <span class="field-label">Icon Emoji</span>
-          <div class="emoji-grid" role="group" aria-label="Select army icon emoji">
-            @for (emoji of factionEmojis; track emoji) {
-              <button
-                type="button"
-                class="emoji-button"
-                [class.selected]="formData.iconEmoji === emoji"
-                (click)="selectEmoji(emoji)"
-              >
-                {{ emoji }}
-              </button>
-            }
-            <button
-              type="button"
-              class="emoji-button clear-button"
-              [class.selected]="!formData.iconEmoji"
-              (click)="selectEmoji(undefined)"
-            >
-              ✕
-            </button>
+        @if (formData.iconEmoji) {
+          <div class="form-field">
+            <span class="field-label">Selected Icon</span>
+            <div class="selected-icon-preview">
+              <img
+                [src]="'assets/icons/factions/' + formData.iconEmoji + '.svg'"
+                [alt]="formData.faction"
+                class="preview-icon"
+              />
+              <span class="preview-label">{{ formData.faction }}</span>
+            </div>
           </div>
-        </div>
+        }
       </form>
 
       <ng-template #footer>
@@ -251,38 +311,47 @@ const FACTION_EMOJIS = [
       border: 1px solid var(--border-dim);
     }
 
-    .emoji-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-xs);
-    }
-
-    .emoji-button {
-      width: 40px;
-      height: 40px;
+    .faction-option {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
+      gap: var(--space-sm);
+    }
+
+    .faction-option-icon {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      filter: brightness(0) invert(0.85);
+    }
+
+    .selected-icon-preview {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
       background: var(--bg-card);
       border: 1px solid var(--border-dim);
       border-radius: var(--radius-md);
-      cursor: pointer;
-      transition: all var(--transition-fast);
+    }
 
-      &:hover {
-        border-color: var(--border-glow);
-        background: var(--bg-elevated);
-      }
+    .preview-icon {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      filter: brightness(0) invert(0.85);
+    }
 
-      &.selected {
-        border-color: var(--gold);
-        box-shadow: 0 0 8px rgba(201, 162, 39, 0.3);
-      }
+    .preview-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
 
-      &.clear-button {
-        font-size: 0.875rem;
-        color: var(--text-dim);
+    :host ::ng-deep .faction-select {
+      .p-select-label {
+        display: flex;
+        align-items: center;
       }
     }
 
@@ -310,7 +379,7 @@ export class ArmyDialogComponent implements OnInit {
   delete = output<string>();
 
   readonly gameSystemOptions = GAME_SYSTEM_OPTIONS;
-  readonly factionEmojis = FACTION_EMOJIS;
+  readonly factionOptions = FACTION_OPTIONS;
 
   readonly dialogTitle = computed(() =>
     this.army() ? 'Edit Army' : 'Create Army'
@@ -362,6 +431,13 @@ export class ArmyDialogComponent implements OnInit {
 
   selectEmoji(emoji: string | undefined): void {
     this.formData.iconEmoji = emoji;
+  }
+
+  onFactionChange(factionValue: string): void {
+    const selectedFaction = FACTION_OPTIONS.find(f => f.value === factionValue);
+    if (selectedFaction) {
+      this.formData.iconEmoji = selectedFaction.iconId;
+    }
   }
 
   onVisibleChange(visible: boolean): void {

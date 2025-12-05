@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Drukhari/Dark Eldar Symbol - Sharp angular design -->
+  <path fill="currentColor" d="M50 5 L65 30 L95 35 L70 50 L95 65 L65 70 L50 95 L35 70 L5 65 L30 50 L5 35 L35 30 Z"/>
+  <path fill="currentColor" d="M50 25 L58 40 L75 42 L60 52 L65 70 L50 58 L35 70 L40 52 L25 42 L42 40 Z" opacity="0.6"/>
+</svg>

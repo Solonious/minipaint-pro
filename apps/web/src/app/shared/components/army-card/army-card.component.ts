@@ -27,7 +27,11 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
     >
       <div class="icon-section" [style.background-color]="army().colorHex || 'var(--bg-elevated)'">
         @if (army().iconEmoji) {
-          <span class="emoji">{{ army().iconEmoji }}</span>
+          <img
+            class="faction-icon"
+            [src]="'assets/icons/factions/' + army().iconEmoji + '.svg'"
+            [alt]="army().faction + ' icon'"
+          />
         } @else {
           <span class="placeholder">{{ initials() }}</span>
         }
@@ -84,8 +88,12 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
       flex-shrink: 0;
     }
 
-    .emoji {
-      font-size: 2.5rem;
+    .faction-icon {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+      opacity: 0.9;
     }
 
     .placeholder {

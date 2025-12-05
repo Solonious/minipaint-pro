@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Chaos Daemons Symbol - Warp flame/entity -->
+  <path fill="currentColor" d="M50 5 C45 20 35 25 30 35 C25 45 30 55 35 60 C30 65 25 75 30 85 C35 90 45 95 50 95 C55 95 65 90 70 85 C75 75 70 65 65 60 C70 55 75 45 70 35 C65 25 55 20 50 5 Z"/>
+  <path fill="currentColor" d="M50 20 C47 30 42 33 40 40 C38 47 40 52 43 55 C40 58 38 65 40 72 C42 76 47 78 50 78 C53 78 58 76 60 72 C62 65 60 58 57 55 C60 52 62 47 60 40 C58 33 53 30 50 20 Z" opacity="0.6"/>
+  <circle cx="45" cy="45" r="4" fill="currentColor"/>
+  <circle cx="55" cy="45" r="4" fill="currentColor"/>
+</svg>

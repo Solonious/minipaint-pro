@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Aeldari/Eldar Rune - Stylized eye/spirit stone -->
+  <path fill="currentColor" d="M50 5 L60 35 L90 50 L60 65 L50 95 L40 65 L10 50 L40 35 Z"/>
+  <ellipse cx="50" cy="50" rx="15" ry="20" fill="none" stroke="currentColor" stroke-width="3"/>
+  <circle cx="50" cy="50" r="8" fill="currentColor"/>
+</svg>

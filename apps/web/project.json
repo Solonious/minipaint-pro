@@ -18,7 +18,8 @@
         "assets": [
           {
             "glob": "**/*",
-            "input": "apps/web/src/assets"
+            "input": "apps/web/src/assets",
+            "output": "assets"
           }
         ],
         "styles": ["apps/web/src/styles.scss"]

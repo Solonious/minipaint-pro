@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Ork Glyph - Simplified skull with tusks -->
+  <path fill="currentColor" d="M50 10 C25 10 15 30 15 50 C15 70 25 85 50 90 C75 85 85 70 85 50 C85 30 75 10 50 10 Z M35 40 C40 40 45 45 45 50 C45 55 40 60 35 60 C30 60 25 55 25 50 C25 45 30 40 35 40 Z M65 40 C70 40 75 45 75 50 C75 55 70 60 65 60 C60 60 55 55 55 50 C55 45 60 40 65 40 Z M50 55 L50 70 M40 75 L35 85 M60 75 L65 85 M45 65 L40 70 M55 65 L60 70"/>
+  <circle cx="35" cy="50" r="8" fill="currentColor"/>
+  <circle cx="65" cy="50" r="8" fill="currentColor"/>
+  <path fill="currentColor" d="M20 70 L30 60 L25 80 Z"/>
+  <path fill="currentColor" d="M80 70 L70 60 L75 80 Z"/>
+</svg>
