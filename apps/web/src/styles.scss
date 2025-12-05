@@ -1,0 +1,157 @@
+// MiniPaint Pro - Main Styles Entry Point
+
+// Design system
+@use 'styles/tokens';
+@use 'styles/typography';
+@use 'styles/primeng-theme';
+@use 'styles/utilities';
+
+// PrimeNG icons
+@use 'primeicons/primeicons.css';
+
+// Reset and base styles
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: var(--bg-void);
+  color: var(--text-primary);
+}
+
+a {
+  color: var(--gold);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+
+  &:hover {
+    color: var(--gold-bright);
+  }
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+// App shell container
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-void);
+}
+
+// Main content area
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: margin-left var(--transition-base);
+
+  @media (min-width: 1024px) {
+    margin-left: var(--sidebar-width);
+  }
+}
+
+// Page content
+.page-content {
+  flex: 1;
+  padding: var(--space-md);
+  padding-bottom: calc(var(--bottom-nav-height) + var(--space-md));
+
+  @media (min-width: 1024px) {
+    padding: var(--space-lg);
+    padding-bottom: var(--space-lg);
+  }
+}
+
+// Page header
+.page-header {
+  margin-bottom: var(--space-lg);
+
+  h1 {
+    font-size: var(--text-3xl);
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+  }
+
+  .page-subtitle {
+    color: var(--text-secondary);
+    font-size: var(--text-lg);
+  }
+}
+
+// Card grid layouts
+.card-grid {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: 1fr;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// Status color classes
+.status-unbuilt {
+  background-color: var(--status-unbuilt);
+}
+
+.status-assembled {
+  background-color: var(--status-assembled);
+}
+
+.status-primed {
+  background-color: var(--status-primed);
+}
+
+.status-wip {
+  background-color: var(--status-wip);
+}
+
+.status-painted {
+  background-color: var(--status-painted);
+}
+
+.status-complete {
+  background-color: var(--status-complete);
+}
+
+// Gold accent text
+.gold-text {
+  color: var(--gold);
+}
+
+// Gold gradient text
+.gold-gradient {
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// Glow effect
+.glow {
+  box-shadow: var(--shadow-glow);
+}

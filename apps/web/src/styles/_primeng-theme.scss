@@ -1,0 +1,175 @@
+// MiniPaint Pro PrimeNG Theme Overrides
+
+// Override PrimeNG CSS variables to match our design system
+:root {
+  // Primary colors
+  --p-primary-color: var(--gold);
+  --p-primary-contrast-color: var(--bg-void);
+  --p-primary-hover-color: var(--gold-bright);
+  --p-primary-active-color: var(--gold);
+
+  // Surface colors
+  --p-surface-0: var(--bg-void);
+  --p-surface-50: var(--bg-panel);
+  --p-surface-100: var(--bg-card);
+  --p-surface-200: var(--bg-elevated);
+  --p-surface-300: var(--border-dim);
+  --p-surface-400: var(--border-glow);
+  --p-surface-500: var(--text-dim);
+  --p-surface-600: var(--text-secondary);
+  --p-surface-700: var(--text-primary);
+  --p-surface-800: #f0ede8;
+  --p-surface-900: #ffffff;
+
+  // Text colors
+  --p-text-color: var(--text-primary);
+  --p-text-muted-color: var(--text-secondary);
+
+  // Content/card
+  --p-content-background: var(--bg-card);
+  --p-content-border-color: var(--border-dim);
+  --p-content-hover-background: var(--bg-elevated);
+
+  // Form fields
+  --p-form-field-background: var(--bg-panel);
+  --p-form-field-border-color: var(--border-dim);
+  --p-form-field-focus-border-color: var(--gold);
+
+  // Misc
+  --p-overlay-background: var(--bg-panel);
+  --p-mask-background: rgba(10, 10, 15, 0.8);
+}
+
+// Button overrides
+.p-button {
+  font-family: var(--font-body);
+  font-weight: var(--font-semibold);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+
+  &:focus {
+    box-shadow: 0 0 0 2px var(--bg-void), 0 0 0 4px var(--gold);
+  }
+}
+
+// Card overrides
+.p-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+// Panel/sidebar overrides
+.p-panel {
+  background: var(--bg-panel);
+  border-color: var(--border-dim);
+}
+
+// Menu overrides
+.p-menu {
+  background: var(--bg-panel);
+  border-color: var(--border-dim);
+
+  .p-menuitem-link {
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+
+    &:hover {
+      background: var(--bg-elevated);
+    }
+  }
+
+  .p-menuitem-link.p-highlight,
+  .p-menuitem.p-highlight > .p-menuitem-link {
+    background: rgba(201, 162, 39, 0.15);
+    color: var(--gold);
+  }
+}
+
+// Dialog overrides
+.p-dialog {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg);
+
+  .p-dialog-header {
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-dim);
+    color: var(--text-primary);
+  }
+
+  .p-dialog-content {
+    background: var(--bg-panel);
+  }
+}
+
+// Input overrides
+.p-inputtext {
+  background: var(--bg-panel);
+  border-color: var(--border-dim);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+
+  &:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 1px var(--gold);
+  }
+
+  &::placeholder {
+    color: var(--text-dim);
+  }
+}
+
+// Dropdown overrides
+.p-dropdown {
+  background: var(--bg-panel);
+  border-color: var(--border-dim);
+  border-radius: var(--radius-md);
+}
+
+// Progress bar overrides
+.p-progressbar {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+
+  .p-progressbar-value {
+    background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+  }
+}
+
+// Badge overrides
+.p-badge {
+  font-family: var(--font-mono);
+  font-weight: var(--font-medium);
+}
+
+// Tooltip overrides
+.p-tooltip {
+  .p-tooltip-text {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border-glow);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+  }
+}
+
+// Scrollbar styling
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-glow);
+  border-radius: var(--radius-sm);
+
+  &:hover {
+    background: var(--text-dim);
+  }
+}

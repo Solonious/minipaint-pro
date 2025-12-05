@@ -1,0 +1,14 @@
+<div class="app-container">
+  <app-sidebar
+    [expanded]="sidebarExpanded()"
+    (toggleSidebar)="toggleSidebar()"
+  />
+
+  <main class="main-content" [class.sidebar-collapsed]="!sidebarExpanded()">
+    <div class="page-content">
+      <router-outlet />
+    </div>
+  </main>
+
+  <app-bottom-nav class="mobile-nav" />
+</div>

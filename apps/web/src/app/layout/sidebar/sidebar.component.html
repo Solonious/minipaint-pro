@@ -1,0 +1,50 @@
+<aside class="sidebar" [class.collapsed]="!expanded()">
+  <div class="sidebar-header">
+    <div class="logo">
+      <span class="logo-icon">🎨</span>
+      @if (expanded()) {
+        <span class="logo-text">MiniPaint Pro</span>
+      }
+    </div>
+    <button
+      pButton
+      pRipple
+      type="button"
+      [icon]="expanded() ? 'pi pi-angle-left' : 'pi pi-angle-right'"
+      class="toggle-btn p-button-text p-button-rounded"
+      (click)="onToggle()"
+      [pTooltip]="expanded() ? 'Collapse' : 'Expand'"
+      tooltipPosition="right"
+      [attr.aria-label]="expanded() ? 'Collapse sidebar' : 'Expand sidebar'"
+    >
+      <span class="sr-only">{{ expanded() ? 'Collapse sidebar' : 'Expand sidebar' }}</span>
+    </button>
+  </div>
+
+  <nav class="nav-menu">
+    @for (item of navItems; track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        class="nav-item"
+        pRipple
+        [pTooltip]="expanded() ? '' : item.label"
+        tooltipPosition="right"
+      >
+        <i [class]="item.icon"></i>
+        @if (expanded()) {
+          <span class="nav-label">{{ item.label }}</span>
+        }
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar-footer">
+    @if (expanded()) {
+      <div class="streak-badge">
+        <i class="pi pi-bolt"></i>
+        <span>3 Day Streak</span>
+      </div>
+    }
+  </div>
+</aside>

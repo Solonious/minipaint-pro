@@ -5,8 +5,12 @@
     "target": "es2022",
     "module": "preserve",
     "lib": ["es2020", "dom"],
-    "paths": {},
-    "isolatedModules": true
+    "baseUrl": ".",
+    "paths": {
+      "@minipaint-pro/types": ["libs/shared/types/src/index.ts"]
+    },
+    "isolatedModules": true,
+    "skipLibCheck": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
@@ -19,10 +23,10 @@
   "include": [],
   "references": [
     {
-      "path": "./tsconfig.app.json"
+      "path": "./apps/web/tsconfig.app.json"
     },
     {
-      "path": "./tsconfig.spec.json"
+      "path": "./apps/web/tsconfig.spec.json"
     }
   ],
   "compileOnSave": false,
