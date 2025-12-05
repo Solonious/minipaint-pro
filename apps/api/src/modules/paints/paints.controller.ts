@@ -13,8 +13,9 @@ import { CreatePaintDto } from './dto/create-paint.dto';
 import { ToggleOwnedDto, ToggleWishlistDto } from './dto/toggle-paint.dto';
 import { PaintBrand, PaintType } from '@prisma/client';
 
-// Temporary user ID for MVP (no auth)
-const TEMP_USER_ID = 'default-user';
+// For MVP without auth, use null userId
+// This will be replaced with actual user ID from JWT when auth is implemented
+const TEMP_USER_ID = null;
 
 @ApiTags('paints')
 @Controller('paints')
@@ -38,8 +39,8 @@ export class PaintsController {
     return this.paintsService.findAll({ brand, type });
   }
 
-  @Get('user')
-  @ApiOperation({ summary: 'Get user paint collection' })
+  @Get('collection')
+  @ApiOperation({ summary: 'Get user paint collection with owned/wishlist status' })
   getUserCollection() {
     return this.paintsService.getUserCollection(TEMP_USER_ID);
   }

@@ -42,7 +42,7 @@ export class PaintsService {
     return paint;
   }
 
-  async getUserCollection(userId: string): Promise<Array<Paint & { owned: boolean; wishlist: boolean }>> {
+  async getUserCollection(userId: string | null): Promise<Array<Paint & { owned: boolean; wishlist: boolean }>> {
     const paints = await this.prisma.paint.findMany({
       include: {
         userPaints: {
@@ -67,30 +67,44 @@ export class PaintsService {
     });
   }
 
-  async toggleOwned(paintId: string, userId: string, owned: boolean): Promise<{ owned: boolean }> {
+  async toggleOwned(paintId: string, userId: string | null, owned: boolean): Promise<{ owned: boolean }> {
     await this.findOne(paintId);
 
-    await this.prisma.userPaint.upsert({
-      where: {
-        userId_paintId: { userId, paintId },
-      },
-      update: { owned },
-      create: { userId, paintId, owned },
+    const existingUserPaint = await this.prisma.userPaint.findFirst({
+      where: { userId, paintId },
     });
+
+    if (existingUserPaint) {
+      await this.prisma.userPaint.update({
+        where: { id: existingUserPaint.id },
+        data: { owned },
+      });
+    } else {
+      await this.prisma.userPaint.create({
+        data: { userId, paintId, owned },
+      });
+    }
 
     return { owned };
   }
 
-  async toggleWishlist(paintId: string, userId: string, wishlist: boolean): Promise<{ wishlist: boolean }> {
+  async toggleWishlist(paintId: string, userId: string | null, wishlist: boolean): Promise<{ wishlist: boolean }> {
     await this.findOne(paintId);
 
-    await this.prisma.userPaint.upsert({
-      where: {
-        userId_paintId: { userId, paintId },
-      },
-      update: { wishlist },
-      create: { userId, paintId, wishlist },
+    const existingUserPaint = await this.prisma.userPaint.findFirst({
+      where: { userId, paintId },
     });
+
+    if (existingUserPaint) {
+      await this.prisma.userPaint.update({
+        where: { id: existingUserPaint.id },
+        data: { wishlist },
+      });
+    } else {
+      await this.prisma.userPaint.create({
+        data: { userId, paintId, wishlist },
+      });
+    }
 
     return { wishlist };
   }

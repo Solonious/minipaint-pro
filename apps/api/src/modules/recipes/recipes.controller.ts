@@ -14,7 +14,8 @@ import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { RecipeDifficulty } from '@prisma/client';
 
-const TEMP_USER_ID = 'default-user';
+// For MVP without auth, use null userId
+const TEMP_USER_ID = null;
 
 @ApiTags('recipes')
 @Controller('recipes')

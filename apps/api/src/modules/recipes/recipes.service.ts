@@ -104,17 +104,23 @@ export class RecipesService {
     });
   }
 
-  async save(recipeId: string, userId: string): Promise<{ saved: boolean }> {
+  async save(recipeId: string, userId: string | null): Promise<{ saved: boolean }> {
     await this.findOne(recipeId);
 
-    await this.prisma.savedRecipe.create({
-      data: { userId, recipeId },
+    const existing = await this.prisma.savedRecipe.findFirst({
+      where: { userId, recipeId },
     });
+
+    if (!existing) {
+      await this.prisma.savedRecipe.create({
+        data: { userId, recipeId },
+      });
+    }
 
     return { saved: true };
   }
 
-  async unsave(recipeId: string, userId: string): Promise<{ saved: boolean }> {
+  async unsave(recipeId: string, userId: string | null): Promise<{ saved: boolean }> {
     await this.prisma.savedRecipe.deleteMany({
       where: { userId, recipeId },
     });
@@ -122,7 +128,7 @@ export class RecipesService {
     return { saved: false };
   }
 
-  async getSavedRecipes(userId: string): Promise<Recipe[]> {
+  async getSavedRecipes(userId: string | null): Promise<Recipe[]> {
     const saved = await this.prisma.savedRecipe.findMany({
       where: { userId },
       include: {
