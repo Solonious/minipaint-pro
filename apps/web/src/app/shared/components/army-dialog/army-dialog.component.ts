@@ -132,6 +132,7 @@ const FACTION_OPTIONS: FactionOption[] = [
               placeholder="Select faction"
               (ngModelChange)="onFactionChange($event)"
               styleClass="faction-select"
+              appendTo="body"
             >
               <ng-template #selectedItem let-selected>
                 @if (selected) {

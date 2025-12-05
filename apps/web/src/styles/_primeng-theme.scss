@@ -146,12 +146,18 @@
 
 // Tooltip overrides
 .p-tooltip {
+  max-width: 300px !important;
+  min-width: auto !important;
+  width: auto !important;
+
   .p-tooltip-text {
     background: var(--bg-elevated);
     color: var(--text-primary);
     border: 1px solid var(--border-glow);
     border-radius: var(--radius-md);
     font-family: var(--font-body);
+    white-space: nowrap;
+    padding: var(--space-sm) var(--space-md);
   }
 }
 
