@@ -1,9 +1,269 @@
 <div class="page-header">
-  <h1>Progress</h1>
-  <p class="page-subtitle">Track your streaks, goals, and achievements</p>
+  <div class="header-text">
+    <h1>Progress</h1>
+    <p class="page-subtitle">Track your streaks, goals, and achievements</p>
+  </div>
 </div>
 
-<div class="placeholder-content">
-  <i class="pi pi-chart-line placeholder-icon"></i>
-  <p>Progress tracking coming soon...</p>
+<div class="progress-grid">
+  <!-- Streak Card -->
+  <div class="card streak-card" [class.active]="streakStatus() === 'active'" [class.warning]="streakStatus() === 'warning'" [class.broken]="streakStatus() === 'broken'">
+    <div class="card-header">
+      <h2>Painting Streak</h2>
+      <p-button
+        icon="pi pi-plus"
+        [rounded]="true"
+        [text]="true"
+        severity="secondary"
+        (onClick)="onLogSession()"
+        pTooltip="Log painting session"
+        tooltipPosition="top"
+      />
+    </div>
+    <div class="streak-content">
+      <div class="streak-main">
+        <span class="streak-icon">
+          @if (streakStatus() === 'active') {
+            <span class="fire active">&#128293;</span>
+          } @else if (streakStatus() === 'warning') {
+            <span class="fire warning">&#128293;</span>
+          } @else {
+            <span class="fire inactive">&#128293;</span>
+          }
+        </span>
+        <div class="streak-numbers">
+          <span class="current-streak">{{ currentStreak() }}</span>
+          <span class="streak-label">day streak</span>
+        </div>
+      </div>
+      <div class="streak-stats">
+        <div class="streak-stat">
+          <span class="stat-value">{{ bestStreak() }}</span>
+          <span class="stat-label">Best Streak</span>
+        </div>
+        <div class="streak-stat">
+          <span class="stat-value">{{ formattedLastPainted() }}</span>
+          <span class="stat-label">Last Painted</span>
+        </div>
+      </div>
+      @if (streakStatus() === 'warning') {
+        <div class="streak-warning">
+          <i class="pi pi-exclamation-triangle"></i>
+          <span>Paint today to keep your streak!</span>
+        </div>
+      }
+      @if (streakStatus() === 'broken') {
+        <div class="streak-broken">
+          <span>Your streak has ended. Start a new one today!</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Stats Card -->
+  <div class="card stats-card">
+    <div class="card-header">
+      <h2>Overall Stats</h2>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="stat-value">{{ totalModelsPainted() }}</span>
+        <span class="stat-label">Models Painted</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">{{ totalPoints() }}</span>
+        <span class="stat-label">Points Painted</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">{{ unlockedCount() }}/{{ totalAchievements() }}</span>
+        <span class="stat-label">Achievements</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">{{ completedGoalsCount() }}</span>
+        <span class="stat-label">Goals Completed</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly Goals Card -->
+  <div class="card goals-card">
+    <div class="card-header">
+      <h2>Weekly Goals</h2>
+      <p-button
+        icon="pi pi-plus"
+        label="Add Goal"
+        [rounded]="true"
+        [outlined]="true"
+        severity="secondary"
+        size="small"
+        (onClick)="openGoalDialog()"
+      />
+    </div>
+    @if (activeGoals().length > 0) {
+      <div class="goals-list">
+        @for (goal of activeGoals(); track goal.id) {
+          <div class="goal-item">
+            <div class="goal-content">
+              <div class="goal-header">
+                <span class="goal-name">{{ goal.name }}</span>
+                <span class="goal-type">{{ getGoalTypeLabel(goal.type) }}</span>
+              </div>
+              <app-goal-progress
+                [label]="''"
+                [current]="goal.currentValue"
+                [target]="goal.targetValue"
+              />
+            </div>
+            <div class="goal-actions">
+              <p-button
+                icon="pi pi-plus"
+                [rounded]="true"
+                [text]="true"
+                severity="success"
+                size="small"
+                (onClick)="onIncrementGoal(goal.id)"
+                [disabled]="goal.currentValue >= goal.targetValue"
+                pTooltip="Log progress"
+              />
+              <p-button
+                icon="pi pi-trash"
+                [rounded]="true"
+                [text]="true"
+                severity="danger"
+                size="small"
+                (onClick)="onDeleteGoal(goal.id)"
+                pTooltip="Delete goal"
+              />
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-goals">
+        <i class="pi pi-flag"></i>
+        <p>No goals set for this week</p>
+        <p-button
+          label="Set Your First Goal"
+          icon="pi pi-plus"
+          (onClick)="openGoalDialog()"
+        />
+      </div>
+    }
+  </div>
+
+  <!-- Achievements Card -->
+  <div class="card achievements-card">
+    <div class="card-header">
+      <h2>Achievements</h2>
+      <div class="achievement-progress">
+        <app-progress-ring
+          [value]="achievementProgress()"
+          [size]="40"
+          [strokeWidth]="4"
+        />
+      </div>
+    </div>
+
+    @if (unlockedAchievements().length > 0) {
+      <div class="achievements-section">
+        <h3 class="section-title">Unlocked</h3>
+        <div class="achievements-grid">
+          @for (achievement of unlockedAchievements(); track achievement.id) {
+            <div class="achievement-item" [title]="achievement.description">
+              <app-achievement-badge
+                [emoji]="achievement.emoji"
+                [name]="achievement.name"
+                [unlocked]="true"
+              />
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (lockedAchievements().length > 0) {
+      <div class="achievements-section">
+        <h3 class="section-title">Locked</h3>
+        <div class="achievements-grid">
+          @for (achievement of lockedAchievements(); track achievement.id) {
+            <div class="achievement-item" [title]="achievement.description">
+              <app-achievement-badge
+                [emoji]="achievement.emoji"
+                [name]="achievement.name"
+                [unlocked]="false"
+              />
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
 </div>
+
+<!-- Add Goal Dialog -->
+<p-dialog
+  header="Add Weekly Goal"
+  [visible]="goalDialogVisible()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '400px' }"
+  (visibleChange)="goalDialogVisible.set($event)"
+  styleClass="goal-dialog"
+>
+  <form class="dialog-form" (ngSubmit)="onSaveGoal()">
+    <div class="form-field">
+      <label for="goalName">Goal Name *</label>
+      <input
+        pInputText
+        id="goalName"
+        [(ngModel)]="goalForm.name"
+        name="name"
+        placeholder="e.g., Paint 5 models"
+        required
+      />
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label for="goalType">Type</label>
+        <p-select
+          id="goalType"
+          [(ngModel)]="goalForm.type"
+          name="type"
+          [options]="goalTypeOptions"
+          optionLabel="label"
+          optionValue="value"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="goalTarget">Target</label>
+        <p-inputNumber
+          id="goalTarget"
+          [(ngModel)]="goalForm.targetValue"
+          name="targetValue"
+          [min]="1"
+          [max]="100"
+        />
+      </div>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="dialog-footer">
+      <p-button
+        label="Cancel"
+        severity="secondary"
+        [text]="true"
+        (onClick)="closeGoalDialog()"
+      />
+      <p-button
+        label="Add Goal"
+        icon="pi pi-check"
+        (onClick)="onSaveGoal()"
+        [disabled]="!isGoalFormValid()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

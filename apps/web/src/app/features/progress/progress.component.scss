@@ -1,17 +1,392 @@
-.placeholder-content {
+.page-header {
+  margin-bottom: var(--space-lg);
+
+  .header-text {
+    h1 {
+      margin: 0;
+      font-family: 'Cinzel', serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.02em;
+    }
+
+    .page-subtitle {
+      margin: var(--space-xs) 0 0;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+  }
+}
+
+.progress-grid {
+  display: grid;
+  gap: var(--space-lg);
+  grid-template-columns: 1fr;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+
+  h2 {
+    margin: 0;
+    font-family: 'Cinzel', serif;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+}
+
+// Streak Card
+.streak-card {
+  &.active {
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(201, 162, 39, 0.15);
+  }
+
+  &.warning {
+    border-color: #f59e0b;
+  }
+
+  &.broken {
+    border-color: var(--error);
+  }
+}
+
+.streak-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  background-color: var(--bg-card);
-  border: 1px dashed var(--border-dim);
-  border-radius: var(--radius-lg);
-  color: var(--text-secondary);
   gap: var(--space-md);
 }
 
-.placeholder-icon {
-  font-size: 3rem;
+.streak-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.streak-icon {
+  .fire {
+    font-size: 3rem;
+    line-height: 1;
+
+    &.active {
+      filter: none;
+    }
+
+    &.warning {
+      filter: hue-rotate(30deg);
+    }
+
+    &.inactive {
+      filter: grayscale(100%);
+      opacity: 0.4;
+    }
+  }
+}
+
+.streak-numbers {
+  display: flex;
+  flex-direction: column;
+
+  .current-streak {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .streak-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+.streak-stats {
+  display: flex;
+  gap: var(--space-lg);
+}
+
+.streak-stat {
+  display: flex;
+  flex-direction: column;
+
+  .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .stat-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+.streak-warning {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-md);
+  color: #f59e0b;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.875rem;
+}
+
+.streak-broken {
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(217, 61, 92, 0.1);
+  border: 1px solid rgba(217, 61, 92, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--error);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+// Stats Card
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-md);
+  background: var(--bg-panel);
+  border-radius: var(--radius-md);
+
+  .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .stat-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+}
+
+// Goals Card
+.goals-card {
+  @media (min-width: 768px) {
+    grid-column: span 2;
+  }
+
+  @media (min-width: 1200px) {
+    grid-column: span 1;
+  }
+}
+
+.goals-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.goal-item {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-panel);
+  border-radius: var(--radius-md);
+}
+
+.goal-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.goal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.goal-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.goal-type {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.6875rem;
   color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px var(--space-xs);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+}
+
+.goal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.empty-goals {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-xl);
+  text-align: center;
+
+  i {
+    font-size: 2rem;
+    color: var(--text-dim);
+    margin-bottom: var(--space-sm);
+  }
+
+  p {
+    margin: 0 0 var(--space-md);
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--text-secondary);
+  }
+}
+
+// Achievements Card
+.achievements-card {
+  @media (min-width: 768px) {
+    grid-column: span 2;
+  }
+
+  @media (min-width: 1200px) {
+    grid-column: span 1;
+  }
+}
+
+.achievement-progress {
+  display: flex;
+  align-items: center;
+}
+
+.achievements-section {
+  margin-bottom: var(--space-lg);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.section-title {
+  margin: 0 0 var(--space-sm);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.achievements-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.achievement-item {
+  cursor: help;
+}
+
+// Dialog styles
+:host ::ng-deep .goal-dialog {
+  .p-dialog-header {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-dim);
+    padding: var(--space-md) var(--space-lg);
+  }
+
+  .p-dialog-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.125rem;
+    color: var(--text-primary);
+  }
+
+  .p-dialog-content {
+    background: var(--bg-panel);
+    padding: var(--space-lg);
+  }
+
+  .p-dialog-footer {
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-dim);
+    padding: var(--space-md) var(--space-lg);
+  }
+}
+
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+
+  label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
 }
