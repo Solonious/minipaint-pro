@@ -155,3 +155,33 @@ select {
 .glow {
   box-shadow: var(--shadow-glow);
 }
+
+// Recipe dialog styles (global for budget optimization)
+.recipe-dialog {
+  .p-dialog-header { background: var(--bg-card); border-bottom: 1px solid var(--border-dim); padding: var(--space-md) var(--space-lg); }
+  .p-dialog-title { font-family: 'Cinzel', serif; font-size: 1.25rem; color: var(--text-primary); }
+  .p-dialog-content { background: var(--bg-panel); padding: var(--space-lg); }
+  .p-dialog-footer { background: var(--bg-card); border-top: 1px solid var(--border-dim); padding: var(--space-md) var(--space-lg); }
+}
+
+// Recipe detail dialog content styles
+.detail-header { display: flex; gap: var(--space-md); align-items: flex-start; margin-bottom: var(--space-md); }
+.detail-color { width: 60px; height: 60px; border-radius: var(--radius-md); flex-shrink: 0; }
+.detail-info { flex: 1; }
+.detail-author { margin: 0 0 var(--space-xs); font-family: 'Rajdhani', sans-serif; font-size: 0.875rem; color: var(--text-secondary); }
+.detail-meta { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; }
+.detail-time, .detail-rating { display: flex; align-items: center; gap: var(--space-xs); font-family: 'Rajdhani', sans-serif; font-size: 0.875rem; color: var(--text-secondary); i { font-size: 0.875rem; } }
+.detail-rating { color: var(--gold); }
+.detail-save-btn { display: flex; align-items: center; gap: var(--space-xs); padding: var(--space-sm) var(--space-md); background: var(--bg-elevated); border: 1px solid var(--border-dim); border-radius: var(--radius-md); font-family: 'Rajdhani', sans-serif; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); cursor: pointer; &:hover { border-color: var(--gold); color: var(--gold); } &.saved { background: rgba(201,162,39,0.1); border-color: var(--gold); color: var(--gold); } }
+.detail-tags { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.detail-tag { padding: var(--space-xs) var(--space-sm); background: var(--bg-elevated); border-radius: var(--radius-sm); font-family: 'Rajdhani', sans-serif; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); }
+.detail-paints-summary { h4 { margin: 0 0 var(--space-sm); font-family: 'Cinzel', serif; font-size: 0.875rem; font-weight: 600; color: var(--text-primary); } .paints-indicator { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: var(--bg-elevated); border-radius: var(--radius-md); font-family: 'Rajdhani', sans-serif; font-size: 0.875rem; color: var(--text-secondary); i { font-size: 1rem; } &.complete { background: rgba(95,166,122,0.1); color: var(--success); } } }
+.detail-steps h4 { margin: 0 0 var(--space-md); font-family: 'Cinzel', serif; font-size: 0.875rem; font-weight: 600; color: var(--text-primary); }
+.steps-list { display: flex; flex-direction: column; gap: var(--space-md); }
+.step-item { display: flex; gap: var(--space-md); }
+.step-number { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: var(--gold); border-radius: 50%; font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; font-weight: 700; color: var(--bg-void); flex-shrink: 0; }
+.step-content { flex: 1; padding-top: 2px; }
+.step-instruction { margin: 0 0 var(--space-xs); font-family: 'Rajdhani', sans-serif; font-size: 0.9375rem; color: var(--text-primary); line-height: 1.4; }
+.step-paint { display: inline-flex; align-items: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); background: var(--bg-elevated); border-radius: var(--radius-sm); margin-bottom: var(--space-xs); .paint-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--border-glow); } .paint-name { font-family: 'Rajdhani', sans-serif; font-size: 0.75rem; color: var(--text-secondary); } i { font-size: 0.625rem; } &.owned i { color: var(--success); } &:not(.owned) i { color: var(--error); } }
+.step-technique { display: inline-block; padding: 2px var(--space-sm); background: rgba(201,162,39,0.1); border-radius: var(--radius-sm); font-family: 'Rajdhani', sans-serif; font-size: 0.625rem; font-weight: 600; color: var(--gold); text-transform: uppercase; }
+.no-steps { font-family: 'Rajdhani', sans-serif; font-size: 0.875rem; color: var(--text-dim); text-align: center; padding: var(--space-lg); }

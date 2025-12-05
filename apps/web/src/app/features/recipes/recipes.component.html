@@ -1,9 +1,271 @@
 <div class="page-header">
-  <h1>Recipes</h1>
-  <p class="page-subtitle">Discover and save painting recipes for your miniatures</p>
+  <div class="header-content">
+    <div class="header-text">
+      <h1>Recipes</h1>
+      <p class="page-subtitle">Discover and save painting recipes for your miniatures</p>
+    </div>
+    <div class="header-stats">
+      <div class="stat">
+        <span class="stat-value">{{ totalCount() }}</span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat saved">
+        <span class="stat-value">{{ savedCount() }}</span>
+        <span class="stat-label">Saved</span>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="placeholder-content">
-  <i class="pi pi-book placeholder-icon"></i>
-  <p>Recipes library coming soon...</p>
+<div class="filters-section">
+  <div class="search-wrapper">
+    <span class="p-input-icon-left search-input-wrapper">
+      <i class="pi pi-search"></i>
+      <input
+        pInputText
+        type="text"
+        placeholder="Search recipes..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+      />
+    </span>
+  </div>
+
+  <div class="filter-controls">
+    <p-select
+      [options]="difficultyOptions"
+      [(ngModel)]="selectedDifficulty"
+      [ngModelOptions]="{ updateOn: 'change' }"
+      (ngModelChange)="selectedDifficulty.set($event)"
+      placeholder="Difficulty"
+      [showClear]="true"
+      optionLabel="label"
+      optionValue="value"
+      styleClass="filter-select"
+    />
+
+    <p-select
+      [options]="tagOptions()"
+      [(ngModel)]="selectedTag"
+      [ngModelOptions]="{ updateOn: 'change' }"
+      (ngModelChange)="selectedTag.set($event)"
+      placeholder="Tag"
+      [showClear]="true"
+      optionLabel="label"
+      optionValue="value"
+      styleClass="filter-select tag-select"
+    />
+
+    <p-toggleButton
+      [(ngModel)]="showSavedOnly"
+      [ngModelOptions]="{ updateOn: 'change' }"
+      (ngModelChange)="showSavedOnly.set($event)"
+      onIcon="pi pi-bookmark-fill"
+      offIcon="pi pi-bookmark"
+      onLabel="Saved Only"
+      offLabel="All Recipes"
+      styleClass="saved-toggle"
+    />
+  </div>
+
+  <div class="filter-info">
+    <span class="result-count">
+      Showing {{ filteredRecipes().length }} of {{ totalCount() }} recipes
+    </span>
+    @if (hasActiveFilters()) {
+      <button class="clear-filters" (click)="clearFilters()">
+        <i class="pi pi-times"></i>
+        Clear filters
+      </button>
+    }
+  </div>
 </div>
+
+@if (filteredRecipes().length > 0) {
+  <div class="recipes-grid">
+    @for (recipe of filteredRecipes(); track trackRecipe($index, recipe)) {
+      <div class="recipe-card" tabindex="0" role="button" (click)="onRecipeClick(recipe)" (keydown.enter)="onRecipeClick(recipe)">
+        <div class="recipe-header">
+          <div
+            class="recipe-color"
+            [style.background-color]="recipe.previewColorHex"
+          ></div>
+          <button
+            class="save-btn"
+            [class.saved]="recipe.saved"
+            (click)="onToggleSaved(recipe, $event)"
+            [attr.aria-label]="recipe.saved ? 'Remove from saved' : 'Save recipe'"
+          >
+            <i [class]="recipe.saved ? 'pi pi-bookmark-fill' : 'pi pi-bookmark'"></i>
+          </button>
+        </div>
+
+        <div class="recipe-content">
+          <h3 class="recipe-name">{{ recipe.name }}</h3>
+          <p class="recipe-author">by {{ recipe.authorName }}</p>
+
+          <div class="recipe-meta">
+            <p-tag
+              [value]="getDifficultyLabel(recipe.difficulty)"
+              [severity]="getDifficultySeverity(recipe.difficulty)"
+            />
+            <span class="recipe-time">
+              <i class="pi pi-clock"></i>
+              {{ formatTime(recipe.timeMinutes) }}
+            </span>
+          </div>
+
+          <div class="recipe-stats">
+            <span class="recipe-rating">
+              <i class="pi pi-star-fill"></i>
+              {{ recipe.rating.toFixed(1) }}
+              <span class="rating-count">({{ recipe.ratingCount }})</span>
+            </span>
+            <span class="recipe-steps">
+              {{ recipe.steps?.length || 0 }} steps
+            </span>
+          </div>
+
+          <div class="recipe-paints">
+            <span class="paints-owned" [class.complete]="getOwnedPaintsCount(recipe) === getRecipePaintsCount(recipe)">
+              <i class="pi pi-palette"></i>
+              {{ getOwnedPaintsCount(recipe) }}/{{ getRecipePaintsCount(recipe) }} paints owned
+            </span>
+          </div>
+
+          <div class="recipe-tags">
+            @for (tag of recipe.tags.slice(0, 3); track tag) {
+              <span class="tag">{{ tag }}</span>
+            }
+            @if (recipe.tags.length > 3) {
+              <span class="tag more">+{{ recipe.tags.length - 3 }}</span>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+} @else {
+  <div class="empty-state">
+    <div class="empty-icon">
+      <i class="pi pi-book"></i>
+    </div>
+    <h3>No recipes found</h3>
+    <p>Try adjusting your filters or search terms</p>
+    @if (hasActiveFilters()) {
+      <button class="clear-filters-btn" (click)="clearFilters()">
+        Clear all filters
+      </button>
+    }
+  </div>
+}
+
+<!-- Recipe Detail Dialog -->
+<p-dialog
+  [header]="selectedRecipe()?.name || 'Recipe Details'"
+  [visible]="detailDialogVisible()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '90vw', maxWidth: '600px' }"
+  (visibleChange)="detailDialogVisible.set($event)"
+  styleClass="recipe-dialog"
+>
+  @if (selectedRecipe(); as recipe) {
+    <div class="detail-header">
+      <div
+        class="detail-color"
+        [style.background-color]="recipe.previewColorHex"
+      ></div>
+      <div class="detail-info">
+        <p class="detail-author">by {{ recipe.authorName }}</p>
+        <div class="detail-meta">
+          <p-tag
+            [value]="getDifficultyLabel(recipe.difficulty)"
+            [severity]="getDifficultySeverity(recipe.difficulty)"
+          />
+          <span class="detail-time">
+            <i class="pi pi-clock"></i>
+            {{ formatTime(recipe.timeMinutes) }}
+          </span>
+          <span class="detail-rating">
+            <i class="pi pi-star-fill"></i>
+            {{ recipe.rating.toFixed(1) }}
+          </span>
+        </div>
+      </div>
+      <button
+        class="detail-save-btn"
+        [class.saved]="recipe.saved"
+        (click)="onToggleSaved(recipe, $event)"
+      >
+        <i [class]="recipe.saved ? 'pi pi-bookmark-fill' : 'pi pi-bookmark'"></i>
+        {{ recipe.saved ? 'Saved' : 'Save' }}
+      </button>
+    </div>
+
+    <div class="detail-tags">
+      @for (tag of recipe.tags; track tag) {
+        <span class="detail-tag">{{ tag }}</span>
+      }
+    </div>
+
+    <p-divider />
+
+    <div class="detail-paints-summary">
+      <h4>Paints Required</h4>
+      <div class="paints-indicator" [class.complete]="getOwnedPaintsCount(recipe) === getRecipePaintsCount(recipe)">
+        <i class="pi pi-palette"></i>
+        <span>You own {{ getOwnedPaintsCount(recipe) }} of {{ getRecipePaintsCount(recipe) }} paints</span>
+      </div>
+    </div>
+
+    <p-divider />
+
+    <div class="detail-steps">
+      <h4>Steps</h4>
+      @if (recipe.steps && recipe.steps.length > 0) {
+        <div class="steps-list">
+          @for (step of recipe.steps; track trackStep($index, step)) {
+            <div class="step-item">
+              <div class="step-number">{{ step.order }}</div>
+              <div class="step-content">
+                <p class="step-instruction">{{ step.instruction }}</p>
+                @if (step.paintId) {
+                  <div class="step-paint" [class.owned]="isPaintOwned(step.paintId)">
+                    <span
+                      class="paint-swatch"
+                      [style.background-color]="getPaintColor(step.paintId)"
+                    ></span>
+                    <span class="paint-name">{{ getPaintName(step.paintId) }}</span>
+                    @if (!isPaintOwned(step.paintId)) {
+                      <i class="pi pi-shopping-cart" pTooltip="Not in your collection"></i>
+                    } @else {
+                      <i class="pi pi-check" pTooltip="In your collection"></i>
+                    }
+                  </div>
+                }
+                @if (step.technique) {
+                  <span class="step-technique">{{ step.technique }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="no-steps">No steps available for this recipe.</p>
+      }
+    </div>
+  }
+
+  <ng-template #footer>
+    <div class="dialog-footer">
+      <p-button
+        label="Close"
+        severity="secondary"
+        [text]="true"
+        (onClick)="closeDetailDialog()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>
