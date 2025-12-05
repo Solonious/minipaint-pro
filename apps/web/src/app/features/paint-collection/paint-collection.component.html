@@ -1,9 +1,105 @@
 <div class="page-header">
-  <h1>Paint Collection</h1>
-  <p class="page-subtitle">Manage your paint inventory and track what you own</p>
+  <div class="header-content">
+    <div class="header-text">
+      <h1>Paint Collection</h1>
+      <p class="page-subtitle">Manage your paint inventory and track what you own</p>
+    </div>
+    <div class="header-stats">
+      <div class="stat">
+        <span class="stat-value">{{ totalCount() }}</span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat owned">
+        <span class="stat-value">{{ ownedCount() }}</span>
+        <span class="stat-label">Owned</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{{ unownedCount() }}</span>
+        <span class="stat-label">Needed</span>
+      </div>
+      <div class="stat wishlist">
+        <span class="stat-value">{{ wishlistCount() }}</span>
+        <span class="stat-label">Wishlist</span>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="placeholder-content">
-  <i class="pi pi-palette placeholder-icon"></i>
-  <p>Paint collection coming soon...</p>
+<div class="filters-section">
+  <div class="search-wrapper">
+    <span class="p-input-icon-left search-input-wrapper">
+      <i class="pi pi-search"></i>
+      <input
+        pInputText
+        type="text"
+        placeholder="Search paints..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearchChange($event)"
+      />
+    </span>
+  </div>
+
+  <div class="filter-controls">
+    <p-select
+      [options]="brandOptions"
+      [ngModel]="selectedBrand()"
+      (ngModelChange)="onBrandChange($event)"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Brand"
+      styleClass="filter-select"
+    />
+
+    <p-select
+      [options]="typeOptions"
+      [ngModel]="selectedType()"
+      (ngModelChange)="onTypeChange($event)"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Type"
+      styleClass="filter-select"
+    />
+
+    <p-selectButton
+      [options]="ownershipOptions"
+      [ngModel]="selectedOwnership()"
+      (ngModelChange)="onOwnershipChange($event)"
+      optionLabel="label"
+      optionValue="value"
+      styleClass="ownership-toggle"
+    />
+  </div>
+
+  <div class="filter-info">
+    <span class="result-count">{{ filteredCount() }} paints</span>
+    @if (searchQuery() || selectedBrand() || selectedType() || selectedOwnership() !== 'all') {
+      <button type="button" class="clear-filters" (click)="clearFilters()">
+        <i class="pi pi-times"></i>
+        Clear filters
+      </button>
+    }
+  </div>
 </div>
+
+@if (filteredPaints().length > 0) {
+  <div class="paints-grid">
+    @for (paint of filteredPaints(); track paint.id) {
+      <app-paint-card
+        [paint]="paint"
+        (toggleOwned)="onToggleOwned($event)"
+        (toggleWishlist)="onToggleWishlist($event)"
+      />
+    }
+  </div>
+} @else {
+  <div class="empty-state">
+    <div class="empty-icon">
+      <i class="pi pi-palette"></i>
+    </div>
+    <h3>No Paints Found</h3>
+    <p>Try adjusting your filters or search query</p>
+    <button type="button" class="clear-filters-btn" (click)="clearFilters()">
+      Clear All Filters
+    </button>
+  </div>
+}

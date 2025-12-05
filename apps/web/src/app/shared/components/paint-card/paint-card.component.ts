@@ -29,19 +29,36 @@ const TYPE_LABELS: Record<string, string> = {
     <div
       class="paint-card"
       [class.owned]="paint().owned"
-      [class.wishlist]="paint().wishlist"
-      tabindex="0"
-      role="button"
-      (click)="cardClick.emit()"
-      (keydown.enter)="cardClick.emit()"
-      (keydown.space)="cardClick.emit()"
+      [class.wishlist]="paint().wishlist && !paint().owned"
     >
       <div class="swatch" [style.background-color]="paint().colorHex">
+        <div class="swatch-actions">
+          <button
+            type="button"
+            class="action-btn owned-btn"
+            [class.active]="paint().owned"
+            [title]="paint().owned ? 'Remove from owned' : 'Mark as owned'"
+            (click)="onToggleOwned($event)"
+          >
+            <span class="icon">&#10003;</span>
+          </button>
+          <button
+            type="button"
+            class="action-btn wishlist-btn"
+            [class.active]="paint().wishlist && !paint().owned"
+            [class.disabled]="paint().owned"
+            [title]="paint().owned ? 'Already owned' : (paint().wishlist ? 'Remove from wishlist' : 'Add to wishlist')"
+            (click)="onToggleWishlist($event)"
+            [disabled]="paint().owned"
+          >
+            <span class="icon">&#9825;</span>
+          </button>
+        </div>
         @if (paint().owned) {
-          <span class="owned-indicator" title="Owned">&#10003;</span>
+          <span class="status-indicator owned-indicator">&#10003;</span>
         }
         @if (paint().wishlist && !paint().owned) {
-          <span class="wishlist-indicator" title="Wishlist">&#9825;</span>
+          <span class="status-indicator wishlist-indicator">&#9825;</span>
         }
       </div>
       <div class="info">
@@ -61,7 +78,6 @@ const TYPE_LABELS: Record<string, string> = {
       border: 1px solid var(--border-dim);
       border-radius: var(--radius-md);
       overflow: hidden;
-      cursor: pointer;
       transition: all var(--transition-fast);
     }
 
@@ -74,7 +90,7 @@ const TYPE_LABELS: Record<string, string> = {
       border-color: var(--success);
     }
 
-    .paint-card.wishlist:not(.owned) {
+    .paint-card.wishlist {
       border-color: var(--info);
     }
 
@@ -84,8 +100,64 @@ const TYPE_LABELS: Record<string, string> = {
       width: 100%;
     }
 
-    .owned-indicator,
-    .wishlist-indicator {
+    .swatch-actions {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      opacity: 0;
+      background: rgba(0, 0, 0, 0.5);
+      transition: opacity var(--transition-fast);
+    }
+
+    .paint-card:hover .swatch-actions {
+      opacity: 1;
+    }
+
+    .action-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      background: rgba(0, 0, 0, 0.3);
+      color: rgba(255, 255, 255, 0.8);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      transition: all var(--transition-fast);
+    }
+
+    .action-btn:hover:not(.disabled) {
+      transform: scale(1.1);
+    }
+
+    .action-btn.owned-btn:hover:not(.disabled),
+    .action-btn.owned-btn.active {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+
+    .action-btn.wishlist-btn:hover:not(.disabled),
+    .action-btn.wishlist-btn.active {
+      background: var(--info);
+      border-color: var(--info);
+      color: white;
+    }
+
+    .action-btn.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .status-indicator {
       position: absolute;
       top: var(--space-xs);
       right: var(--space-xs);
@@ -97,6 +169,11 @@ const TYPE_LABELS: Record<string, string> = {
       justify-content: center;
       font-size: 0.75rem;
       font-weight: bold;
+      pointer-events: none;
+    }
+
+    .paint-card:hover .status-indicator {
+      opacity: 0;
     }
 
     .owned-indicator {
@@ -150,7 +227,21 @@ export class PaintCardComponent {
   paint = input.required<PaintWithOwnership>();
 
   cardClick = output<void>();
+  toggleOwned = output<string>();
+  toggleWishlist = output<string>();
 
   brandLabel = computed(() => BRAND_LABELS[this.paint().brand] || this.paint().brand);
   typeLabel = computed(() => TYPE_LABELS[this.paint().type] || this.paint().type);
+
+  onToggleOwned(event: Event): void {
+    event.stopPropagation();
+    this.toggleOwned.emit(this.paint().id);
+  }
+
+  onToggleWishlist(event: Event): void {
+    event.stopPropagation();
+    if (!this.paint().owned) {
+      this.toggleWishlist.emit(this.paint().id);
+    }
+  }
 }
