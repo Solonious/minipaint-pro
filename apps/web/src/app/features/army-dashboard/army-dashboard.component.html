@@ -1,9 +1,71 @@
 <div class="page-header">
-  <h1>Armies</h1>
-  <p class="page-subtitle">Manage your army collections and track painting progress</p>
+  <div class="header-content">
+    <div class="header-text">
+      <h1>Armies</h1>
+      <p class="page-subtitle">Manage your army collections and track painting progress</p>
+    </div>
+    <div class="header-stats">
+      <div class="stat">
+        <span class="stat-value">{{ totalArmies() }}</span>
+        <span class="stat-label">Armies</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{{ totalMiniatures() }}</span>
+        <span class="stat-label">Minis</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{{ totalCompletedMiniatures() }}</span>
+        <span class="stat-label">Painted</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{{ totalPoints() }}</span>
+        <span class="stat-label">Points</span>
+      </div>
+      <div class="stat progress">
+        <span class="stat-value">{{ overallProgress() }}%</span>
+        <span class="stat-label">Progress</span>
+      </div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <p-button
+      label="Create Army"
+      icon="pi pi-plus"
+      (onClick)="openAddDialog()"
+      pTooltip="Create a new army collection"
+      tooltipPosition="bottom"
+    />
+  </div>
 </div>
 
-<div class="placeholder-content">
-  <i class="pi pi-users placeholder-icon"></i>
-  <p>Army dashboard coming soon...</p>
-</div>
+@if (armiesWithProgress().length > 0) {
+  <div class="armies-grid">
+    @for (army of armiesWithProgress(); track army.id) {
+      <app-army-card
+        [army]="army"
+        (cardClick)="openEditDialog(army)"
+      />
+    }
+  </div>
+} @else {
+  <div class="empty-state">
+    <div class="empty-icon">
+      <i class="pi pi-users"></i>
+    </div>
+    <h3>No Armies Yet</h3>
+    <p>Create your first army to start tracking your painting progress</p>
+    <p-button
+      label="Create Your First Army"
+      icon="pi pi-plus"
+      (onClick)="openAddDialog()"
+    />
+  </div>
+}
+
+<app-army-dialog
+  [visible]="dialogVisible()"
+  [army]="selectedArmy()"
+  (visibleChange)="onDialogVisibleChange($event)"
+  (save)="onSave($event)"
+  (delete)="onDelete($event)"
+/>
