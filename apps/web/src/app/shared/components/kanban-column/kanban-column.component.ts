@@ -65,16 +65,21 @@ export const STATUS_CONFIGS: StatusConfig[] = [
     </div>
   `,
   styles: `
+    :host {
+      display: flex;
+      flex: 1;
+      min-width: 0;
+    }
+
     .kanban-column {
       display: flex;
       flex-direction: column;
-      min-width: 280px;
-      max-width: 320px;
+      flex: 1;
+      min-width: 180px;
       background: var(--bg-panel);
       border: 1px solid var(--border-dim);
       border-radius: var(--radius-lg);
       overflow: hidden;
-      flex-shrink: 0;
     }
 
     .column-header {

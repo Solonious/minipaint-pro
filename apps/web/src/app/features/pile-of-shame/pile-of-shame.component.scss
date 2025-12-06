@@ -84,26 +84,10 @@
 
 .kanban-board {
   display: flex;
-  gap: var(--space-md);
+  gap: var(--space-sm);
   padding-bottom: var(--space-lg);
-  overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-dim) transparent;
 
-  &::-webkit-scrollbar {
-    height: 8px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--border-dim);
-    border-radius: 4px;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: var(--border-glow);
+  @media (min-width: 1200px) {
+    gap: var(--space-md);
   }
 }
