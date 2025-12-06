@@ -39,7 +39,10 @@
     }
 
     .toggle-btn {
-      display: none;
+      position: absolute;
+      right: var(--space-md);
+      top: 50%;
+      transform: translateY(-50%);
     }
 
     .sidebar-footer {
@@ -60,6 +63,7 @@
 }
 
 .sidebar-header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
