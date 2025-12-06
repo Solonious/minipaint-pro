@@ -53,6 +53,27 @@ export const appRoutes: Routes = [
             (m) => m.AdminComponent
           ),
       },
+      {
+        path: 'library-admin',
+        loadComponent: () =>
+          import('./features/library-admin/library-admin.component').then(
+            (m) => m.LibraryAdminComponent
+          ),
+      },
+      {
+        path: 'library',
+        loadComponent: () =>
+          import('./features/miniature-library/miniature-library.component').then(
+            (m) => m.MiniatureLibraryComponent
+          ),
+      },
+      {
+        path: 'library/:id',
+        loadComponent: () =>
+          import('./features/miniature-library/miniature-detail/miniature-detail.component').then(
+            (m) => m.MiniatureDetailComponent
+          ),
+      },
     ],
   },
   {

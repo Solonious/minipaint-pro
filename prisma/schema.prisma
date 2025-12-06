@@ -80,8 +80,11 @@ model Miniature {
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
-  user       User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  army       Army?  @relation(fields: [armyId], references: [id], onDelete: SetNull)
+  user        User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  army        Army?               @relation(fields: [armyId], references: [id], onDelete: SetNull)
+  images      MiniatureImage[]
+  colorScheme ColorScheme?
+  tutorials   MiniatureTutorial[]
 
   @@map("miniatures")
 }
@@ -107,10 +110,11 @@ model Paint {
   isOfficial   Boolean    @default(true)
   createdAt    DateTime   @default(now())
 
-  userPaints   UserPaint[]
-  recipeSteps  RecipeStep[]
-  equivalentTo PaintEquivalent[] @relation("EquivalentTo")
-  equivalents  PaintEquivalent[] @relation("EquivalentFrom")
+  userPaints    UserPaint[]
+  recipeSteps   RecipeStep[]
+  equivalentTo  PaintEquivalent[] @relation("EquivalentTo")
+  equivalents   PaintEquivalent[] @relation("EquivalentFrom")
+  sectionPaints SectionPaint[]
 
   @@unique([name, brand])
   @@map("paints")
@@ -333,4 +337,100 @@ enum ImageSource {
   MANUAL
   WARHAMMER_COMMUNITY
   GAMES_WORKSHOP
+}
+
+// ============================================
+// Miniature Library
+// ============================================
+
+// Multiple images per miniature
+model MiniatureImage {
+  id           String             @id @default(uuid())
+  miniatureId  String
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  caption      String?
+  imageType    MiniatureImageType @default(REFERENCE)
+  order        Int                @default(0)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  miniature    Miniature @relation(fields: [miniatureId], references: [id], onDelete: Cascade)
+
+  @@map("miniature_images")
+}
+
+enum MiniatureImageType {
+  REFERENCE
+  WIP
+  COMPLETED
+  DETAIL
+}
+
+// Color scheme with sections
+model ColorScheme {
+  id           String               @id @default(uuid())
+  miniatureId  String               @unique
+  name         String
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  miniature    Miniature            @relation(fields: [miniatureId], references: [id], onDelete: Cascade)
+  sections     ColorSchemeSection[]
+
+  @@map("color_schemes")
+}
+
+model ColorSchemeSection {
+  id          String         @id @default(uuid())
+  schemeId    String
+  areaName    String
+  order       Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  scheme      ColorScheme    @relation(fields: [schemeId], references: [id], onDelete: Cascade)
+  paints      SectionPaint[]
+
+  @@map("color_scheme_sections")
+}
+
+model SectionPaint {
+  id          String               @id @default(uuid())
+  sectionId   String
+  paintId     String
+  order       Int                  @default(0)
+  technique   String?
+  notes       String?
+
+  section     ColorSchemeSection   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  paint       Paint                @relation(fields: [paintId], references: [id])
+
+  @@map("section_paints")
+}
+
+// Tutorial videos
+model MiniatureTutorial {
+  id           String        @id @default(uuid())
+  miniatureId  String
+  title        String
+  videoUrl     String
+  platform     VideoPlatform @default(YOUTUBE)
+  duration     Int?
+  author       String?
+  order        Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  miniature    Miniature     @relation(fields: [miniatureId], references: [id], onDelete: Cascade)
+
+  @@map("miniature_tutorials")
+}
+
+enum VideoPlatform {
+  YOUTUBE
+  VIMEO
+  CUSTOM
 }

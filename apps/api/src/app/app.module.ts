@@ -9,6 +9,9 @@ import { PaintsModule } from '../modules/paints/paints.module';
 import { RecipesModule } from '../modules/recipes/recipes.module';
 import { ProgressModule } from '../modules/progress/progress.module';
 import { AdminModule } from '../modules/admin/admin.module';
+import { MiniatureImagesModule } from '../modules/miniature-images/miniature-images.module';
+import { TutorialsModule } from '../modules/tutorials/tutorials.module';
+import { ColorSchemesModule } from '../modules/color-schemes/color-schemes.module';
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { AdminModule } from '../modules/admin/admin.module';
     RecipesModule,
     ProgressModule,
     AdminModule,
+    MiniatureImagesModule,
+    TutorialsModule,
+    ColorSchemesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

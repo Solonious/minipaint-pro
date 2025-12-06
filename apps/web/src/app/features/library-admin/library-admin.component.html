@@ -1,0 +1,438 @@
+<div class="library-admin-container">
+  <p-toast />
+  <p-confirmDialog />
+
+  <header class="admin-header">
+    <h1>Library Content Manager</h1>
+    <p class="subtitle">Manage images, tutorials, and color schemes for miniatures</p>
+  </header>
+
+  <div class="miniature-selector">
+    <label for="miniature-select">Select Miniature</label>
+    <p-select
+      id="miniature-select"
+      [options]="miniatureOptions()"
+      [ngModel]="selectedMiniature()"
+      (ngModelChange)="onMiniatureChange($event)"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Choose a miniature..."
+      [filter]="true"
+      filterBy="label"
+      [showClear]="true"
+      class="miniature-dropdown"
+    />
+    @if (selectedMiniature()) {
+      <button
+        pButton
+        icon="pi pi-external-link"
+        class="p-button-text"
+        pTooltip="View in Library"
+        aria-label="View in Library"
+        (click)="goToLibrary()"
+      ></button>
+    }
+  </div>
+
+  @if (selectedMiniature()) {
+    @if (libraryLoading()) {
+      <div class="loading-state">
+        <i class="pi pi-spin pi-spinner"></i>
+        <span>Loading library data...</span>
+      </div>
+    } @else {
+      <p-tabs [(value)]="activeTab">
+        <p-tablist>
+          <p-tab [value]="0">
+            <i class="pi pi-images"></i>
+            Images ({{ images().length }})
+          </p-tab>
+          <p-tab [value]="1">
+            <i class="pi pi-youtube"></i>
+            Tutorials ({{ tutorials().length }})
+          </p-tab>
+          <p-tab [value]="2">
+            <i class="pi pi-palette"></i>
+            Color Scheme
+          </p-tab>
+        </p-tablist>
+
+        <p-tabpanels>
+          <!-- Images Tab -->
+          <p-tabpanel [value]="0">
+            <div class="tab-header">
+              <h3>Images</h3>
+              <button pButton label="Upload Image" icon="pi pi-upload" (click)="openImageDialog()">Upload Image</button>
+            </div>
+
+            @if (images().length === 0) {
+              <div class="empty-state">
+                <i class="pi pi-image"></i>
+                <p>No images uploaded yet</p>
+                <button pButton label="Upload First Image" icon="pi pi-upload" (click)="openImageDialog()">Upload First Image</button>
+              </div>
+            } @else {
+              <div class="image-grid">
+                @for (image of images(); track image.id) {
+                  <div class="image-card">
+                    <div class="image-preview">
+                      <img [src]="getImageUrl(image.filename)" [alt]="image.caption || image.originalName" />
+                    </div>
+                    <div class="image-info">
+                      <span class="image-type">{{ image.imageType }}</span>
+                      @if (image.caption) {
+                        <p class="caption">{{ image.caption }}</p>
+                      }
+                      <span class="filename">{{ image.originalName }}</span>
+                    </div>
+                    <div class="image-actions">
+                      <button
+                        pButton
+                        icon="pi pi-trash"
+                        class="p-button-danger p-button-text"
+                        pTooltip="Delete"
+                        aria-label="Delete image"
+                        (click)="deleteImage(image)"
+                      ></button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </p-tabpanel>
+
+          <!-- Tutorials Tab -->
+          <p-tabpanel [value]="1">
+            <div class="tab-header">
+              <h3>Tutorial Videos</h3>
+              <button pButton label="Add Tutorial" icon="pi pi-plus" (click)="openTutorialDialog()">Add Tutorial</button>
+            </div>
+
+            @if (tutorials().length === 0) {
+              <div class="empty-state">
+                <i class="pi pi-video"></i>
+                <p>No tutorials added yet</p>
+                <button pButton label="Add First Tutorial" icon="pi pi-plus" (click)="openTutorialDialog()">Add First Tutorial</button>
+              </div>
+            } @else {
+              <p-table [value]="tutorials()" [tableStyle]="{ 'min-width': '50rem' }">
+                <ng-template #header>
+                  <tr>
+                    <th>Title</th>
+                    <th>Platform</th>
+                    <th>Author</th>
+                    <th>Duration</th>
+                    <th>Actions</th>
+                  </tr>
+                </ng-template>
+                <ng-template #body let-tutorial>
+                  <tr>
+                    <td>
+                      <a [href]="tutorial.videoUrl" target="_blank" class="tutorial-link">
+                        {{ tutorial.title }}
+                        <i class="pi pi-external-link"></i>
+                      </a>
+                    </td>
+                    <td>
+                      <span class="platform-badge" [class]="tutorial.platform">
+                        {{ tutorial.platform }}
+                      </span>
+                    </td>
+                    <td>{{ tutorial.author || '-' }}</td>
+                    <td>{{ tutorial.duration ? formatDuration(tutorial.duration) : '-' }}</td>
+                    <td>
+                      <button
+                        pButton
+                        icon="pi pi-pencil"
+                        class="p-button-text"
+                        pTooltip="Edit"
+                        aria-label="Edit tutorial"
+                        (click)="openTutorialDialog(tutorial)"
+                      ></button>
+                      <button
+                        pButton
+                        icon="pi pi-trash"
+                        class="p-button-danger p-button-text"
+                        pTooltip="Delete"
+                        aria-label="Delete tutorial"
+                        (click)="deleteTutorial(tutorial)"
+                      ></button>
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            }
+          </p-tabpanel>
+
+          <!-- Color Scheme Tab -->
+          <p-tabpanel [value]="2">
+            <div class="tab-header">
+              <h3>Color Scheme</h3>
+              <div class="scheme-actions">
+                @if (colorScheme()) {
+                  <button
+                    pButton
+                    label="Delete Scheme"
+                    icon="pi pi-trash"
+                    class="p-button-danger p-button-outlined"
+                    (click)="deleteScheme()"
+                  >Delete Scheme</button>
+                }
+                <button
+                  pButton
+                  [label]="colorScheme() ? 'Edit Scheme' : 'Create Scheme'"
+                  [icon]="colorScheme() ? 'pi pi-pencil' : 'pi pi-plus'"
+                  (click)="openSchemeDialog()"
+                >{{ colorScheme() ? 'Edit Scheme' : 'Create Scheme' }}</button>
+              </div>
+            </div>
+
+            @if (!colorScheme()) {
+              <div class="empty-state">
+                <i class="pi pi-palette"></i>
+                <p>No color scheme defined</p>
+                <button pButton label="Create Color Scheme" icon="pi pi-plus" (click)="openSchemeDialog()">Create Color Scheme</button>
+              </div>
+            } @else {
+              <div class="scheme-display">
+                <h4>{{ colorScheme()!.name }}</h4>
+                <div class="sections-list">
+                  @for (section of colorScheme()!.sections; track section.id) {
+                    <div class="section-card">
+                      <h5>{{ section.areaName }}</h5>
+                      <div class="paints-list">
+                        @for (sectionPaint of section.paints; track sectionPaint.id) {
+                          <div class="paint-item">
+                            <div
+                              class="color-swatch"
+                              [style.background-color]="sectionPaint.paint?.colorHex || '#666'"
+                            ></div>
+                            <span class="paint-name">{{ sectionPaint.paint?.name || 'Unknown' }}</span>
+                            @if (sectionPaint.technique) {
+                              <span class="technique">{{ sectionPaint.technique }}</span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
+    }
+  } @else {
+    <div class="empty-state large">
+      <i class="pi pi-box"></i>
+      <p>Select a miniature to manage its library content</p>
+    </div>
+  }
+</div>
+
+<!-- Image Upload Dialog -->
+<p-dialog
+  header="Upload Image"
+  [(visible)]="showImageDialog"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  [draggable]="false"
+>
+  <div class="dialog-content">
+    <div class="form-field">
+      <label for="image-file">Image File</label>
+      <input
+        type="file"
+        id="image-file"
+        accept="image/*"
+        (change)="onFileSelect($event)"
+        #fileInput
+      />
+      @if (selectedFile()) {
+        <span class="file-name">{{ selectedFile()!.name }}</span>
+      }
+    </div>
+
+    <div class="form-field">
+      <label for="image-type">Image Type</label>
+      <p-select
+        id="image-type"
+        [options]="imageTypeOptions"
+        [(ngModel)]="imageType"
+        optionLabel="label"
+        optionValue="value"
+      />
+    </div>
+
+    <div class="form-field">
+      <label for="image-caption">Caption (optional)</label>
+      <input type="text" pInputText id="image-caption" [(ngModel)]="imageCaption" />
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" class="p-button-text" (click)="closeImageDialog()">Cancel</button>
+    <button
+      pButton
+      label="Upload"
+      icon="pi pi-upload"
+      [disabled]="!selectedFile() || uploading()"
+      [loading]="uploading()"
+      (click)="uploadImage()"
+    >Upload</button>
+  </ng-template>
+</p-dialog>
+
+<!-- Tutorial Dialog -->
+<p-dialog
+  [header]="editingTutorial() ? 'Edit Tutorial' : 'Add Tutorial'"
+  [(visible)]="showTutorialDialog"
+  [modal]="true"
+  [style]="{ width: '500px' }"
+  [draggable]="false"
+>
+  <div class="dialog-content">
+    <div class="form-field">
+      <label for="tutorial-title">Title *</label>
+      <input type="text" pInputText id="tutorial-title" [(ngModel)]="tutorialTitle" />
+    </div>
+
+    <div class="form-field">
+      <label for="tutorial-url">Video URL *</label>
+      <input type="text" pInputText id="tutorial-url" [(ngModel)]="tutorialUrl" placeholder="https://youtube.com/watch?v=..." />
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label for="tutorial-platform">Platform</label>
+        <p-select
+          id="tutorial-platform"
+          [options]="platformOptions"
+          [(ngModel)]="tutorialPlatform"
+          optionLabel="label"
+          optionValue="value"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="tutorial-duration">Duration (seconds)</label>
+        <p-inputNumber id="tutorial-duration" [(ngModel)]="tutorialDuration" [min]="0" />
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label for="tutorial-author">Author</label>
+      <input type="text" pInputText id="tutorial-author" [(ngModel)]="tutorialAuthor" />
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" class="p-button-text" (click)="closeTutorialDialog()">Cancel</button>
+    <button
+      pButton
+      [label]="editingTutorial() ? 'Save' : 'Add'"
+      icon="pi pi-check"
+      [disabled]="!tutorialTitle() || !tutorialUrl()"
+      (click)="saveTutorial()"
+    >{{ editingTutorial() ? 'Save' : 'Add' }}</button>
+  </ng-template>
+</p-dialog>
+
+<!-- Color Scheme Dialog -->
+<p-dialog
+  [header]="colorScheme() ? 'Edit Color Scheme' : 'Create Color Scheme'"
+  [(visible)]="showSchemeDialog"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  [draggable]="false"
+>
+  <div class="dialog-content scheme-dialog">
+    <div class="form-field">
+      <label for="scheme-name">Scheme Name *</label>
+      <input type="text" pInputText id="scheme-name" [(ngModel)]="schemeName" placeholder="e.g., Standard Battle Ready" />
+    </div>
+
+    <div class="sections-editor">
+      <div class="sections-header">
+        <h4>Sections</h4>
+        <button pButton label="Add Section" icon="pi pi-plus" class="p-button-outlined p-button-sm" (click)="addSection()">Add Section</button>
+      </div>
+
+      @for (section of schemeSections(); track $index; let i = $index) {
+        <div class="section-editor">
+          <div class="section-header">
+            <input
+              type="text"
+              pInputText
+              [ngModel]="section.areaName"
+              (ngModelChange)="updateSectionName(i, $event)"
+              placeholder="Area name (e.g., Armor, Cloak)"
+              class="section-name-input"
+            />
+            <button
+              pButton
+              icon="pi pi-trash"
+              class="p-button-danger p-button-text p-button-sm"
+              pTooltip="Remove Section"
+              aria-label="Remove Section"
+              (click)="removeSection(i)"
+            ></button>
+          </div>
+
+          <div class="paints-editor">
+            @for (paint of section.paints; track $index; let j = $index) {
+              <div class="paint-row">
+                <p-select
+                  [options]="paintOptions()"
+                  [ngModel]="paint.paintId"
+                  (ngModelChange)="updateSectionPaint(i, j, 'paintId', $event)"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Select paint..."
+                  [filter]="true"
+                  filterBy="label"
+                  class="paint-select"
+                />
+                <input
+                  type="text"
+                  pInputText
+                  [ngModel]="paint.technique"
+                  (ngModelChange)="updateSectionPaint(i, j, 'technique', $event)"
+                  placeholder="Technique (e.g., Base, Layer)"
+                  class="technique-input"
+                />
+                <button
+                  pButton
+                  icon="pi pi-times"
+                  class="p-button-text p-button-sm"
+                  pTooltip="Remove Paint"
+                  aria-label="Remove Paint"
+                  (click)="removePaintFromSection(i, j)"
+                ></button>
+              </div>
+            }
+            <button
+              pButton
+              label="Add Paint"
+              icon="pi pi-plus"
+              class="p-button-text p-button-sm"
+              (click)="addPaintToSection(i)"
+            >Add Paint</button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" class="p-button-text" (click)="closeSchemeDialog()">Cancel</button>
+    <button
+      pButton
+      label="Save Scheme"
+      icon="pi pi-check"
+      [disabled]="!schemeName()"
+      (click)="saveScheme()"
+    >Save Scheme</button>
+  </ng-template>
+</p-dialog>

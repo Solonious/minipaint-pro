@@ -45,6 +45,12 @@ export default [
     },
   },
   {
+    files: ['apps/api/**/*.ts'],
+    rules: {
+      '@angular-eslint/prefer-inject': 'off',
+    },
+  },
+  {
     files: ['**/*.html'],
     // Override or add rules here
     rules: {},

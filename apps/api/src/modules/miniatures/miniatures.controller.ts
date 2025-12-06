@@ -45,6 +45,12 @@ export class MiniaturesController {
     return this.miniaturesService.getStatsByStatus();
   }
 
+  @Get(':id/library')
+  @ApiOperation({ summary: 'Get a miniature with all library data (images, color scheme, tutorials)' })
+  async findOneWithLibrary(@Param('id') id: string) {
+    return { data: await this.miniaturesService.findOneWithLibrary(id) };
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a miniature by ID' })
   findOne(@Param('id') id: string) {

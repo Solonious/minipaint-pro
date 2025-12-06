@@ -93,4 +93,48 @@ export class MiniaturesService {
 
     return stats;
   }
+
+  async findOneWithLibrary(id: string) {
+    const miniature = await this.prisma.miniature.findUnique({
+      where: { id },
+      include: {
+        army: true,
+        images: {
+          orderBy: { order: 'asc' },
+        },
+        colorScheme: {
+          include: {
+            sections: {
+              orderBy: { order: 'asc' },
+              include: {
+                paints: {
+                  orderBy: { order: 'asc' },
+                  include: {
+                    paint: {
+                      select: {
+                        id: true,
+                        name: true,
+                        colorHex: true,
+                        brand: true,
+                        type: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        tutorials: {
+          orderBy: { order: 'asc' },
+        },
+      },
+    });
+
+    if (!miniature) {
+      throw new NotFoundException(`Miniature with ID ${id} not found`);
+    }
+
+    return miniature;
+  }
 }

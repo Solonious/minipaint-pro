@@ -23,6 +23,8 @@ export class SidebarComponent {
 
   navItems: NavItem[] = [
     { label: 'Pile of Shame', icon: 'pi pi-th-large', route: '/pile' },
+    { label: 'Library', icon: 'pi pi-images', route: '/library' },
+    { label: 'Library Admin', icon: 'pi pi-cog', route: '/library-admin' },
     { label: 'Armies', icon: 'pi pi-users', route: '/armies' },
     { label: 'Paints', icon: 'pi pi-palette', route: '/paints' },
     { label: 'Recipes', icon: 'pi pi-book', route: '/recipes' },
