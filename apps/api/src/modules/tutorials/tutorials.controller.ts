@@ -14,9 +14,11 @@ import {
   UpdateTutorialDto,
   ReorderTutorialsDto,
 } from './dto/create-tutorial.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('Tutorials')
 @Controller('tutorials')
+@Public()
 export class TutorialsController {
   constructor(private readonly tutorialsService: TutorialsService) {}
 

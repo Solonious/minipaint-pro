@@ -5,3 +5,4 @@ export * from './recipe.model';
 export * from './progress.model';
 export * from './unit.model';
 export * from './miniature-library.model';
+export * from './auth.model';

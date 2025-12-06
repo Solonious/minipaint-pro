@@ -22,7 +22,7 @@
   </div>
 
   <nav class="nav-menu">
-    @for (item of navItems; track item.route) {
+    @for (item of regularNavItems(); track item.route) {
       <a
         [routerLink]="item.route"
         routerLinkActive="active"
@@ -37,14 +37,70 @@
         }
       </a>
     }
+
+    @if (adminNavItems().length > 0) {
+      <div class="nav-separator">
+        @if (expanded()) {
+          <span class="separator-label">Admin</span>
+        }
+        <div class="separator-line"></div>
+      </div>
+
+      @for (item of adminNavItems(); track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          class="nav-item admin-item"
+          pRipple
+          [pTooltip]="expanded() ? '' : item.label"
+          tooltipPosition="right"
+        >
+          <i [class]="item.icon"></i>
+          @if (expanded()) {
+            <span class="nav-label">{{ item.label }}</span>
+          }
+        </a>
+      }
+    }
   </nav>
 
   <div class="sidebar-footer">
-    @if (expanded()) {
-      <div class="streak-badge">
-        <i class="pi pi-bolt"></i>
-        <span>3 Day Streak</span>
-      </div>
+    @if (authService.isAuthenticated()) {
+      @if (expanded()) {
+        <div class="user-info">
+          <i class="pi pi-user"></i>
+          <div class="user-details">
+            <span class="user-name">{{ authService.user()?.displayName }}</span>
+            @if (authService.isAdmin()) {
+              <span class="user-role">Admin</span>
+            }
+          </div>
+        </div>
+      }
+      <button
+        pButton
+        pRipple
+        type="button"
+        [icon]="'pi pi-sign-out'"
+        [label]="expanded() ? 'Logout' : ''"
+        class="logout-btn p-button-text"
+        (click)="onLogout()"
+        [pTooltip]="expanded() ? '' : 'Logout'"
+        tooltipPosition="right"
+      ></button>
+    } @else {
+      <a
+        routerLink="/auth/login"
+        class="nav-item login-link"
+        pRipple
+        [pTooltip]="expanded() ? '' : 'Login'"
+        tooltipPosition="right"
+      >
+        <i class="pi pi-sign-in"></i>
+        @if (expanded()) {
+          <span class="nav-label">Login</span>
+        }
+      </a>
     }
   </div>
 </aside>

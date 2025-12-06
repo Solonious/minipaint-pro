@@ -5,9 +5,11 @@ import { AdminService } from './admin.service';
 import { GameSystem } from '@prisma/client';
 import * as path from 'path';
 import * as fs from 'fs';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('uploads')
 @Controller('uploads')
+@Public()
 export class UploadsController {
   private readonly uploadDir = path.join(process.cwd(), 'apps/api/uploads/units');
 
@@ -28,6 +30,7 @@ export class UploadsController {
 
 @ApiTags('unit-images')
 @Controller('unit-images')
+@Public()
 export class UnitImagesController {
   constructor(private readonly adminService: AdminService) {}
 

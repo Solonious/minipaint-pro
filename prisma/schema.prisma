@@ -9,24 +9,69 @@ datasource db {
 }
 
 // ============================================
-// User (Phase 2)
+// User Role
+// ============================================
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// ============================================
+// User
 // ============================================
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  passwordHash  String
-  displayName   String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                       String    @id @default(uuid())
+  email                    String    @unique
+  passwordHash             String
+  displayName              String
+  role                     UserRole  @default(USER)
 
-  armies        Army[]
-  miniatures    Miniature[]
-  paints        UserPaint[]
-  recipes       Recipe[]
-  savedRecipes  SavedRecipe[]
-  progress      UserProgress?
+  // Email verification
+  emailVerified            Boolean   @default(false)
+  emailVerificationToken   String?   @unique
+  emailVerificationExpires DateTime?
+
+  // Password reset
+  passwordResetToken       String?   @unique
+  passwordResetExpires     DateTime?
+
+  // Account status
+  isActive                 Boolean   @default(true)
+  lastLoginAt              DateTime?
+
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+
+  // Relations
+  refreshTokens            RefreshToken[]
+  armies                   Army[]
+  miniatures               Miniature[]
+  paints                   UserPaint[]
+  recipes                  Recipe[]
+  savedRecipes             SavedRecipe[]
+  progress                 UserProgress?
 
   @@map("users")
+}
+
+// ============================================
+// Refresh Token
+// ============================================
+model RefreshToken {
+  id          String    @id @default(uuid())
+  userId      String
+  tokenHash   String    @unique
+  userAgent   String?
+  ipAddress   String?
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  revokedAt   DateTime?
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
 }
 
 // ============================================

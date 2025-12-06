@@ -13,12 +13,14 @@ import { RecipesService } from './recipes.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { RecipeDifficulty } from '@prisma/client';
+import { Public } from '../auth/decorators/public.decorator';
 
 // For MVP without auth, use null userId
 const TEMP_USER_ID = null;
 
 @ApiTags('recipes')
 @Controller('recipes')
+@Public()
 export class RecipesController {
   constructor(private readonly recipesService: RecipesService) {}
 

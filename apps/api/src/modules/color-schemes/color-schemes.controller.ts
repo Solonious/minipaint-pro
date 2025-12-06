@@ -17,9 +17,11 @@ import {
   AddSectionPaintDto,
   UpdateSectionPaintDto,
 } from './dto/create-color-scheme.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('Color Schemes')
 @Controller('color-schemes')
+@Public()
 export class ColorSchemesController {
   constructor(private readonly colorSchemesService: ColorSchemesService) {}
 

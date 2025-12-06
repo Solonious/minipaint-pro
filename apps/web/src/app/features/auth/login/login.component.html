@@ -1,0 +1,63 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1 class="auth-title">Welcome Back</h1>
+      <p class="auth-subtitle">Sign in to continue to MiniPaint Pro</p>
+    </div>
+
+    @if (errorMessage()) {
+      <p-message severity="error" [text]="errorMessage()!" styleClass="auth-error"></p-message>
+    }
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-field">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          pInputText
+          formControlName="email"
+          placeholder="Enter your email"
+          [class.ng-invalid]="isFieldInvalid('email')"
+        />
+        @if (isFieldInvalid('email')) {
+          <small class="p-error">{{ getFieldError('email') }}</small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="password">Password</label>
+        <p-password
+          id="password"
+          formControlName="password"
+          placeholder="Enter your password"
+          [feedback]="false"
+          [toggleMask]="true"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+          [class.ng-invalid]="isFieldInvalid('password')"
+        ></p-password>
+        @if (isFieldInvalid('password')) {
+          <small class="p-error">{{ getFieldError('password') }}</small>
+        }
+      </div>
+
+      <div class="forgot-password">
+        <a routerLink="/auth/forgot-password">Forgot password?</a>
+      </div>
+
+      <p-button
+        type="submit"
+        label="Sign In"
+        styleClass="w-full"
+        [loading]="authService.loading()"
+        [disabled]="loginForm.invalid || authService.loading()"
+      ></p-button>
+    </form>
+
+    <div class="auth-footer">
+      <span>Don't have an account?</span>
+      <a routerLink="/auth/register">Create one</a>
+    </div>
+  </div>
+</div>

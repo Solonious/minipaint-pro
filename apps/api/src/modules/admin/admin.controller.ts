@@ -16,8 +16,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { UploadImageDto, ImportImageDto } from './dto/upload-image.dto';
-import { GameSystem } from '@prisma/client';
+import { GameSystem, UserRole } from '@prisma/client';
 import { memoryStorage } from 'multer';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 interface MulterFile {
   fieldname: string;
@@ -30,6 +31,7 @@ interface MulterFile {
 
 @ApiTags('admin')
 @Controller('admin')
+@Roles(UserRole.ADMIN)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 

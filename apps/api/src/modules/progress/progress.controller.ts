@@ -10,12 +10,14 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { ProgressService } from './progress.service';
 import { LogSessionDto } from './dto/log-session.dto';
 import { UpdateGoalDto } from './dto/update-goal.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 // For MVP without auth, use a visitor ID
 const TEMP_VISITOR_ID = 'default-visitor';
 
 @ApiTags('progress')
 @Controller('progress')
+@Public()
 export class ProgressController {
   constructor(private readonly progressService: ProgressService) {}
 

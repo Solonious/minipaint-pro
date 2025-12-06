@@ -1,6 +1,7 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app/app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
@@ -8,12 +9,15 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
+  // Cookie parser for JWT httpOnly cookies
+  app.use(cookieParser());
+
   const globalPrefix = process.env.API_PREFIX || 'api';
   app.setGlobalPrefix(globalPrefix);
 
   app.enableCors({
     origin: process.env.CORS_ORIGIN || 'http://localhost:4200',
-    credentials: true,
+    credentials: true, // Required for cookies
   });
 
   app.useGlobalPipes(
@@ -31,11 +35,13 @@ async function bootstrap(): Promise<void> {
     .setTitle('MiniPaint Pro API')
     .setDescription('API for tracking miniature painting progress')
     .setVersion('1.0')
+    .addTag('auth')
     .addTag('miniatures')
     .addTag('armies')
     .addTag('paints')
     .addTag('recipes')
     .addTag('progress')
+    .addCookieAuth('access_token')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

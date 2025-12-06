@@ -14,9 +14,11 @@ import { CreateMiniatureDto } from './dto/create-miniature.dto';
 import { UpdateMiniatureDto } from './dto/update-miniature.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { MiniatureStatus } from '@prisma/client';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('miniatures')
 @Controller('miniatures')
+@Public()
 export class MiniaturesController {
   constructor(private readonly miniaturesService: MiniaturesService) {}
 

@@ -1,7 +1,55 @@
 import { Routes } from '@angular/router';
 import { ShellComponent } from './layout/shell/shell.component';
+import { adminGuard } from './core/guards/admin.guard';
+import { guestGuard } from './core/guards/guest.guard';
 
 export const appRoutes: Routes = [
+  {
+    path: 'auth',
+    canActivate: [guestGuard],
+    children: [
+      {
+        path: 'login',
+        loadComponent: () =>
+          import('./features/auth/login/login.component').then(
+            (m) => m.LoginComponent
+          ),
+      },
+      {
+        path: 'register',
+        loadComponent: () =>
+          import('./features/auth/register/register.component').then(
+            (m) => m.RegisterComponent
+          ),
+      },
+      {
+        path: 'forgot-password',
+        loadComponent: () =>
+          import('./features/auth/forgot-password/forgot-password.component').then(
+            (m) => m.ForgotPasswordComponent
+          ),
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () =>
+          import('./features/auth/reset-password/reset-password.component').then(
+            (m) => m.ResetPasswordComponent
+          ),
+      },
+      {
+        path: 'verify-email',
+        loadComponent: () =>
+          import('./features/auth/verify-email/verify-email.component').then(
+            (m) => m.VerifyEmailComponent
+          ),
+      },
+      {
+        path: '',
+        redirectTo: 'login',
+        pathMatch: 'full',
+      },
+    ],
+  },
   {
     path: '',
     component: ShellComponent,
@@ -48,6 +96,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'admin',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/admin/admin.component').then(
             (m) => m.AdminComponent
@@ -55,6 +104,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'library-admin',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/library-admin/library-admin.component').then(
             (m) => m.LibraryAdminComponent

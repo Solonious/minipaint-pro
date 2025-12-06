@@ -12,6 +12,7 @@ import { PaintsService } from './paints.service';
 import { CreatePaintDto } from './dto/create-paint.dto';
 import { ToggleOwnedDto, ToggleWishlistDto } from './dto/toggle-paint.dto';
 import { PaintBrand, PaintType } from '@prisma/client';
+import { Public } from '../auth/decorators/public.decorator';
 
 // For MVP without auth, use null userId
 // This will be replaced with actual user ID from JWT when auth is implemented
@@ -19,6 +20,7 @@ const TEMP_USER_ID = null;
 
 @ApiTags('paints')
 @Controller('paints')
+@Public()
 export class PaintsController {
   constructor(private readonly paintsService: PaintsService) {}
 

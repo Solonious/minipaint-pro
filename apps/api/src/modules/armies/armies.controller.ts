@@ -11,9 +11,11 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { ArmiesService } from './armies.service';
 import { CreateArmyDto } from './dto/create-army.dto';
 import { UpdateArmyDto } from './dto/update-army.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('armies')
 @Controller('armies')
+@Public()
 export class ArmiesController {
   constructor(private readonly armiesService: ArmiesService) {}
 

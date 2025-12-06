@@ -23,6 +23,7 @@ import {
   UpdateMiniatureImageDto,
   ReorderImagesDto,
 } from './dto/create-miniature-image.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 interface MulterFile {
   fieldname: string;
@@ -35,6 +36,7 @@ interface MulterFile {
 
 @ApiTags('Miniature Images')
 @Controller('miniature-images')
+@Public()
 export class MiniatureImagesController {
   constructor(private readonly miniatureImagesService: MiniatureImagesService) {}
 

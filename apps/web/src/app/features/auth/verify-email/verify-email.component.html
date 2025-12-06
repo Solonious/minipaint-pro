@@ -1,0 +1,30 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1 class="auth-title">Email Verification</h1>
+    </div>
+
+    @if (verifying()) {
+      <div class="verifying-container">
+        <p-progressSpinner
+          strokeWidth="3"
+          [style]="{width: '50px', height: '50px'}"
+        ></p-progressSpinner>
+        <p class="verifying-message">Verifying your email...</p>
+      </div>
+    } @else {
+      @if (errorMessage()) {
+        <p-message severity="error" [text]="errorMessage()!" styleClass="auth-error"></p-message>
+      }
+
+      @if (successMessage()) {
+        <p-message severity="success" [text]="successMessage()!" styleClass="auth-success"></p-message>
+        <p class="redirect-message">Redirecting to login...</p>
+      }
+    }
+
+    <div class="back-to-login">
+      <a routerLink="/auth/login">Go to login</a>
+    </div>
+  </div>
+</div>
