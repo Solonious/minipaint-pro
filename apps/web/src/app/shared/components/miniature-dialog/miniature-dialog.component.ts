@@ -2,10 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   input,
   output,
-  OnInit,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
@@ -278,7 +278,7 @@ const STATUS_OPTIONS: StatusOption[] = [
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MiniatureDialogComponent implements OnInit {
+export class MiniatureDialogComponent {
   private readonly armyService = inject(ArmyService);
 
   visible = input.required<boolean>();
@@ -308,8 +308,12 @@ export class MiniatureDialogComponent implements OnInit {
     notes: '',
   };
 
-  ngOnInit(): void {
-    this.resetForm();
+  constructor() {
+    effect(() => {
+      if (this.visible()) {
+        this.resetForm();
+      }
+    });
   }
 
   private resetForm(): void {

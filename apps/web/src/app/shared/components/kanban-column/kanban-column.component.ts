@@ -42,6 +42,7 @@ export const STATUS_CONFIGS: StatusConfig[] = [
       <div
         class="column-content"
         cdkDropList
+        [id]="config().status"
         [cdkDropListData]="config().status"
         [cdkDropListConnectedTo]="connectedLists()"
         (cdkDropListDropped)="onDrop($event)"

@@ -2,9 +2,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   input,
   output,
-  OnInit,
   viewChild,
 } from '@angular/core';
 import { ColorPicker } from 'primeng/colorpicker';
@@ -375,7 +375,7 @@ const FACTION_OPTIONS: FactionOption[] = [
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ArmyDialogComponent implements OnInit {
+export class ArmyDialogComponent {
   visible = input.required<boolean>();
   army = input<Army | null>(null);
 
@@ -401,8 +401,12 @@ export class ArmyDialogComponent implements OnInit {
     colorHex: '#3d5a6b',
   };
 
-  ngOnInit(): void {
-    this.resetForm();
+  constructor() {
+    effect(() => {
+      if (this.visible()) {
+        this.resetForm();
+      }
+    });
   }
 
   private resetForm(): void {
