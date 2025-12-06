@@ -86,6 +86,7 @@
   display: grid;
   gap: var(--space-md);
   grid-template-columns: 1fr;
+  align-items: stretch;
 
   @media (min-width: 640px) {
     grid-template-columns: repeat(2, 1fr);

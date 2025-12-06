@@ -35,17 +35,21 @@
   </div>
 </div>
 
-<div class="kanban-board">
-  @for (config of statusConfigs; track config.status) {
-    <app-kanban-column
-      [config]="config"
-      [miniatures]="getMiniaturesByStatus(config.status)"
-      [connectedLists]="connectedListIds"
-      (cardClick)="openEditDialog($event)"
-      (itemDropped)="onDrop($event)"
-    />
-  }
-</div>
+@if (loading()) {
+  <app-page-loader message="Loading miniatures..." />
+} @else {
+  <div class="kanban-board">
+    @for (config of statusConfigs; track config.status) {
+      <app-kanban-column
+        [config]="config"
+        [miniatures]="getMiniaturesByStatus(config.status)"
+        [connectedLists]="connectedListIds"
+        (cardClick)="openEditDialog($event)"
+        (itemDropped)="onDrop($event)"
+      />
+    }
+  </div>
+}
 
 <app-miniature-dialog
   [visible]="dialogVisible()"

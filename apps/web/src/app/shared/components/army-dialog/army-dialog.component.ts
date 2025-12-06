@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   effect,
+  inject,
   input,
   output,
   viewChild,
@@ -15,12 +16,14 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { ColorPickerModule } from 'primeng/colorpicker';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import {
   Army,
   CreateArmyDto,
   GameSystem,
   UpdateArmyDto,
 } from '@minipaint-pro/types';
+import { WahapediaService } from '../../../core/services/wahapedia.service';
 
 interface GameSystemOption {
   label: string;
@@ -42,6 +45,60 @@ interface FactionOption {
   iconId: string;
   category: 'imperium' | 'chaos' | 'xenos' | 'chapter';
 }
+
+// Mapping from faction names (including Wahapedia names) to icon IDs
+const FACTION_ICON_MAP: Record<string, string> = {
+  // Imperium
+  'Space Marines': 'adeptus-astartes',
+  'Adeptus Astartes': 'adeptus-astartes',
+  'Astra Militarum': 'astra-militarum',
+  'Imperial Guard': 'astra-militarum',
+  'Adeptus Mechanicus': 'adeptus-mechanicus',
+  'Adeptus Custodes': 'adeptus-custodes',
+  'Sisters of Battle': 'sisters-of-battle',
+  'Adepta Sororitas': 'sisters-of-battle',
+  'Imperial Knights': 'imperial-knights',
+  'Inquisition': 'inquisition',
+  'Imperial Agents': 'imperial-aquila',
+  'Agents of the Imperium': 'imperial-aquila',
+  // Space Marine Chapters
+  'Ultramarines': 'ultramarines',
+  'Blood Angels': 'blood-angels',
+  'Dark Angels': 'dark-angels',
+  'Space Wolves': 'space-wolves',
+  'Imperial Fists': 'imperial-fists',
+  'Iron Hands': 'iron-hands',
+  'Raven Guard': 'raven-guard',
+  'Salamanders': 'salamanders',
+  'White Scars': 'white-scars',
+  'Black Templars': 'adeptus-astartes',
+  'Deathwatch': 'adeptus-astartes',
+  'Grey Knights': 'adeptus-astartes',
+  // Chaos
+  'Chaos Space Marines': 'chaos',
+  'Heretic Astartes': 'chaos',
+  'Black Legion': 'black-legion',
+  'Death Guard': 'death-guard',
+  'Thousand Sons': 'thousand-sons',
+  'World Eaters': 'world-eaters',
+  "Emperor's Children": 'emperors-children',
+  'Chaos Knights': 'chaos-knights',
+  'Chaos Daemons': 'chaos-daemons',
+  'Daemons of Chaos': 'chaos-daemons',
+  'Legiones Daemonica': 'chaos-daemons',
+  // Xenos
+  'Orks': 'orks',
+  'Aeldari': 'aeldari',
+  'Craftworlds': 'aeldari',
+  'Drukhari': 'drukhari',
+  'Tyranids': 'tyranids',
+  'Necrons': 'necrons',
+  "T'au Empire": 'tau',
+  'Tau Empire': 'tau',
+  'Genestealer Cults': 'genestealer-cults',
+  'Leagues of Votann': 'leagues-of-votann',
+  'Votann': 'leagues-of-votann',
+};
 
 const FACTION_OPTIONS: FactionOption[] = [
   // Imperium
@@ -94,6 +151,7 @@ const FACTION_OPTIONS: FactionOption[] = [
     SelectModule,
     ButtonModule,
     ColorPickerModule,
+    ProgressSpinnerModule,
   ],
   template: `
     <p-dialog
@@ -119,61 +177,89 @@ const FACTION_OPTIONS: FactionOption[] = [
           />
         </div>
 
-        <div class="form-row">
+        <div class="form-field">
+          <label for="gameSystem">Game System *</label>
+          <p-select
+            id="gameSystem"
+            [(ngModel)]="formData.gameSystem"
+            name="gameSystem"
+            [options]="gameSystemOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Select game system"
+            (ngModelChange)="onGameSystemChange($event)"
+            appendTo="body"
+          />
+        </div>
+
+        @if (formData.gameSystem) {
           <div class="form-field">
             <label for="faction">Faction *</label>
-            <p-select
-              id="faction"
-              [(ngModel)]="formData.faction"
-              name="faction"
-              [options]="factionOptions"
-              optionLabel="label"
-              optionValue="value"
-              [filter]="true"
-              filterPlaceholder="Search factions..."
-              placeholder="Select faction"
-              (ngModelChange)="onFactionChange($event)"
-              styleClass="faction-select"
-              appendTo="body"
-            >
-              <ng-template #selectedItem let-selected>
-                @if (selected) {
+            @if (formData.gameSystem === 'warhammer40k') {
+              @if (wahapediaService.loading()) {
+                <div class="loading-indicator">
+                  <p-progressSpinner
+                    [style]="{ width: '20px', height: '20px' }"
+                    strokeWidth="4"
+                  />
+                  <span>Loading factions...</span>
+                </div>
+              } @else {
+                <p-select
+                  id="faction"
+                  [(ngModel)]="formData.factionId"
+                  name="factionId"
+                  [options]="wahapediaService.factions()"
+                  optionLabel="name"
+                  optionValue="id"
+                  [filter]="true"
+                  filterPlaceholder="Search factions..."
+                  placeholder="Select faction"
+                  (ngModelChange)="onWahapediaFactionChange($event)"
+                  appendTo="body"
+                />
+              }
+            } @else {
+              <p-select
+                id="faction"
+                [(ngModel)]="formData.faction"
+                name="faction"
+                [options]="factionOptions"
+                optionLabel="label"
+                optionValue="value"
+                [filter]="true"
+                filterPlaceholder="Search factions..."
+                placeholder="Select faction"
+                (ngModelChange)="onFactionChange($event)"
+                styleClass="faction-select"
+                appendTo="body"
+              >
+                <ng-template #selectedItem let-selected>
+                  @if (selected) {
+                    <div class="faction-option">
+                      <img
+                        [src]="'assets/icons/factions/' + selected.iconId + '.svg'"
+                        [alt]="selected.label"
+                        class="faction-option-icon"
+                      />
+                      <span>{{ selected.label }}</span>
+                    </div>
+                  }
+                </ng-template>
+                <ng-template #item let-option>
                   <div class="faction-option">
                     <img
-                      [src]="'assets/icons/factions/' + selected.iconId + '.svg'"
-                      [alt]="selected.label"
+                      [src]="'assets/icons/factions/' + option.iconId + '.svg'"
+                      [alt]="option.label"
                       class="faction-option-icon"
                     />
-                    <span>{{ selected.label }}</span>
+                    <span>{{ option.label }}</span>
                   </div>
-                }
-              </ng-template>
-              <ng-template #item let-option>
-                <div class="faction-option">
-                  <img
-                    [src]="'assets/icons/factions/' + option.iconId + '.svg'"
-                    [alt]="option.label"
-                    class="faction-option-icon"
-                  />
-                  <span>{{ option.label }}</span>
-                </div>
-              </ng-template>
-            </p-select>
+                </ng-template>
+              </p-select>
+            }
           </div>
-
-          <div class="form-field">
-            <label for="gameSystem">Game System *</label>
-            <p-select
-              id="gameSystem"
-              [(ngModel)]="formData.gameSystem"
-              name="gameSystem"
-              [options]="gameSystemOptions"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Select game"
-            />
-          </div>
-        </div>
+        }
 
         <div class="form-row">
           <div class="form-field">
@@ -316,6 +402,15 @@ const FACTION_OPTIONS: FactionOption[] = [
       border: 1px solid var(--border-dim);
     }
 
+    .loading-indicator {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm);
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
     .faction-option {
       display: flex;
       align-items: center;
@@ -376,6 +471,8 @@ const FACTION_OPTIONS: FactionOption[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ArmyDialogComponent {
+  readonly wahapediaService = inject(WahapediaService);
+
   visible = input.required<boolean>();
   army = input<Army | null>(null);
 
@@ -395,7 +492,8 @@ export class ArmyDialogComponent {
   formData = {
     name: '',
     faction: '',
-    gameSystem: 'warhammer40k' as GameSystem,
+    factionId: undefined as string | undefined,
+    gameSystem: undefined as GameSystem | undefined,
     targetPoints: 2000,
     iconEmoji: undefined as string | undefined,
     colorHex: '#3d5a6b',
@@ -415,16 +513,29 @@ export class ArmyDialogComponent {
       this.formData = {
         name: existingArmy.name,
         faction: existingArmy.faction,
+        factionId: undefined,
         gameSystem: existingArmy.gameSystem,
         targetPoints: existingArmy.targetPoints,
         iconEmoji: existingArmy.iconEmoji,
         colorHex: existingArmy.colorHex ?? '#3d5a6b',
       };
+
+      // Load Wahapedia data and find matching faction for 40K armies
+      if (existingArmy.gameSystem === 'warhammer40k') {
+        this.wahapediaService.loadData(existingArmy.gameSystem);
+        const faction = this.wahapediaService
+          .factions()
+          .find((f) => f.name === existingArmy.faction);
+        if (faction) {
+          this.formData.factionId = faction.id;
+        }
+      }
     } else {
       this.formData = {
         name: '',
         faction: '',
-        gameSystem: 'warhammer40k',
+        factionId: undefined,
+        gameSystem: undefined,
         targetPoints: 2000,
         iconEmoji: undefined,
         colorHex: '#3d5a6b',
@@ -433,15 +544,40 @@ export class ArmyDialogComponent {
   }
 
   isFormValid(): boolean {
-    return (
-      this.formData.name.trim().length > 0 &&
-      this.formData.faction.trim().length > 0 &&
-      this.formData.targetPoints > 0
-    );
+    const hasName = this.formData.name.trim().length > 0;
+    const hasGameSystem = !!this.formData.gameSystem;
+    const hasFaction =
+      this.formData.gameSystem === 'warhammer40k'
+        ? !!this.formData.factionId
+        : this.formData.faction.trim().length > 0;
+    const hasTargetPoints = this.formData.targetPoints > 0;
+
+    return hasName && hasGameSystem && hasFaction && hasTargetPoints;
   }
 
   selectEmoji(emoji: string | undefined): void {
     this.formData.iconEmoji = emoji;
+  }
+
+  onGameSystemChange(gameSystem: GameSystem): void {
+    // Clear faction data when game system changes
+    this.formData.faction = '';
+    this.formData.factionId = undefined;
+    this.formData.iconEmoji = undefined;
+
+    // Load Wahapedia data for 40K
+    if (gameSystem === 'warhammer40k') {
+      this.wahapediaService.loadData(gameSystem);
+    }
+  }
+
+  onWahapediaFactionChange(factionId: string): void {
+    const faction = this.wahapediaService.getFactionById(factionId);
+    if (faction) {
+      this.formData.faction = faction.name;
+      // Map Wahapedia faction name to icon ID
+      this.formData.iconEmoji = FACTION_ICON_MAP[faction.name] || 'imperial-aquila';
+    }
   }
 
   onFactionChange(factionValue: string): void {

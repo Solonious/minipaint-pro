@@ -16,6 +16,7 @@ import {
 import { ArmyService } from '../../core/services/army.service';
 import { ArmyCardComponent } from '../../shared/components/army-card/army-card.component';
 import { ArmyDialogComponent } from '../../shared/components/army-dialog/army-dialog.component';
+import { PageLoaderComponent } from '../../shared/components/loading-skeleton';
 
 @Component({
   selector: 'app-army-dashboard',
@@ -25,6 +26,7 @@ import { ArmyDialogComponent } from '../../shared/components/army-dialog/army-di
     TooltipModule,
     ArmyCardComponent,
     ArmyDialogComponent,
+    PageLoaderComponent,
   ],
   templateUrl: './army-dashboard.component.html',
   styleUrl: './army-dashboard.component.scss',
@@ -33,6 +35,7 @@ import { ArmyDialogComponent } from '../../shared/components/army-dialog/army-di
 export class ArmyDashboardComponent {
   private readonly armyService = inject(ArmyService);
 
+  readonly loading = this.armyService.loading;
   readonly armiesWithProgress = this.armyService.armiesWithProgress;
 
   readonly totalArmies = computed(() => this.armiesWithProgress().length);

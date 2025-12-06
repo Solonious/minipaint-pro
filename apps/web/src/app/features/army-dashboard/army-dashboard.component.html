@@ -38,7 +38,9 @@
   </div>
 </div>
 
-@if (armiesWithProgress().length > 0) {
+@if (loading()) {
+  <app-page-loader message="Loading armies..." />
+} @else if (armiesWithProgress().length > 0) {
   <div class="armies-grid">
     @for (army of armiesWithProgress(); track army.id) {
       <app-army-card

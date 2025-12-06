@@ -63,8 +63,14 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
     </div>
   `,
   styles: `
+    :host {
+      display: block;
+      height: 100%;
+    }
+
     .army-card {
       display: flex;
+      height: 100%;
       background: var(--bg-card);
       border: 1px solid var(--border-dim);
       border-radius: var(--radius-lg);
@@ -86,6 +92,7 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      align-self: stretch;
     }
 
     .faction-icon {
@@ -129,8 +136,8 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
 
     .meta {
       display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-sm);
+      flex-direction: column;
+      gap: var(--space-xs);
       font-family: var(--font-body);
       font-size: 0.75rem;
       text-transform: uppercase;

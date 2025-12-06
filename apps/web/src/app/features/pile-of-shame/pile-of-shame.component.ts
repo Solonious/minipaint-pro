@@ -20,6 +20,7 @@ import {
   STATUS_CONFIGS,
 } from '../../shared/components/kanban-column/kanban-column.component';
 import { MiniatureDialogComponent } from '../../shared/components/miniature-dialog/miniature-dialog.component';
+import { PageLoaderComponent } from '../../shared/components/loading-skeleton';
 
 @Component({
   selector: 'app-pile-of-shame',
@@ -29,6 +30,7 @@ import { MiniatureDialogComponent } from '../../shared/components/miniature-dial
     TooltipModule,
     KanbanColumnComponent,
     MiniatureDialogComponent,
+    PageLoaderComponent,
   ],
   templateUrl: './pile-of-shame.component.html',
   styleUrl: './pile-of-shame.component.scss',
@@ -40,6 +42,7 @@ export class PileOfShameComponent {
   readonly statusConfigs = STATUS_CONFIGS;
   readonly connectedListIds = STATUS_CONFIGS.map((c) => c.status);
 
+  readonly loading = this.miniatureService.loading;
   readonly miniaturesByStatus = this.miniatureService.miniaturesByStatus;
   readonly totalCount = this.miniatureService.totalCount;
   readonly totalPoints = this.miniatureService.totalPoints;
