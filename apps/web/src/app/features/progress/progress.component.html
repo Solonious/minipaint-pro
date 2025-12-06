@@ -210,6 +210,7 @@
   [style]="{ width: '400px' }"
   (visibleChange)="goalDialogVisible.set($event)"
   styleClass="goal-dialog"
+  [appendTo]="'body'"
 >
   <form class="dialog-form" (ngSubmit)="onSaveGoal()">
     <div class="form-field">
@@ -234,6 +235,7 @@
           [options]="goalTypeOptions"
           optionLabel="label"
           optionValue="value"
+          [appendTo]="'body'"
         />
       </div>
 
@@ -250,7 +252,7 @@
     </div>
   </form>
 
-  <ng-template #footer>
+  <ng-template pTemplate="footer">
     <div class="dialog-footer">
       <p-button
         label="Cancel"
