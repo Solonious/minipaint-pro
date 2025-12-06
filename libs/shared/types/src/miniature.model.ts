@@ -1,3 +1,5 @@
+import { GameSystem } from './army.model';
+
 export type MiniatureStatus =
   | 'unbuilt'
   | 'assembled'
@@ -12,6 +14,9 @@ export interface Miniature {
   armyId?: string;
   name: string;
   faction: string;
+  gameSystem?: GameSystem;
+  unitId?: string;
+  wahapediaUrl?: string;
   points: number;
   modelCount: number;
   status: MiniatureStatus;
@@ -25,6 +30,9 @@ export interface Miniature {
 export interface CreateMiniatureDto {
   name: string;
   faction: string;
+  gameSystem?: GameSystem;
+  unitId?: string;
+  wahapediaUrl?: string;
   armyId?: string;
   points: number;
   modelCount?: number;
@@ -37,6 +45,9 @@ export interface CreateMiniatureDto {
 export interface UpdateMiniatureDto {
   name?: string;
   faction?: string;
+  gameSystem?: GameSystem | null;
+  unitId?: string | null;
+  wahapediaUrl?: string | null;
   armyId?: string | null;
   points?: number;
   modelCount?: number;

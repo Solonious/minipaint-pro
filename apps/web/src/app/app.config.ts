@@ -9,6 +9,7 @@ import {
   provideClientHydration,
   withEventReplay,
 } from '@angular/platform-browser';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { appRoutes } from './app.routes';
@@ -20,6 +21,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(appRoutes, withComponentInputBinding()),
     provideAnimationsAsync(),
+    provideHttpClient(withFetch()),
     providePrimeNG({
       theme: {
         preset: Aura,

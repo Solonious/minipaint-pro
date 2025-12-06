@@ -6,6 +6,7 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
@@ -14,18 +15,29 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import {
   Army,
   CreateMiniatureDto,
+  GameSystem,
   Miniature,
   MiniatureStatus,
   UpdateMiniatureDto,
 } from '@minipaint-pro/types';
 import { ArmyService } from '../../../core/services/army.service';
+import {
+  WahapediaService,
+  WahapediaUnit,
+} from '../../../core/services/wahapedia.service';
 
 interface StatusOption {
   label: string;
   value: MiniatureStatus;
+}
+
+interface GameSystemOption {
+  label: string;
+  value: GameSystem;
 }
 
 const STATUS_OPTIONS: StatusOption[] = [
@@ -35,6 +47,15 @@ const STATUS_OPTIONS: StatusOption[] = [
   { label: 'Work in Progress', value: 'wip' },
   { label: 'Painted', value: 'painted' },
   { label: 'Complete', value: 'complete' },
+];
+
+const GAME_SYSTEM_OPTIONS: GameSystemOption[] = [
+  { label: 'Warhammer 40K', value: 'warhammer40k' },
+  { label: 'Age of Sigmar', value: 'ageOfSigmar' },
+  { label: 'Kill Team', value: 'killTeam' },
+  { label: 'Necromunda', value: 'necromunda' },
+  { label: 'Horus Heresy', value: 'horusHeresy' },
+  { label: 'Other', value: 'other' },
 ];
 
 @Component({
@@ -48,6 +69,7 @@ const STATUS_OPTIONS: StatusOption[] = [
     SelectModule,
     TextareaModule,
     ButtonModule,
+    ProgressSpinnerModule,
   ],
   template: `
     <p-dialog
@@ -56,9 +78,10 @@ const STATUS_OPTIONS: StatusOption[] = [
       [modal]="true"
       [draggable]="false"
       [resizable]="false"
-      [style]="{ width: '480px' }"
+      [style]="{ width: '520px' }"
       (visibleChange)="onVisibleChange($event)"
       styleClass="miniature-dialog"
+      appendTo="body"
     >
       <form class="dialog-form" (ngSubmit)="onSubmit()">
         <div class="form-field">
@@ -75,70 +98,17 @@ const STATUS_OPTIONS: StatusOption[] = [
 
         <div class="form-row">
           <div class="form-field">
-            <label for="faction">Faction *</label>
-            <input
-              pInputText
-              id="faction"
-              [(ngModel)]="formData.faction"
-              name="faction"
-              placeholder="e.g., Space Marines"
-              required
-            />
-          </div>
-
-          <div class="form-field">
-            <label for="points">Points *</label>
-            <p-inputNumber
-              id="points"
-              [(ngModel)]="formData.points"
-              name="points"
-              [min]="0"
-              [max]="9999"
-              placeholder="0"
-              required
-            />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-field">
-            <label for="modelCount">Model Count</label>
-            <p-inputNumber
-              id="modelCount"
-              [(ngModel)]="formData.modelCount"
-              name="modelCount"
-              [min]="1"
-              [max]="100"
-              placeholder="1"
-            />
-          </div>
-
-          <div class="form-field">
-            <label for="cost">Cost ($)</label>
-            <p-inputNumber
-              id="cost"
-              [(ngModel)]="formData.cost"
-              name="cost"
-              [min]="0"
-              [max]="9999"
-              [minFractionDigits]="2"
-              [maxFractionDigits]="2"
-              placeholder="0.00"
-            />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-field">
-            <label for="status">Status</label>
+            <label for="gameSystem">Game System</label>
             <p-select
-              id="status"
-              [(ngModel)]="formData.status"
-              name="status"
-              [options]="statusOptions"
+              id="gameSystem"
+              [(ngModel)]="formData.gameSystem"
+              name="gameSystem"
+              [options]="gameSystemOptions"
               optionLabel="label"
               optionValue="value"
-              placeholder="Select status"
+              placeholder="Select game system"
+              (ngModelChange)="onGameSystemChange($event)"
+              appendTo="body"
             />
           </div>
 
@@ -153,9 +123,153 @@ const STATUS_OPTIONS: StatusOption[] = [
               optionValue="id"
               placeholder="No army"
               [showClear]="true"
+              appendTo="body"
             />
           </div>
         </div>
+
+        @if (formData.gameSystem === 'warhammer40k') {
+          <div class="form-row">
+            <div class="form-field">
+              <label for="faction">Faction</label>
+              @if (wahapediaService.loading()) {
+                <div class="loading-indicator">
+                  <p-progressSpinner
+                    [style]="{ width: '20px', height: '20px' }"
+                    strokeWidth="4"
+                  />
+                  <span>Loading factions...</span>
+                </div>
+              } @else {
+                <p-select
+                  id="faction"
+                  [(ngModel)]="formData.factionId"
+                  name="factionId"
+                  [options]="wahapediaService.factions()"
+                  optionLabel="name"
+                  optionValue="id"
+                  [filter]="true"
+                  filterPlaceholder="Search factions..."
+                  placeholder="Select faction"
+                  (ngModelChange)="onFactionChange($event)"
+                  appendTo="body"
+                />
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="unit">Unit</label>
+              <p-select
+                id="unit"
+                [(ngModel)]="formData.unitId"
+                name="unitId"
+                [options]="availableUnits()"
+                optionLabel="name"
+                optionValue="id"
+                [filter]="true"
+                filterPlaceholder="Search units..."
+                placeholder="Select unit (optional)"
+                [disabled]="!formData.factionId"
+                (ngModelChange)="onUnitChange($event)"
+                [showClear]="true"
+                appendTo="body"
+              >
+                <ng-template #item let-unit>
+                  <div class="unit-option">
+                    <span class="unit-name">{{ unit.name }}</span>
+                    @if (unit.role) {
+                      <span class="unit-role">{{ unit.role }}</span>
+                    }
+                  </div>
+                </ng-template>
+              </p-select>
+            </div>
+          </div>
+        } @else {
+          <div class="form-field">
+            <label for="faction">Faction *</label>
+            <input
+              pInputText
+              id="faction"
+              [(ngModel)]="formData.faction"
+              name="faction"
+              placeholder="e.g., Space Marines"
+              required
+            />
+          </div>
+        }
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="points">Points *</label>
+            <p-inputNumber
+              id="points"
+              [(ngModel)]="formData.points"
+              name="points"
+              [min]="0"
+              [max]="9999"
+              placeholder="0"
+              required
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="modelCount">Model Count</label>
+            <p-inputNumber
+              id="modelCount"
+              [(ngModel)]="formData.modelCount"
+              name="modelCount"
+              [min]="1"
+              [max]="100"
+              placeholder="1"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="cost">Cost ($)</label>
+            <p-inputNumber
+              id="cost"
+              [(ngModel)]="formData.cost"
+              name="cost"
+              [min]="0"
+              [max]="9999"
+              [minFractionDigits]="2"
+              [maxFractionDigits]="2"
+              placeholder="0.00"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="status">Status</label>
+            <p-select
+              id="status"
+              [(ngModel)]="formData.status"
+              name="status"
+              [options]="statusOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select status"
+              appendTo="body"
+            />
+          </div>
+        </div>
+
+        @if (formData.wahapediaUrl) {
+          <div class="form-field">
+            <span class="field-label">Wahapedia Reference</span>
+            <a
+              [href]="formData.wahapediaUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="wahapedia-link"
+            >
+              <i class="pi pi-external-link"></i>
+              View on Wahapedia
+            </a>
+          </div>
+        }
 
         <div class="form-field">
           <label for="imageUrl">Image URL</label>
@@ -254,13 +368,63 @@ const STATUS_OPTIONS: StatusOption[] = [
       gap: var(--space-xs);
     }
 
-    .form-field label {
+    .form-field label,
+    .form-field .field-label {
       font-family: var(--font-body);
       font-size: 0.875rem;
       font-weight: 600;
       color: var(--text-secondary);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+    }
+
+    .loading-indicator {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm);
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .unit-option {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .unit-name {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .unit-role {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+
+    .wahapedia-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--bg-card);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-md);
+      color: var(--gold);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: var(--bg-elevated);
+        border-color: var(--gold);
+      }
+
+      i {
+        font-size: 0.75rem;
+      }
     }
 
     .dialog-footer {
@@ -280,6 +444,7 @@ const STATUS_OPTIONS: StatusOption[] = [
 })
 export class MiniatureDialogComponent {
   private readonly armyService = inject(ArmyService);
+  readonly wahapediaService = inject(WahapediaService);
 
   visible = input.required<boolean>();
   miniature = input<Miniature | null>(null);
@@ -289,6 +454,7 @@ export class MiniatureDialogComponent {
   delete = output<string>();
 
   readonly statusOptions = STATUS_OPTIONS;
+  readonly gameSystemOptions = GAME_SYSTEM_OPTIONS;
 
   readonly armyOptions = computed<Army[]>(() => this.armyService.armies());
 
@@ -296,9 +462,21 @@ export class MiniatureDialogComponent {
     this.miniature() ? 'Edit Miniature' : 'Add Miniature'
   );
 
+  private readonly selectedFactionId = signal<string | undefined>(undefined);
+
+  readonly availableUnits = computed<WahapediaUnit[]>(() => {
+    const factionId = this.selectedFactionId();
+    if (!factionId) return [];
+    return this.wahapediaService.getUnitsForFaction(factionId);
+  });
+
   formData = {
     name: '',
     faction: '',
+    factionId: undefined as string | undefined,
+    gameSystem: undefined as GameSystem | undefined,
+    unitId: undefined as string | undefined,
+    wahapediaUrl: undefined as string | undefined,
     points: 0,
     modelCount: 1,
     cost: undefined as number | undefined,
@@ -322,6 +500,10 @@ export class MiniatureDialogComponent {
       this.formData = {
         name: mini.name,
         faction: mini.faction,
+        factionId: undefined,
+        gameSystem: mini.gameSystem,
+        unitId: mini.unitId,
+        wahapediaUrl: mini.wahapediaUrl,
         points: mini.points,
         modelCount: mini.modelCount,
         cost: mini.cost,
@@ -330,10 +512,25 @@ export class MiniatureDialogComponent {
         imageUrl: mini.imageUrl ?? '',
         notes: mini.notes ?? '',
       };
+
+      if (mini.gameSystem === 'warhammer40k') {
+        this.wahapediaService.loadData(mini.gameSystem);
+        const faction = this.wahapediaService
+          .factions()
+          .find((f) => f.name === mini.faction);
+        if (faction) {
+          this.formData.factionId = faction.id;
+          this.selectedFactionId.set(faction.id);
+        }
+      }
     } else {
       this.formData = {
         name: '',
         faction: '',
+        factionId: undefined,
+        gameSystem: undefined,
+        unitId: undefined,
+        wahapediaUrl: undefined,
         points: 0,
         modelCount: 1,
         cost: undefined,
@@ -342,15 +539,49 @@ export class MiniatureDialogComponent {
         imageUrl: '',
         notes: '',
       };
+      this.selectedFactionId.set(undefined);
+    }
+  }
+
+  onGameSystemChange(gameSystem: GameSystem): void {
+    this.formData.factionId = undefined;
+    this.formData.unitId = undefined;
+    this.formData.wahapediaUrl = undefined;
+    this.selectedFactionId.set(undefined);
+
+    if (gameSystem === 'warhammer40k') {
+      this.wahapediaService.loadData(gameSystem);
+    }
+  }
+
+  onFactionChange(factionId: string): void {
+    this.selectedFactionId.set(factionId);
+    this.formData.unitId = undefined;
+    this.formData.wahapediaUrl = undefined;
+
+    const faction = this.wahapediaService.getFactionById(factionId);
+    if (faction) {
+      this.formData.faction = faction.name;
+    }
+  }
+
+  onUnitChange(unitId: string): void {
+    const unit = this.wahapediaService.getUnitById(unitId);
+    if (unit) {
+      this.formData.name = unit.name;
+      this.formData.wahapediaUrl = unit.link;
     }
   }
 
   isFormValid(): boolean {
-    return (
-      this.formData.name.trim().length > 0 &&
-      this.formData.faction.trim().length > 0 &&
-      this.formData.points >= 0
-    );
+    const hasName = this.formData.name.trim().length > 0;
+    const hasFaction =
+      this.formData.gameSystem === 'warhammer40k'
+        ? !!this.formData.factionId
+        : this.formData.faction.trim().length > 0;
+    const hasPoints = this.formData.points >= 0;
+
+    return hasName && hasFaction && hasPoints;
   }
 
   onVisibleChange(visible: boolean): void {
@@ -368,6 +599,9 @@ export class MiniatureDialogComponent {
     const dto: CreateMiniatureDto | UpdateMiniatureDto = {
       name: this.formData.name.trim(),
       faction: this.formData.faction.trim(),
+      gameSystem: this.formData.gameSystem,
+      unitId: this.formData.unitId,
+      wahapediaUrl: this.formData.wahapediaUrl,
       points: this.formData.points,
       modelCount: this.formData.modelCount,
       cost: this.formData.cost,

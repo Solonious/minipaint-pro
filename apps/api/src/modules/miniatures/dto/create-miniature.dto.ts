@@ -1,6 +1,6 @@
 import { IsString, IsInt, IsOptional, IsEnum, IsNumber, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { MiniatureStatus } from '@prisma/client';
+import { MiniatureStatus, GameSystem } from '@prisma/client';
 
 export class CreateMiniatureDto {
   @ApiProperty({ example: 'Intercessor Squad', description: 'Name of the miniature or unit' })
@@ -27,10 +27,25 @@ export class CreateMiniatureDto {
   @IsOptional()
   status?: MiniatureStatus = MiniatureStatus.UNBUILT;
 
+  @ApiPropertyOptional({ enum: GameSystem, description: 'Game system (Warhammer 40K, Kill Team, etc.)' })
+  @IsEnum(GameSystem)
+  @IsOptional()
+  gameSystem?: GameSystem;
+
   @ApiPropertyOptional({ description: 'UUID of the army this miniature belongs to' })
   @IsString()
   @IsOptional()
   armyId?: string;
+
+  @ApiPropertyOptional({ description: 'Wahapedia unit ID' })
+  @IsString()
+  @IsOptional()
+  unitId?: string;
+
+  @ApiPropertyOptional({ description: 'Wahapedia URL for the unit datasheet' })
+  @IsString()
+  @IsOptional()
+  wahapediaUrl?: string;
 
   @ApiPropertyOptional({ example: 45.00, description: 'Cost paid for the miniature' })
   @IsNumber()

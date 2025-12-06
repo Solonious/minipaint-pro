@@ -1,25 +1,31 @@
-import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { catchError, of, tap } from 'rxjs';
 import {
   Army,
   ArmyWithProgress,
   CreateArmyDto,
+  GameSystem,
   UpdateArmyDto,
 } from '@minipaint-pro/types';
-import { StorageService } from './storage.service';
 import { MiniatureService } from './miniature.service';
-
-const STORAGE_KEY = 'minipaint_armies';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ArmyService {
-  private readonly storage = inject(StorageService);
+  private readonly http = inject(HttpClient);
   private readonly miniatureService = inject(MiniatureService);
+  private readonly apiUrl = `${environment.apiUrl}/armies`;
 
-  private readonly armiesSignal = signal<Army[]>(this.loadFromStorage());
+  private readonly armiesSignal = signal<Army[]>([]);
+  private readonly loadingSignal = signal<boolean>(false);
+  private readonly errorSignal = signal<string | null>(null);
 
   readonly armies = this.armiesSignal.asReadonly();
+  readonly loading = this.loadingSignal.asReadonly();
+  readonly error = this.errorSignal.asReadonly();
 
   readonly armiesWithProgress = computed<ArmyWithProgress[]>(() => {
     const armies = this.armiesSignal();
@@ -44,66 +50,134 @@ export class ArmyService {
   });
 
   constructor() {
-    effect(() => {
-      this.saveToStorage(this.armiesSignal());
-    });
+    this.loadAll();
   }
 
-  private loadFromStorage(): Army[] {
-    return this.storage.get<Army[]>(STORAGE_KEY) ?? [];
+  loadAll(): void {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    this.http
+      .get<Army[]>(this.apiUrl)
+      .pipe(
+        tap((armies) => {
+          this.armiesSignal.set(this.mapFromApi(armies));
+          this.loadingSignal.set(false);
+        }),
+        catchError((error) => {
+          console.error('Error loading armies:', error);
+          this.errorSignal.set('Failed to load armies');
+          this.loadingSignal.set(false);
+          return of([]);
+        })
+      )
+      .subscribe();
   }
 
-  private saveToStorage(armies: Army[]): void {
-    this.storage.set(STORAGE_KEY, armies);
+  add(dto: CreateArmyDto): void {
+    const apiDto = this.mapToApi(dto);
+
+    this.http
+      .post<Army>(this.apiUrl, apiDto)
+      .pipe(
+        tap((army) => {
+          const mapped = this.mapSingleFromApi(army);
+          this.armiesSignal.update((armies) => [...armies, mapped]);
+        }),
+        catchError((error) => {
+          console.error('Error creating army:', error);
+          this.errorSignal.set('Failed to create army');
+          return of(null);
+        })
+      )
+      .subscribe();
   }
 
-  private generateId(): string {
-    return `army_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-  }
+  update(id: string, dto: UpdateArmyDto): void {
+    const apiDto = this.mapToApi(dto);
 
-  add(dto: CreateArmyDto): Army {
-    const now = new Date().toISOString();
-    const army: Army = {
-      id: this.generateId(),
-      name: dto.name,
-      faction: dto.faction,
-      gameSystem: dto.gameSystem,
-      targetPoints: dto.targetPoints,
-      iconEmoji: dto.iconEmoji,
-      colorHex: dto.colorHex,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    this.armiesSignal.update((armies) => [...armies, army]);
-    return army;
-  }
-
-  update(id: string, dto: UpdateArmyDto): Army | null {
-    let updated: Army | null = null;
-
-    this.armiesSignal.update((armies) =>
-      armies.map((a) => {
-        if (a.id === id) {
-          updated = {
-            ...a,
-            ...dto,
-            updatedAt: new Date().toISOString(),
-          };
-          return updated;
-        }
-        return a;
-      })
-    );
-
-    return updated;
+    this.http
+      .patch<Army>(`${this.apiUrl}/${id}`, apiDto)
+      .pipe(
+        tap((army) => {
+          const mapped = this.mapSingleFromApi(army);
+          this.armiesSignal.update((armies) =>
+            armies.map((a) => (a.id === id ? mapped : a))
+          );
+        }),
+        catchError((error) => {
+          console.error('Error updating army:', error);
+          this.errorSignal.set('Failed to update army');
+          return of(null);
+        })
+      )
+      .subscribe();
   }
 
   delete(id: string): void {
-    this.armiesSignal.update((armies) => armies.filter((a) => a.id !== id));
+    this.http
+      .delete<Army>(`${this.apiUrl}/${id}`)
+      .pipe(
+        tap(() => {
+          this.armiesSignal.update((armies) => armies.filter((a) => a.id !== id));
+        }),
+        catchError((error) => {
+          console.error('Error deleting army:', error);
+          this.errorSignal.set('Failed to delete army');
+          return of(null);
+        })
+      )
+      .subscribe();
   }
 
   getById(id: string): Army | undefined {
     return this.armiesSignal().find((a) => a.id === id);
+  }
+
+  private mapFromApi(armies: Army[]): Army[] {
+    return armies.map((a) => this.mapSingleFromApi(a));
+  }
+
+  private mapSingleFromApi(army: Army): Army {
+    return {
+      ...army,
+      gameSystem: this.mapGameSystemFromApi(army.gameSystem),
+    };
+  }
+
+  private mapToApi(
+    dto: CreateArmyDto | UpdateArmyDto
+  ): Record<string, unknown> {
+    const result: Record<string, unknown> = { ...dto };
+
+    if (dto.gameSystem) {
+      result['gameSystem'] = this.mapGameSystemToApi(dto.gameSystem);
+    }
+
+    return result;
+  }
+
+  private mapGameSystemFromApi(gameSystem: string): GameSystem {
+    const mapping: Record<string, GameSystem> = {
+      WARHAMMER_40K: 'warhammer40k',
+      AGE_OF_SIGMAR: 'ageOfSigmar',
+      KILL_TEAM: 'killTeam',
+      NECROMUNDA: 'necromunda',
+      HORUS_HERESY: 'horusHeresy',
+      OTHER: 'other',
+    };
+    return mapping[gameSystem] || 'other';
+  }
+
+  private mapGameSystemToApi(gameSystem: GameSystem): string {
+    const mapping: Record<GameSystem, string> = {
+      warhammer40k: 'WARHAMMER_40K',
+      ageOfSigmar: 'AGE_OF_SIGMAR',
+      killTeam: 'KILL_TEAM',
+      necromunda: 'NECROMUNDA',
+      horusHeresy: 'HORUS_HERESY',
+      other: 'OTHER',
+    };
+    return mapping[gameSystem];
   }
 }
