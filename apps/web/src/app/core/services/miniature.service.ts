@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, of, tap } from 'rxjs';
+import { catchError, map, of, tap } from 'rxjs';
 import {
   CreateMiniatureDto,
   GameSystem,
@@ -9,6 +9,10 @@ import {
   UpdateMiniatureDto,
 } from '@minipaint-pro/types';
 import { environment } from '../../../environments/environment';
+
+interface ApiResponse<T> {
+  data: T;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -62,8 +66,9 @@ export class MiniatureService {
     this.errorSignal.set(null);
 
     this.http
-      .get<Miniature[]>(this.apiUrl)
+      .get<ApiResponse<Miniature[]>>(this.apiUrl)
       .pipe(
+        map((response) => response.data),
         tap((miniatures) => {
           this.miniaturesSignal.set(this.mapFromApi(miniatures));
           this.loadingSignal.set(false);
@@ -82,8 +87,9 @@ export class MiniatureService {
     const apiDto = this.mapToApi(dto);
 
     this.http
-      .post<Miniature>(this.apiUrl, apiDto)
+      .post<ApiResponse<Miniature>>(this.apiUrl, apiDto)
       .pipe(
+        map((response) => response.data),
         tap((miniature) => {
           const mapped = this.mapSingleFromApi(miniature);
           this.miniaturesSignal.update((minis) => [...minis, mapped]);
@@ -101,8 +107,9 @@ export class MiniatureService {
     const apiDto = this.mapToApi(dto);
 
     this.http
-      .patch<Miniature>(`${this.apiUrl}/${id}`, apiDto)
+      .patch<ApiResponse<Miniature>>(`${this.apiUrl}/${id}`, apiDto)
       .pipe(
+        map((response) => response.data),
         tap((miniature) => {
           const mapped = this.mapSingleFromApi(miniature);
           this.miniaturesSignal.update((minis) =>
@@ -122,8 +129,9 @@ export class MiniatureService {
     const apiStatus = this.mapStatusToApi(status);
 
     this.http
-      .patch<Miniature>(`${this.apiUrl}/${id}/status`, { status: apiStatus })
+      .patch<ApiResponse<Miniature>>(`${this.apiUrl}/${id}/status`, { status: apiStatus })
       .pipe(
+        map((response) => response.data),
         tap((miniature) => {
           const mapped = this.mapSingleFromApi(miniature);
           this.miniaturesSignal.update((minis) =>
@@ -141,7 +149,7 @@ export class MiniatureService {
 
   delete(id: string): void {
     this.http
-      .delete<Miniature>(`${this.apiUrl}/${id}`)
+      .delete<ApiResponse<Miniature>>(`${this.apiUrl}/${id}`)
       .pipe(
         tap(() => {
           this.miniaturesSignal.update((minis) =>

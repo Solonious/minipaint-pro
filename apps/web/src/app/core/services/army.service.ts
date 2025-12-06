@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, of, tap } from 'rxjs';
+import { catchError, map, of, tap } from 'rxjs';
 import {
   Army,
   ArmyWithProgress,
@@ -10,6 +10,10 @@ import {
 } from '@minipaint-pro/types';
 import { MiniatureService } from './miniature.service';
 import { environment } from '../../../environments/environment';
+
+interface ApiResponse<T> {
+  data: T;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -58,8 +62,9 @@ export class ArmyService {
     this.errorSignal.set(null);
 
     this.http
-      .get<Army[]>(this.apiUrl)
+      .get<ApiResponse<Army[]>>(this.apiUrl)
       .pipe(
+        map((response) => response.data),
         tap((armies) => {
           this.armiesSignal.set(this.mapFromApi(armies));
           this.loadingSignal.set(false);
@@ -78,8 +83,9 @@ export class ArmyService {
     const apiDto = this.mapToApi(dto);
 
     this.http
-      .post<Army>(this.apiUrl, apiDto)
+      .post<ApiResponse<Army>>(this.apiUrl, apiDto)
       .pipe(
+        map((response) => response.data),
         tap((army) => {
           const mapped = this.mapSingleFromApi(army);
           this.armiesSignal.update((armies) => [...armies, mapped]);
@@ -97,8 +103,9 @@ export class ArmyService {
     const apiDto = this.mapToApi(dto);
 
     this.http
-      .patch<Army>(`${this.apiUrl}/${id}`, apiDto)
+      .patch<ApiResponse<Army>>(`${this.apiUrl}/${id}`, apiDto)
       .pipe(
+        map((response) => response.data),
         tap((army) => {
           const mapped = this.mapSingleFromApi(army);
           this.armiesSignal.update((armies) =>
@@ -116,7 +123,7 @@ export class ArmyService {
 
   delete(id: string): void {
     this.http
-      .delete<Army>(`${this.apiUrl}/${id}`)
+      .delete<ApiResponse<Army>>(`${this.apiUrl}/${id}`)
       .pipe(
         tap(() => {
           this.armiesSignal.update((armies) => armies.filter((a) => a.id !== id));

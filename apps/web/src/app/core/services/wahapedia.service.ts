@@ -128,7 +128,7 @@ export class WahapediaService {
   }
 
   private fetchFactions(edition: string) {
-    const url = `https://wahapedia.ru/${edition}/Factions.csv`;
+    const url = `/wahapedia/${edition}/Factions.csv`;
 
     return this.http.get(url, { responseType: 'text' }).pipe(
       map((csv) => this.parseFactionsCsv(csv)),
@@ -140,7 +140,7 @@ export class WahapediaService {
   }
 
   private fetchUnits(edition: string) {
-    const url = `https://wahapedia.ru/${edition}/Datasheets.csv`;
+    const url = `/wahapedia/${edition}/Datasheets.csv`;
 
     return this.http.get(url, { responseType: 'text' }).pipe(
       map((csv) => this.parseUnitsCsv(csv)),
@@ -152,7 +152,8 @@ export class WahapediaService {
   }
 
   private parseFactionsCsv(csv: string): WahapediaFaction[] {
-    const lines = csv.trim().split('\n');
+    const cleanCsv = csv.replace(/^\uFEFF/, '');
+    const lines = cleanCsv.trim().split('\n');
     if (lines.length < 2) return [];
 
     return lines.slice(1).map((line) => {
@@ -166,7 +167,8 @@ export class WahapediaService {
   }
 
   private parseUnitsCsv(csv: string): WahapediaUnit[] {
-    const lines = csv.trim().split('\n');
+    const cleanCsv = csv.replace(/^\uFEFF/, '');
+    const lines = cleanCsv.trim().split('\n');
     if (lines.length < 2) return [];
 
     return lines.slice(1).map((line) => {
