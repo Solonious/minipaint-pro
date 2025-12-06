@@ -88,7 +88,7 @@ import { StatusBadgeComponent } from '../status-badge/status-badge.component';
     }
 
     .name {
-      font-family: 'Cinzel', serif;
+      font-family: var(--font-display);
       font-size: 0.875rem;
       font-weight: 600;
       color: var(--text-primary);
@@ -101,7 +101,7 @@ import { StatusBadgeComponent } from '../status-badge/status-badge.component';
       display: flex;
       align-items: center;
       gap: var(--space-sm);
-      font-family: 'Rajdhani', sans-serif;
+      font-family: var(--font-body);
       font-size: 0.75rem;
       color: var(--text-secondary);
     }

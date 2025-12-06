@@ -39,7 +39,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     }
 
     .name {
-      font-family: 'Rajdhani', sans-serif;
+      font-family: var(--font-body);
       font-size: 0.625rem;
       font-weight: 600;
       text-transform: uppercase;

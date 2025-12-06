@@ -97,7 +97,7 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
     }
 
     .placeholder {
-      font-family: 'Cinzel', serif;
+      font-family: var(--font-display);
       font-size: 1.5rem;
       font-weight: 700;
       color: var(--text-dim);
@@ -119,7 +119,7 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
     }
 
     .name {
-      font-family: 'Cinzel', serif;
+      font-family: var(--font-display);
       font-size: 1.125rem;
       font-weight: 600;
       color: var(--text-primary);
@@ -131,7 +131,7 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
       display: flex;
       flex-wrap: wrap;
       gap: var(--space-sm);
-      font-family: 'Rajdhani', sans-serif;
+      font-family: var(--font-body);
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -153,7 +153,7 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
     }
 
     .stat {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--font-mono);
       font-size: 0.75rem;
     }
 
@@ -173,7 +173,7 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
     }
 
     .target-points {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--font-mono);
       font-size: 0.75rem;
       color: var(--text-secondary);
     }

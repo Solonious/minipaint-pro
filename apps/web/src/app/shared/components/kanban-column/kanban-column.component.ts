@@ -101,7 +101,7 @@ export const STATUS_CONFIGS: StatusConfig[] = [
     .column-title {
       flex: 1;
       margin: 0;
-      font-family: 'Cinzel', serif;
+      font-family: var(--font-heading);
       font-size: 0.875rem;
       font-weight: 600;
       color: var(--text-primary);
@@ -118,7 +118,7 @@ export const STATUS_CONFIGS: StatusConfig[] = [
       padding: 0 var(--space-xs);
       background: var(--bg-elevated);
       border-radius: var(--radius-sm);
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--font-mono);
       font-size: 0.75rem;
       font-weight: 600;
       color: var(--text-secondary);
@@ -162,7 +162,7 @@ export const STATUS_CONFIGS: StatusConfig[] = [
     }
 
     .empty-text {
-      font-family: 'Rajdhani', sans-serif;
+      font-family: var(--font-body);
       font-size: 0.875rem;
     }
 

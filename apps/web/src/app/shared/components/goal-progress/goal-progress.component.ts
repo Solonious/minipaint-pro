@@ -36,14 +36,14 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
     }
 
     .label {
-      font-family: 'Rajdhani', sans-serif;
+      font-family: var(--font-body);
       font-size: 0.875rem;
       font-weight: 600;
       color: var(--text-primary);
     }
 
     .values {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--font-mono);
       font-size: 0.75rem;
     }
 

@@ -219,7 +219,7 @@ const STATUS_OPTIONS: StatusOption[] = [
       }
 
       .p-dialog-title {
-        font-family: 'Cinzel', serif;
+        font-family: var(--font-heading);
         font-size: 1.125rem;
         color: var(--text-primary);
       }
@@ -255,7 +255,7 @@ const STATUS_OPTIONS: StatusOption[] = [
     }
 
     .form-field label {
-      font-family: 'Rajdhani', sans-serif;
+      font-family: var(--font-body);
       font-size: 0.875rem;
       font-weight: 600;
       color: var(--text-secondary);

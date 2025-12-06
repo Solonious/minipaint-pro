@@ -61,7 +61,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
       position: absolute;
       display: flex;
       align-items: baseline;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--font-mono);
       color: var(--text-primary);
     }
 

@@ -258,7 +258,7 @@ const FACTION_OPTIONS: FactionOption[] = [
       }
 
       .p-dialog-title {
-        font-family: 'Cinzel', serif;
+        font-family: var(--font-heading);
         font-size: 1.125rem;
         color: var(--text-primary);
       }
@@ -295,7 +295,7 @@ const FACTION_OPTIONS: FactionOption[] = [
 
     .form-field label,
     .form-field .field-label {
-      font-family: 'Rajdhani', sans-serif;
+      font-family: var(--font-body);
       font-size: 0.875rem;
       font-weight: 600;
       color: var(--text-secondary);
@@ -347,7 +347,7 @@ const FACTION_OPTIONS: FactionOption[] = [
     }
 
     .preview-label {
-      font-family: 'Rajdhani', sans-serif;
+      font-family: var(--font-body);
       font-size: 1rem;
       font-weight: 600;
       color: var(--text-primary);

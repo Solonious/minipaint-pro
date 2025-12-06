@@ -26,7 +26,7 @@
 .header-text {
   h1 {
     margin: 0;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-display);
     font-size: 1.75rem;
     font-weight: 700;
     color: var(--text-primary);
@@ -35,7 +35,7 @@
 
   .page-subtitle {
     margin: var(--space-xs) 0 0;
-    font-family: 'Rajdhani', sans-serif;
+    font-family: var(--font-body);
     font-size: 0.875rem;
     color: var(--text-secondary);
   }
@@ -58,14 +58,14 @@
   min-width: 70px;
 
   .stat-value {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--text-primary);
   }
 
   .stat-label {
-    font-family: 'Rajdhani', sans-serif;
+    font-family: var(--font-body);
     font-size: 0.625rem;
     font-weight: 600;
     text-transform: uppercase;

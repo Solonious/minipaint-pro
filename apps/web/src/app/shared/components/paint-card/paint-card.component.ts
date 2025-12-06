@@ -194,7 +194,7 @@ const TYPE_LABELS: Record<string, string> = {
     }
 
     .name {
-      font-family: 'Rajdhani', sans-serif;
+      font-family: var(--font-body);
       font-size: 0.8125rem;
       font-weight: 600;
       color: var(--text-primary);
@@ -207,7 +207,7 @@ const TYPE_LABELS: Record<string, string> = {
     .meta {
       display: flex;
       justify-content: space-between;
-      font-family: 'Rajdhani', sans-serif;
+      font-family: var(--font-body);
       font-size: 0.6875rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;

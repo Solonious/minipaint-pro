@@ -17,7 +17,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       padding: var(--space-xs) var(--space-sm);
       background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
       border-radius: var(--radius-sm);
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--font-mono);
     }
 
     .value {

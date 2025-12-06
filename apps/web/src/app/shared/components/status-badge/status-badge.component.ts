@@ -24,7 +24,7 @@ const STATUS_CONFIG: Record<MiniatureStatus, { label: string; color: string }> =
       display: inline-flex;
       align-items: center;
       gap: var(--space-sm);
-      font-family: 'Rajdhani', sans-serif;
+      font-family: var(--font-body);
       font-size: 0.75rem;
       font-weight: 600;
       text-transform: uppercase;
