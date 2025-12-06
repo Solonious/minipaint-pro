@@ -46,6 +46,13 @@ export const appRoutes: Routes = [
             (m) => m.ProgressComponent
           ),
       },
+      {
+        path: 'admin',
+        loadComponent: () =>
+          import('./features/admin/admin.component').then(
+            (m) => m.AdminComponent
+          ),
+      },
     ],
   },
   {

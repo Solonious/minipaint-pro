@@ -8,6 +8,7 @@ import { ArmiesModule } from '../modules/armies/armies.module';
 import { PaintsModule } from '../modules/paints/paints.module';
 import { RecipesModule } from '../modules/recipes/recipes.module';
 import { ProgressModule } from '../modules/progress/progress.module';
+import { AdminModule } from '../modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ProgressModule } from '../modules/progress/progress.module';
     PaintsModule,
     RecipesModule,
     ProgressModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, inject, signal, computed, OnInit, effect } from '@angular/core';
 import { Miniature } from '@minipaint-pro/types';
 import { PointsBadgeComponent } from '../points-badge/points-badge.component';
 import { StatusBadgeComponent } from '../status-badge/status-badge.component';
+import { AdminService } from '../../../core/services/admin.service';
 
 @Component({
   selector: 'app-mini-card',
@@ -17,9 +18,9 @@ import { StatusBadgeComponent } from '../status-badge/status-badge.component';
       (keydown.enter)="cardClick.emit()"
       (keydown.space)="cardClick.emit()"
     >
-      @if (miniature().imageUrl) {
+      @if (displayImageUrl()) {
         <div class="image-container">
-          <img [src]="miniature().imageUrl" [alt]="miniature().name" />
+          <img [src]="displayImageUrl()" [alt]="miniature().name" />
         </div>
       }
       <div class="content">
@@ -126,9 +127,61 @@ import { StatusBadgeComponent } from '../status-badge/status-badge.component';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MiniCardComponent {
+export class MiniCardComponent implements OnInit {
+  private readonly adminService = inject(AdminService);
+
   miniature = input.required<Miniature>();
   isDragging = input<boolean>(false);
 
   cardClick = output<void>();
+
+  private readonly localImageUrl = signal<string | null>(null);
+
+  readonly displayImageUrl = computed(() => {
+    // First priority: user-provided imageUrl
+    const mini = this.miniature();
+    if (mini.imageUrl) {
+      return mini.imageUrl;
+    }
+    // Second priority: locally stored unit image
+    return this.localImageUrl();
+  });
+
+  constructor() {
+    // Fetch local image when miniature changes
+    effect(() => {
+      const mini = this.miniature();
+      if (!mini.imageUrl && mini.gameSystem && mini.faction && mini.name) {
+        this.fetchLocalImage(mini);
+      }
+    });
+  }
+
+  ngOnInit(): void {
+    // Initial fetch handled by effect
+  }
+
+  private fetchLocalImage(mini: Miniature): void {
+    const gameSystemMap: Record<string, string> = {
+      warhammer40k: 'WARHAMMER_40K',
+      ageOfSigmar: 'AGE_OF_SIGMAR',
+      killTeam: 'KILL_TEAM',
+      necromunda: 'NECROMUNDA',
+      horusHeresy: 'HORUS_HERESY',
+      other: 'OTHER',
+    };
+
+    const gameSystem = mini.gameSystem ? gameSystemMap[mini.gameSystem] || mini.gameSystem : 'WARHAMMER_40K';
+
+    this.adminService
+      .getUnitImageUrl(gameSystem, mini.faction, mini.name)
+      .then((url) => {
+        if (url) {
+          this.localImageUrl.set(url);
+        }
+      })
+      .catch(() => {
+        // Silently fail - no image available
+      });
+  }
 }

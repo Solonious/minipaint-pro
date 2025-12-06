@@ -307,3 +307,30 @@ model UserEvent {
 
   @@map("user_events")
 }
+
+// ============================================
+// Unit Images (Admin-managed)
+// ============================================
+model UnitImage {
+  id           String     @id @default(uuid())
+  gameSystem   GameSystem
+  faction      String
+  unitName     String
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  source       ImageSource @default(MANUAL)
+  sourceUrl    String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([gameSystem, faction, unitName])
+  @@map("unit_images")
+}
+
+enum ImageSource {
+  MANUAL
+  WARHAMMER_COMMUNITY
+  GAMES_WORKSHOP
+}

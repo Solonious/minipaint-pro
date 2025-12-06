@@ -1,0 +1,205 @@
+<div class="admin-container">
+  <header class="admin-header">
+    <h1>Unit Image Management</h1>
+    <p class="subtitle">Upload and manage images for units</p>
+  </header>
+
+  <section class="stats-section" *ngIf="stats() as statsData">
+    <div class="stat-card">
+      <span class="stat-value">{{ statsData.totalImages }}</span>
+      <span class="stat-label">Total Images</span>
+    </div>
+    <div class="stat-card" *ngFor="let entry of statsData.byGameSystem | keyvalue">
+      <span class="stat-value">{{ entry.value }}</span>
+      <span class="stat-label">{{ entry.key.replace('_', ' ') }}</span>
+    </div>
+  </section>
+
+  <section class="upload-section">
+    <h2>Upload New Image</h2>
+
+    <div class="upload-form">
+      <div class="form-row">
+        <div class="form-field">
+          <label>Game System</label>
+          <p-select
+            [options]="gameSystemOptions"
+            [ngModel]="selectedGameSystem()"
+            (ngModelChange)="onGameSystemChange($event)"
+            placeholder="Select Game System"
+            optionLabel="label"
+            optionValue="value"
+            styleClass="w-full"
+          ></p-select>
+        </div>
+
+        <div class="form-field">
+          <label>Faction</label>
+          <p-select
+            [options]="factionOptions()"
+            [ngModel]="selectedFaction()"
+            (ngModelChange)="onFactionChange($event)"
+            placeholder="Select Faction"
+            optionLabel="label"
+            optionValue="value"
+            [filter]="true"
+            filterBy="label"
+            styleClass="w-full"
+            [disabled]="wahapediaLoading()"
+          ></p-select>
+        </div>
+
+        <div class="form-field">
+          <label>Unit</label>
+          <p-select
+            [options]="unitOptions()"
+            [ngModel]="selectedUnit()"
+            (ngModelChange)="onUnitChange($event)"
+            placeholder="Select Unit"
+            optionLabel="label"
+            optionValue="value"
+            [filter]="true"
+            filterBy="label"
+            styleClass="w-full"
+            [disabled]="!selectedFaction()"
+          ></p-select>
+        </div>
+      </div>
+
+      <div class="upload-actions">
+        <input
+          #fileInput
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp"
+          (change)="onFileSelected($event)"
+          style="display: none"
+        />
+
+        <p-button
+          label="Upload Image"
+          icon="pi pi-upload"
+          (onClick)="triggerFileInput()"
+          [disabled]="!selectedFaction() || !selectedUnit() || uploading()"
+          [loading]="uploading()"
+        ></p-button>
+
+        <p-button
+          label="Import from URL"
+          icon="pi pi-link"
+          severity="secondary"
+          (onClick)="openImportDialog()"
+          [disabled]="!selectedFaction() || !selectedUnit() || uploading()"
+        ></p-button>
+      </div>
+    </div>
+  </section>
+
+  <section class="images-section">
+    <h2>Existing Images</h2>
+
+    <div class="loading-container" *ngIf="loading()">
+      <p-progressSpinner strokeWidth="4" ariaLabel="Loading images"></p-progressSpinner>
+    </div>
+
+    <p-table
+      *ngIf="!loading()"
+      [value]="filteredImages()"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      styleClass="p-datatable-sm"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 80px">Preview</th>
+          <th>Unit Name</th>
+          <th>Faction</th>
+          <th>Source</th>
+          <th style="width: 100px">Size</th>
+          <th style="width: 100px">Date</th>
+          <th style="width: 80px">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-image>
+        <tr>
+          <td>
+            <img
+              [src]="getImageUrl(image)"
+              [alt]="image.unitName"
+              class="preview-image"
+            />
+          </td>
+          <td>{{ image.unitName }}</td>
+          <td>{{ image.faction }}</td>
+          <td>
+            <span class="source-badge" [attr.data-source]="image.source">
+              {{ image.source }}
+            </span>
+          </td>
+          <td>{{ formatSize(image.size) }}</td>
+          <td>{{ formatDate(image.createdAt) }}</td>
+          <td>
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              [text]="true"
+              (onClick)="deleteImage(image)"
+            ></p-button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="empty-message">
+            No images found. Upload your first image above.
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+</div>
+
+<p-dialog
+  header="Import Image from URL"
+  [(visible)]="showImportDialog"
+  [modal]="true"
+  [style]="{ width: '500px' }"
+>
+  <div class="import-dialog-content">
+    <p>
+      Enter the URL of the image to import for
+      <strong>{{ selectedUnit()?.name }}</strong>
+    </p>
+    <div class="form-field">
+      <label>Image URL</label>
+      <input
+        pInputText
+        type="url"
+        [ngModel]="importUrl()"
+        (ngModelChange)="importUrl.set($event)"
+        placeholder="https://..."
+        class="w-full"
+      />
+    </div>
+    <p class="hint">
+      Supported sources: Warhammer Community, Games Workshop, or any direct image URL
+    </p>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Cancel"
+      severity="secondary"
+      [text]="true"
+      (onClick)="closeImportDialog()"
+    ></p-button>
+    <p-button
+      label="Import"
+      icon="pi pi-download"
+      (onClick)="importFromUrl()"
+      [disabled]="!importUrl()"
+    ></p-button>
+  </ng-template>
+</p-dialog>
+
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
