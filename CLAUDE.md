@@ -295,6 +295,10 @@ apps/api/
 - Dark theme only
 - Offline-first (localStorage)
 
+## PrimeNG Component Guidelines
+
+- **Dropdown/Select in Modals:** All PrimeNG dropdown components (`p-select`, `p-dropdown`, `p-multiselect`, etc.) inside dialogs/modals MUST use `appendTo="body"` to ensure the dropdown overlay renders outside the modal and doesn't get clipped
+
 ---
 
 ## Future Features Research

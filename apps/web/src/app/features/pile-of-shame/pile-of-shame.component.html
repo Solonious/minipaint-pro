@@ -45,6 +45,8 @@
         [miniatures]="getMiniaturesByStatus(config.status)"
         [connectedLists]="connectedListIds"
         (cardClick)="openEditDialog($event)"
+        (viewClick)="navigateToDetail($event)"
+        (editClick)="openEditDialog($event)"
         (itemDropped)="onDrop($event)"
       />
     }

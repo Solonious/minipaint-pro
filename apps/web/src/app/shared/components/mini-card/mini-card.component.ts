@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output, inject, signal, computed, OnInit, effect } from '@angular/core';
 import { Miniature } from '@minipaint-pro/types';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
 import { PointsBadgeComponent } from '../points-badge/points-badge.component';
 import { StatusBadgeComponent } from '../status-badge/status-badge.component';
 import { AdminService } from '../../../core/services/admin.service';
@@ -7,16 +9,13 @@ import { AdminService } from '../../../core/services/admin.service';
 @Component({
   selector: 'app-mini-card',
   standalone: true,
-  imports: [PointsBadgeComponent, StatusBadgeComponent],
+  imports: [ButtonModule, TooltipModule, PointsBadgeComponent, StatusBadgeComponent],
   template: `
     <div
       class="mini-card"
       [class.dragging]="isDragging()"
       tabindex="0"
-      role="button"
-      (click)="cardClick.emit()"
-      (keydown.enter)="cardClick.emit()"
-      (keydown.space)="cardClick.emit()"
+      role="article"
     >
       @if (displayImageUrl()) {
         <div class="image-container">
@@ -36,6 +35,28 @@ import { AdminService } from '../../../core/services/admin.service';
         </div>
         <div class="footer">
           <app-status-badge [status]="miniature().status" />
+          <div class="actions">
+            <p-button
+              icon="pi pi-eye"
+              [rounded]="true"
+              [text]="true"
+              severity="secondary"
+              size="small"
+              pTooltip="View details"
+              tooltipPosition="top"
+              (onClick)="onViewClick($event)"
+            />
+            <p-button
+              icon="pi pi-pencil"
+              [rounded]="true"
+              [text]="true"
+              severity="secondary"
+              size="small"
+              pTooltip="Edit"
+              tooltipPosition="top"
+              (onClick)="onEditClick($event)"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -123,6 +144,23 @@ import { AdminService } from '../../../core/services/admin.service';
 
     .footer {
       margin-top: var(--space-xs);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .actions {
+      display: flex;
+      gap: var(--space-xs);
+    }
+
+    .actions :host ::ng-deep .p-button {
+      width: 28px;
+      height: 28px;
+    }
+
+    .actions :host ::ng-deep .p-button-icon {
+      font-size: 0.875rem;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -134,6 +172,8 @@ export class MiniCardComponent implements OnInit {
   isDragging = input<boolean>(false);
 
   cardClick = output<void>();
+  viewClick = output<void>();
+  editClick = output<void>();
 
   private readonly localImageUrl = signal<string | null>(null);
 
@@ -183,5 +223,15 @@ export class MiniCardComponent implements OnInit {
       .catch(() => {
         // Silently fail - no image available
       });
+  }
+
+  onViewClick(event: Event): void {
+    event.stopPropagation();
+    this.viewClick.emit();
+  }
+
+  onEditClick(event: Event): void {
+    event.stopPropagation();
+    this.editClick.emit();
   }
 }

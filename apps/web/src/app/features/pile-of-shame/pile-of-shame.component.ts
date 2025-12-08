@@ -5,6 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
@@ -38,6 +39,7 @@ import { PageLoaderComponent } from '../../shared/components/loading-skeleton';
 })
 export class PileOfShameComponent {
   private readonly miniatureService = inject(MiniatureService);
+  private readonly router = inject(Router);
 
   readonly statusConfigs = STATUS_CONFIGS;
   readonly connectedListIds = STATUS_CONFIGS.map((c) => c.status);
@@ -65,6 +67,10 @@ export class PileOfShameComponent {
   openEditDialog(miniature: Miniature): void {
     this.selectedMiniature.set(miniature);
     this.dialogVisible.set(true);
+  }
+
+  navigateToDetail(miniature: Miniature): void {
+    this.router.navigate(['/pile', miniature.id]);
   }
 
   onDialogVisibleChange(visible: boolean): void {

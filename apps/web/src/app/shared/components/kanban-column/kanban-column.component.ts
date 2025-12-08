@@ -52,6 +52,8 @@ export const STATUS_CONFIGS: StatusConfig[] = [
             <app-mini-card
               [miniature]="mini"
               (cardClick)="cardClick.emit(mini)"
+              (viewClick)="viewClick.emit(mini)"
+              (editClick)="editClick.emit(mini)"
             />
             <div class="drag-placeholder" *cdkDragPlaceholder></div>
           </div>
@@ -195,6 +197,8 @@ export class KanbanColumnComponent {
   connectedLists = input<string[]>([]);
 
   cardClick = output<Miniature>();
+  viewClick = output<Miniature>();
+  editClick = output<Miniature>();
   itemDropped = output<CdkDragDrop<MiniatureStatus, MiniatureStatus, Miniature>>();
 
   onDrop(event: CdkDragDrop<MiniatureStatus, MiniatureStatus, Miniature>): void {

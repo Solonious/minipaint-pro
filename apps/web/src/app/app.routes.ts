@@ -67,6 +67,13 @@ export const appRoutes: Routes = [
           ),
       },
       {
+        path: 'pile/:id',
+        loadComponent: () =>
+          import('./features/pile-of-shame/unit-detail/unit-detail.component').then(
+            (m) => m.UnitDetailComponent
+          ),
+      },
+      {
         path: 'armies',
         loadComponent: () =>
           import('./features/army-dashboard/army-dashboard.component').then(
