@@ -19,6 +19,7 @@ export interface Miniature {
   wahapediaUrl?: string;
   points: number;
   modelCount: number;
+  modelsCompleted: number;
   status: MiniatureStatus;
   cost?: number;
   notes?: string;
@@ -36,6 +37,7 @@ export interface CreateMiniatureDto {
   armyId?: string;
   points: number;
   modelCount?: number;
+  modelsCompleted?: number;
   status?: MiniatureStatus;
   cost?: number;
   notes?: string;
@@ -51,6 +53,7 @@ export interface UpdateMiniatureDto {
   armyId?: string | null;
   points?: number;
   modelCount?: number;
+  modelsCompleted?: number;
   status?: MiniatureStatus;
   cost?: number | null;
   notes?: string | null;

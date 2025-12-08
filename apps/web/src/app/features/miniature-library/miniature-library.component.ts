@@ -74,6 +74,7 @@ interface GameSystemOption {
                 [miniature]="miniature"
                 (cardClick)="onMiniatureClick(miniature)"
                 (viewClick)="onViewClick(miniature)"
+                (incrementClick)="onIncrementCompleted(miniature)"
               />
             }
           </div>
@@ -203,5 +204,9 @@ export class MiniatureLibraryComponent {
 
   onViewClick(miniature: Miniature): void {
     this.router.navigate(['/library', miniature.id]);
+  }
+
+  onIncrementCompleted(miniature: Miniature): void {
+    this.miniatureService.incrementCompleted(miniature.id);
   }
 }

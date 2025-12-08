@@ -197,6 +197,10 @@ export class ArmyDetailComponent implements OnInit {
     this.router.navigate(['/pile', miniature.id]);
   }
 
+  onIncrementCompleted(miniature: Miniature): void {
+    this.miniatureService.incrementCompleted(miniature.id);
+  }
+
   getBaseArmy(): Army | null {
     const currentArmy = this.army();
     if (!currentArmy) return null;

@@ -100,6 +100,10 @@ export class PileOfShameComponent {
     this.unitTemplateService.findOrCreate(dto).subscribe();
   }
 
+  onIncrementCompleted(miniature: Miniature): void {
+    this.miniatureService.incrementCompleted(miniature.id);
+  }
+
   onDrop(event: CdkDragDrop<MiniatureStatus, MiniatureStatus, Miniature>): void {
     const miniature = event.item.data;
     const newStatus = event.container.data;

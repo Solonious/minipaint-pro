@@ -22,6 +22,12 @@ export class CreateMiniatureDto {
   @IsOptional()
   modelCount?: number = 1;
 
+  @ApiPropertyOptional({ example: 0, default: 0, description: 'Number of models completed' })
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  modelsCompleted?: number = 0;
+
   @ApiPropertyOptional({ enum: MiniatureStatus, default: MiniatureStatus.UNBUILT, description: 'Current painting status' })
   @IsEnum(MiniatureStatus)
   @IsOptional()

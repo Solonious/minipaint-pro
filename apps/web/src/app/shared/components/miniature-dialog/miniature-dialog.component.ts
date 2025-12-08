@@ -373,6 +373,23 @@ const GAME_SYSTEM_OPTIONS: GameSystemOption[] = [
             </div>
           </div>
 
+          @if (isEditMode() && formData.modelCount > 1) {
+            <div class="form-field">
+              <label for="modelsCompleted">Models Completed</label>
+              <div class="progress-input-row">
+                <p-inputNumber
+                  id="modelsCompleted"
+                  [(ngModel)]="formData.modelsCompleted"
+                  name="modelsCompleted"
+                  [min]="0"
+                  [max]="formData.modelCount"
+                  placeholder="0"
+                />
+                <span class="progress-label">/ {{ formData.modelCount }} models</span>
+              </div>
+            </div>
+          }
+
           <div class="form-row">
             <div class="form-field">
               <label for="cost">Cost ($)</label>
@@ -693,6 +710,18 @@ const GAME_SYSTEM_OPTIONS: GameSystemOption[] = [
       letter-spacing: 0.05em;
     }
 
+    .progress-input-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .progress-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
     .loading-indicator {
       display: flex;
       align-items: center;
@@ -835,6 +864,7 @@ export class MiniatureDialogComponent {
     wahapediaUrl: undefined as string | undefined,
     points: 0,
     modelCount: 1,
+    modelsCompleted: 0,
     cost: undefined as number | undefined,
     status: 'unbuilt' as MiniatureStatus,
     armyId: undefined as string | undefined,
@@ -865,6 +895,7 @@ export class MiniatureDialogComponent {
         wahapediaUrl: mini.wahapediaUrl,
         points: mini.points,
         modelCount: mini.modelCount,
+        modelsCompleted: mini.modelsCompleted,
         cost: mini.cost,
         status: mini.status,
         armyId: mini.armyId,
@@ -901,6 +932,7 @@ export class MiniatureDialogComponent {
         wahapediaUrl: undefined,
         points: 0,
         modelCount: 1,
+        modelsCompleted: 0,
         cost: undefined,
         status: 'unbuilt',
         armyId: this.defaultArmyId(),
@@ -1086,6 +1118,7 @@ export class MiniatureDialogComponent {
       wahapediaUrl: this.formData.wahapediaUrl,
       points: this.formData.points,
       modelCount: this.formData.modelCount,
+      modelsCompleted: this.formData.modelsCompleted,
       cost: this.formData.cost,
       status: this.formData.status,
       armyId: this.formData.armyId,

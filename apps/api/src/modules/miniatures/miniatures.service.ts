@@ -94,6 +94,46 @@ export class MiniaturesService {
     return stats;
   }
 
+  async incrementCompleted(id: string): Promise<Miniature> {
+    const miniature = await this.findOne(id);
+
+    // Don't exceed modelCount
+    const newCompleted = Math.min(miniature.modelsCompleted + 1, miniature.modelCount);
+
+    // Auto-update status if all models are complete
+    const newStatus = newCompleted === miniature.modelCount
+      ? MiniatureStatus.COMPLETE
+      : miniature.status;
+
+    return this.prisma.miniature.update({
+      where: { id },
+      data: {
+        modelsCompleted: newCompleted,
+        status: newStatus,
+      },
+    });
+  }
+
+  async decrementCompleted(id: string): Promise<Miniature> {
+    const miniature = await this.findOne(id);
+
+    // Don't go below 0
+    const newCompleted = Math.max(miniature.modelsCompleted - 1, 0);
+
+    // If status was COMPLETE and we decrement, change to PAINTED
+    const newStatus = miniature.status === MiniatureStatus.COMPLETE && newCompleted < miniature.modelCount
+      ? MiniatureStatus.PAINTED
+      : miniature.status;
+
+    return this.prisma.miniature.update({
+      where: { id },
+      data: {
+        modelsCompleted: newCompleted,
+        status: newStatus,
+      },
+    });
+  }
+
   async findOneWithLibrary(id: string) {
     const miniature = await this.prisma.miniature.findUnique({
       where: { id },

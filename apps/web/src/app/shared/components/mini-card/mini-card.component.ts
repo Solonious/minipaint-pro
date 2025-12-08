@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, input, output, inject, signal, comp
 import { Miniature } from '@minipaint-pro/types';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { PointsBadgeComponent } from '../points-badge/points-badge.component';
 import { StatusBadgeComponent } from '../status-badge/status-badge.component';
 import { AdminService } from '../../../core/services/admin.service';
@@ -9,7 +10,7 @@ import { AdminService } from '../../../core/services/admin.service';
 @Component({
   selector: 'app-mini-card',
   standalone: true,
-  imports: [ButtonModule, TooltipModule, PointsBadgeComponent, StatusBadgeComponent],
+  imports: [ButtonModule, TooltipModule, ProgressBarModule, PointsBadgeComponent, StatusBadgeComponent],
   template: `
     <div
       class="mini-card"
@@ -30,12 +31,33 @@ import { AdminService } from '../../../core/services/admin.service';
         <div class="meta">
           <span class="faction">{{ miniature().faction }}</span>
           @if (miniature().modelCount > 1) {
-            <span class="model-count">{{ miniature().modelCount }} models</span>
+            <span class="model-count">{{ miniature().modelsCompleted }}/{{ miniature().modelCount }} models</span>
           }
         </div>
+        @if (showProgress()) {
+          <div class="progress-section">
+            <p-progressBar
+              [value]="progressPercent()"
+              [showValue]="false"
+              styleClass="mini-progress"
+            />
+          </div>
+        }
         <div class="footer">
           <app-status-badge [status]="miniature().status" />
           <div class="actions">
+            @if (showProgress() && miniature().modelsCompleted < miniature().modelCount) {
+              <p-button
+                icon="pi pi-plus"
+                [rounded]="true"
+                [text]="true"
+                severity="success"
+                size="small"
+                pTooltip="Mark one model complete"
+                tooltipPosition="top"
+                (onClick)="onIncrementClick($event)"
+              />
+            }
             <p-button
               icon="pi pi-eye"
               [rounded]="true"
@@ -142,6 +164,20 @@ import { AdminService } from '../../../core/services/admin.service';
       font-size: 0.625rem;
     }
 
+    .progress-section {
+      margin-top: var(--space-xs);
+    }
+
+    .progress-section :host ::ng-deep .mini-progress {
+      height: 4px;
+      background: var(--bg-elevated);
+      border-radius: 2px;
+    }
+
+    .progress-section :host ::ng-deep .mini-progress .p-progressbar-value {
+      background: var(--gold);
+    }
+
     .footer {
       margin-top: var(--space-xs);
       display: flex;
@@ -174,6 +210,14 @@ export class MiniCardComponent implements OnInit {
   cardClick = output<void>();
   viewClick = output<void>();
   editClick = output<void>();
+  incrementClick = output<void>();
+
+  readonly showProgress = computed(() => this.miniature().modelCount > 1);
+  readonly progressPercent = computed(() => {
+    const mini = this.miniature();
+    if (mini.modelCount <= 1) return 0;
+    return Math.round((mini.modelsCompleted / mini.modelCount) * 100);
+  });
 
   private readonly localImageUrl = signal<string | null>(null);
 
@@ -233,5 +277,10 @@ export class MiniCardComponent implements OnInit {
   onEditClick(event: Event): void {
     event.stopPropagation();
     this.editClick.emit();
+  }
+
+  onIncrementClick(event: Event): void {
+    event.stopPropagation();
+    this.incrementClick.emit();
   }
 }

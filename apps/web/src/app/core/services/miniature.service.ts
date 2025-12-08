@@ -165,6 +165,46 @@ export class MiniatureService {
       .subscribe();
   }
 
+  incrementCompleted(id: string): void {
+    this.http
+      .post<ApiResponse<Miniature>>(`${this.apiUrl}/${id}/increment-completed`, {})
+      .pipe(
+        map((response) => response.data),
+        tap((miniature) => {
+          const mapped = this.mapSingleFromApi(miniature);
+          this.miniaturesSignal.update((minis) =>
+            minis.map((m) => (m.id === id ? mapped : m))
+          );
+        }),
+        catchError((error) => {
+          console.error('Error incrementing completed:', error);
+          this.errorSignal.set('Failed to update progress');
+          return of(null);
+        })
+      )
+      .subscribe();
+  }
+
+  decrementCompleted(id: string): void {
+    this.http
+      .post<ApiResponse<Miniature>>(`${this.apiUrl}/${id}/decrement-completed`, {})
+      .pipe(
+        map((response) => response.data),
+        tap((miniature) => {
+          const mapped = this.mapSingleFromApi(miniature);
+          this.miniaturesSignal.update((minis) =>
+            minis.map((m) => (m.id === id ? mapped : m))
+          );
+        }),
+        catchError((error) => {
+          console.error('Error decrementing completed:', error);
+          this.errorSignal.set('Failed to update progress');
+          return of(null);
+        })
+      )
+      .subscribe();
+  }
+
   getById(id: string): Miniature | undefined {
     return this.miniaturesSignal().find((m) => m.id === id);
   }

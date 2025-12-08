@@ -71,6 +71,18 @@ export class MiniaturesController {
     return this.miniaturesService.updateStatus(id, updateStatusDto);
   }
 
+  @Post(':id/increment-completed')
+  @ApiOperation({ summary: 'Increment the number of completed models by 1' })
+  incrementCompleted(@Param('id') id: string) {
+    return this.miniaturesService.incrementCompleted(id);
+  }
+
+  @Post(':id/decrement-completed')
+  @ApiOperation({ summary: 'Decrement the number of completed models by 1' })
+  decrementCompleted(@Param('id') id: string) {
+    return this.miniaturesService.decrementCompleted(id);
+  }
+
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a miniature' })
   remove(@Param('id') id: string) {
