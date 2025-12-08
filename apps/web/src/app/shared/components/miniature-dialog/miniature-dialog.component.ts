@@ -123,6 +123,7 @@ const GAME_SYSTEM_OPTIONS: GameSystemOption[] = [
               optionValue="id"
               placeholder="No army"
               [showClear]="true"
+              (ngModelChange)="onArmyChange($event)"
               appendTo="body"
             />
           </div>
@@ -551,6 +552,33 @@ export class MiniatureDialogComponent {
 
     if (gameSystem === 'warhammer40k') {
       this.wahapediaService.loadData(gameSystem);
+    }
+  }
+
+  onArmyChange(armyId: string | undefined): void {
+    if (!armyId) {
+      return;
+    }
+
+    const army = this.armyService.getById(armyId);
+    if (!army) {
+      return;
+    }
+
+    // Auto-fill faction from the selected army
+    if (army.faction) {
+      this.formData.faction = army.faction;
+
+      // If game system is warhammer40k, try to match the faction in wahapedia
+      if (this.formData.gameSystem === 'warhammer40k') {
+        const faction = this.wahapediaService
+          .factions()
+          .find((f) => f.name.toLowerCase() === army.faction.toLowerCase());
+        if (faction) {
+          this.formData.factionId = faction.id;
+          this.selectedFactionId.set(faction.id);
+        }
+      }
     }
   }
 
