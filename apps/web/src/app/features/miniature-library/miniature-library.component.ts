@@ -73,6 +73,7 @@ interface GameSystemOption {
               <app-mini-card
                 [miniature]="miniature"
                 (cardClick)="onMiniatureClick(miniature)"
+                (viewClick)="onViewClick(miniature)"
               />
             }
           </div>
@@ -197,6 +198,10 @@ export class MiniatureLibraryComponent {
   });
 
   onMiniatureClick(miniature: Miniature): void {
+    this.router.navigate(['/library', miniature.id]);
+  }
+
+  onViewClick(miniature: Miniature): void {
     this.router.navigate(['/library', miniature.id]);
   }
 }
