@@ -13,6 +13,7 @@ import { TagModule } from 'primeng/tag';
 import { Miniature } from '@minipaint-pro/types';
 import { MiniatureService } from '../../../core/services/miniature.service';
 import { AdminService } from '../../../core/services/admin.service';
+import { ArmyService } from '../../../core/services/army.service';
 import { PageLoaderComponent } from '../../../shared/components/loading-skeleton/page-loader.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { PointsBadgeComponent } from '../../../shared/components/points-badge/points-badge.component';
@@ -111,10 +112,10 @@ import { PointsBadgeComponent } from '../../../shared/components/points-badge/po
                   <span class="value">\${{ miniature()!.cost }}</span>
                 </div>
               }
-              @if (miniature()!.armyId) {
+              @if (armyName()) {
                 <div class="detail-item">
                   <span class="label">Army</span>
-                  <span class="value">{{ miniature()!.armyId }}</span>
+                  <span class="value">{{ armyName() }}</span>
                 </div>
               }
             </div>
@@ -354,6 +355,7 @@ export class UnitDetailComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly miniatureService = inject(MiniatureService);
   private readonly adminService = inject(AdminService);
+  private readonly armyService = inject(ArmyService);
 
   readonly loading = signal(true);
   readonly miniature = signal<Miniature | null>(null);
@@ -365,6 +367,15 @@ export class UnitDetailComponent implements OnInit {
       return mini.imageUrl;
     }
     return this.localImageUrl();
+  });
+
+  readonly armyName = computed(() => {
+    const mini = this.miniature();
+    if (!mini?.armyId) {
+      return null;
+    }
+    const army = this.armyService.getById(mini.armyId);
+    return army?.name ?? null;
   });
 
   ngOnInit(): void {
