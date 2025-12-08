@@ -78,6 +78,16 @@ import { AdminService } from '../../../core/services/admin.service';
               tooltipPosition="top"
               (onClick)="onEditClick($event)"
             />
+            <p-button
+              icon="pi pi-trash"
+              [rounded]="true"
+              [text]="true"
+              severity="danger"
+              size="small"
+              pTooltip="Delete"
+              tooltipPosition="top"
+              (onClick)="onDeleteClick($event)"
+            />
           </div>
         </div>
       </div>
@@ -211,6 +221,7 @@ export class MiniCardComponent implements OnInit {
   viewClick = output<void>();
   editClick = output<void>();
   incrementClick = output<void>();
+  deleteClick = output<void>();
 
   readonly showProgress = computed(() => this.miniature().modelCount > 1);
   readonly progressPercent = computed(() => {
@@ -282,5 +293,10 @@ export class MiniCardComponent implements OnInit {
   onIncrementClick(event: Event): void {
     event.stopPropagation();
     this.incrementClick.emit();
+  }
+
+  onDeleteClick(event: Event): void {
+    event.stopPropagation();
+    this.deleteClick.emit();
   }
 }
