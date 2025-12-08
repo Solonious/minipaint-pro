@@ -117,6 +117,14 @@ export const appRoutes: Routes = [
           ),
       },
       {
+        path: 'admin/users',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/admin/user-management/user-management.component').then(
+            (m) => m.UserManagementComponent
+          ),
+      },
+      {
         path: 'library-admin',
         canActivate: [adminGuard],
         loadComponent: () =>

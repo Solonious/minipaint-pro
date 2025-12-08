@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Delete,
   Param,
   Body,
@@ -15,10 +16,13 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
+import { AdminUsersService } from './admin-users.service';
 import { UploadImageDto, ImportImageDto } from './dto/upload-image.dto';
+import { UserListQueryDto, UpdateUserDto } from './dto/user-management.dto';
 import { GameSystem, UserRole } from '@prisma/client';
 import { memoryStorage } from 'multer';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 interface MulterFile {
   fieldname: string;
@@ -33,7 +37,10 @@ interface MulterFile {
 @Controller('admin')
 @Roles(UserRole.ADMIN)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly adminUsersService: AdminUsersService
+  ) {}
 
   @Post('images/upload')
   @ApiOperation({ summary: 'Upload an image for a unit' })
@@ -118,5 +125,52 @@ export class AdminController {
   async deleteImage(@Param('id') id: string) {
     await this.adminService.deleteImage(id);
     return { success: true };
+  }
+
+  // ============================================
+  // User Management Endpoints
+  // ============================================
+
+  @Get('users')
+  @ApiOperation({ summary: 'Get paginated list of users' })
+  async getUsers(@Query() query: UserListQueryDto) {
+    return this.adminUsersService.findAll(query);
+  }
+
+  @Get('users/stats')
+  @ApiOperation({ summary: 'Get user statistics' })
+  async getUserStats() {
+    return { data: await this.adminUsersService.getStats() };
+  }
+
+  @Get('users/:id')
+  @ApiOperation({ summary: 'Get user by ID' })
+  async getUserById(@Param('id') id: string) {
+    return { data: await this.adminUsersService.findOne(id) };
+  }
+
+  @Patch('users/:id')
+  @ApiOperation({ summary: 'Update user' })
+  async updateUser(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserDto,
+    @CurrentUser('id') currentUserId: string
+  ) {
+    return { data: await this.adminUsersService.update(id, dto, currentUserId) };
+  }
+
+  @Delete('users/:id')
+  @ApiOperation({ summary: 'Deactivate user (soft delete)' })
+  async deactivateUser(
+    @Param('id') id: string,
+    @CurrentUser('id') currentUserId: string
+  ) {
+    return { data: await this.adminUsersService.deactivate(id, currentUserId) };
+  }
+
+  @Post('users/:id/force-password-reset')
+  @ApiOperation({ summary: 'Force password reset for user' })
+  async forcePasswordReset(@Param('id') id: string) {
+    return this.adminUsersService.forcePasswordReset(id);
   }
 }

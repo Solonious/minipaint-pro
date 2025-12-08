@@ -1,0 +1,320 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="user-management">
+  <!-- Header -->
+  <div class="header">
+    <h1>User Management</h1>
+    <p class="subtitle">Manage user accounts, roles, and permissions</p>
+  </div>
+
+  <!-- Stats Cards -->
+  @if (stats(); as s) {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">{{ s.totalUsers }}</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ s.activeUsers }}</div>
+        <div class="stat-label">Active Users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ s.adminCount }}</div>
+        <div class="stat-label">Admins</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ s.verifiedUsers }}</div>
+        <div class="stat-label">Verified</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ s.recentSignups }}</div>
+        <div class="stat-label">Last 30 Days</div>
+      </div>
+    </div>
+  }
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="search-box">
+      <p-iconfield class="search-input-wrapper">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          type="text"
+          pInputText
+          placeholder="Search by email or name..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+          (keyup.enter)="onSearch()"
+        />
+      </p-iconfield>
+      <p-button
+        icon="pi pi-search"
+        [text]="true"
+        (onClick)="onSearch()"
+        pTooltip="Search"
+      />
+    </div>
+
+    <div class="filter-group">
+      <p-select
+        [options]="roleOptions"
+        [ngModel]="roleFilter()"
+        (ngModelChange)="roleFilter.set($event); onFilterChange()"
+        placeholder="Role"
+        [showClear]="true"
+        appendTo="body"
+      />
+
+      <p-select
+        [options]="statusOptions"
+        [ngModel]="activeFilter()"
+        (ngModelChange)="activeFilter.set($event); onFilterChange()"
+        placeholder="Status"
+        appendTo="body"
+      />
+
+      <p-select
+        [options]="verifiedOptions"
+        [ngModel]="verifiedFilter()"
+        (ngModelChange)="verifiedFilter.set($event); onFilterChange()"
+        placeholder="Verified"
+        appendTo="body"
+      />
+
+      <p-button
+        icon="pi pi-filter-slash"
+        label="Clear"
+        [text]="true"
+        (onClick)="clearFilters()"
+      />
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="table-container">
+    <p-table
+      [value]="users()"
+      [lazy]="true"
+      [paginator]="true"
+      [rows]="rows()"
+      [totalRecords]="usersTotal()"
+      [loading]="loading()"
+      [first]="first()"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [sortField]="sortField()"
+      [sortOrder]="sortOrder()"
+      (onLazyLoad)="onLazyLoad($event)"
+      [tableStyle]="{ 'min-width': '75rem' }"
+      styleClass="p-datatable-sm"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="email">
+            Email
+            <p-sortIcon field="email" />
+          </th>
+          <th pSortableColumn="displayName">
+            Display Name
+            <p-sortIcon field="displayName" />
+          </th>
+          <th pSortableColumn="role">
+            Role
+            <p-sortIcon field="role" />
+          </th>
+          <th>Status</th>
+          <th>Email Verified</th>
+          <th pSortableColumn="lastLoginAt">
+            Last Login
+            <p-sortIcon field="lastLoginAt" />
+          </th>
+          <th pSortableColumn="createdAt">
+            Created
+            <p-sortIcon field="createdAt" />
+          </th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-user>
+        <tr [class.current-user]="user.id === currentUser()?.id">
+          <td>
+            <div class="email-cell">
+              {{ user.email }}
+              @if (user.id === currentUser()?.id) {
+                <span class="you-badge">(You)</span>
+              }
+            </div>
+          </td>
+          <td>{{ user.displayName }}</td>
+          <td>
+            <p-tag
+              [value]="user.role"
+              [severity]="getRoleSeverity(user.role)"
+            />
+          </td>
+          <td>
+            <p-tag
+              [value]="user.isActive ? 'Active' : 'Inactive'"
+              [severity]="getStatusSeverity(user.isActive)"
+            />
+          </td>
+          <td>
+            <p-tag
+              [value]="user.emailVerified ? 'Verified' : 'Pending'"
+              [severity]="getVerifiedSeverity(user.emailVerified)"
+            />
+          </td>
+          <td>{{ formatDate(user.lastLoginAt) }}</td>
+          <td>{{ formatDate(user.createdAt) }}</td>
+          <td>
+            <div class="action-buttons">
+              <p-button
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [text]="true"
+                severity="info"
+                pTooltip="Edit User"
+                (onClick)="openEditDialog(user)"
+              />
+              <p-button
+                [icon]="user.role === 'ADMIN' ? 'pi pi-user' : 'pi pi-shield'"
+                [rounded]="true"
+                [text]="true"
+                [severity]="user.role === 'ADMIN' ? 'secondary' : 'warn'"
+                [pTooltip]="user.role === 'ADMIN' ? 'Demote to User' : 'Promote to Admin'"
+                [disabled]="user.id === currentUser()?.id && user.role === 'ADMIN'"
+                (onClick)="toggleRole(user)"
+              />
+              <p-button
+                [icon]="user.isActive ? 'pi pi-ban' : 'pi pi-check'"
+                [rounded]="true"
+                [text]="true"
+                [severity]="user.isActive ? 'danger' : 'success'"
+                [pTooltip]="user.isActive ? 'Deactivate' : 'Activate'"
+                [disabled]="user.id === currentUser()?.id"
+                (onClick)="toggleActive(user)"
+              />
+              @if (!user.emailVerified) {
+                <p-button
+                  icon="pi pi-check-circle"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="success"
+                  pTooltip="Verify Email"
+                  (onClick)="verifyEmail(user)"
+                />
+              }
+              <p-button
+                icon="pi pi-key"
+                [rounded]="true"
+                [text]="true"
+                severity="warn"
+                pTooltip="Force Password Reset"
+                (onClick)="forcePasswordReset(user)"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8" class="empty-message">
+            <i class="pi pi-users"></i>
+            <p>No users found</p>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<!-- Edit User Dialog -->
+<p-dialog
+  header="Edit User"
+  [(visible)]="showEditDialog"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  [closable]="true"
+  (onHide)="closeEditDialog()"
+>
+  @if (editingUser(); as user) {
+    <div class="edit-form">
+      <div class="form-field">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="text"
+          pInputText
+          [value]="user.email"
+          [disabled]="true"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="displayName">Display Name</label>
+        <input
+          id="displayName"
+          type="text"
+          pInputText
+          [ngModel]="editForm().displayName"
+          (ngModelChange)="updateDisplayName($event)"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="role">Role</label>
+        <p-select
+          id="role"
+          [options]="roleOptions"
+          [ngModel]="editForm().role"
+          (ngModelChange)="updateRole($event)"
+          [disabled]="isCurrentUser()"
+          appendTo="body"
+        />
+        @if (isCurrentUser()) {
+          <small class="hint">You cannot change your own role</small>
+        }
+      </div>
+
+      <div class="form-field checkbox-field">
+        <p-checkbox
+          [ngModel]="editForm().isActive"
+          (ngModelChange)="updateIsActive($event)"
+          [binary]="true"
+          inputId="isActive"
+          [disabled]="isCurrentUser()"
+        />
+        <label for="isActive">Account Active</label>
+        @if (isCurrentUser()) {
+          <small class="hint">You cannot deactivate your own account</small>
+        }
+      </div>
+
+      <div class="form-field checkbox-field">
+        <p-checkbox
+          [ngModel]="editForm().emailVerified"
+          (ngModelChange)="updateEmailVerified($event)"
+          [binary]="true"
+          inputId="emailVerified"
+        />
+        <label for="emailVerified">Email Verified</label>
+      </div>
+    </div>
+  }
+
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Cancel"
+      [text]="true"
+      (onClick)="closeEditDialog()"
+    />
+    <p-button
+      label="Save"
+      icon="pi pi-check"
+      (onClick)="saveUser()"
+      [loading]="saving()"
+    />
+  </ng-template>
+</p-dialog>

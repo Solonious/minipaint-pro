@@ -1,7 +1,12 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { GameSystem } from '@minipaint-pro/types';
+import {
+  AdminUser,
+  AdminUserListQuery,
+  AdminUserListResponse,
+  UpdateUserRequest,
+} from '@minipaint-pro/types';
 
 export interface UnitImage {
   id: string;
@@ -31,6 +36,14 @@ export interface ImageStats {
 
 interface ApiResponse<T> {
   data: T;
+}
+
+export interface UserStats {
+  totalUsers: number;
+  activeUsers: number;
+  adminCount: number;
+  verifiedUsers: number;
+  recentSignups: number;
 }
 
 @Injectable({
@@ -174,5 +187,110 @@ export class AdminService {
 
   getImageUrl(filename: string): string {
     return `${this.apiUrl}/uploads/units/${filename}`;
+  }
+
+  // ============================================
+  // User Management
+  // ============================================
+
+  private readonly usersSignal = signal<AdminUser[]>([]);
+  private readonly usersTotalSignal = signal(0);
+  private readonly usersLoadingSignal = signal(false);
+  private readonly userStatsSignal = signal<UserStats | null>(null);
+  private readonly usersPageSignal = signal(1);
+  private readonly usersPageSizeSignal = signal(10);
+
+  readonly users = this.usersSignal.asReadonly();
+  readonly usersTotal = this.usersTotalSignal.asReadonly();
+  readonly usersLoading = this.usersLoadingSignal.asReadonly();
+  readonly userStats = this.userStatsSignal.asReadonly();
+  readonly usersPage = this.usersPageSignal.asReadonly();
+  readonly usersPageSize = this.usersPageSizeSignal.asReadonly();
+
+  loadUsers(query: AdminUserListQuery = {}): void {
+    this.usersLoadingSignal.set(true);
+
+    let params = new HttpParams();
+    if (query.page) params = params.set('page', query.page.toString());
+    if (query.pageSize) params = params.set('pageSize', query.pageSize.toString());
+    if (query.search) params = params.set('search', query.search);
+    if (query.role) params = params.set('role', query.role);
+    if (query.isActive !== undefined) params = params.set('isActive', query.isActive.toString());
+    if (query.emailVerified !== undefined) params = params.set('emailVerified', query.emailVerified.toString());
+    if (query.sortBy) params = params.set('sortBy', query.sortBy);
+    if (query.sortOrder) params = params.set('sortOrder', query.sortOrder);
+
+    this.http.get<AdminUserListResponse>(`${this.apiUrl}/admin/users`, { params }).subscribe({
+      next: (response) => {
+        this.usersSignal.set(response.data);
+        this.usersTotalSignal.set(response.total);
+        this.usersPageSignal.set(response.page);
+        this.usersPageSizeSignal.set(response.pageSize);
+        this.usersLoadingSignal.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load users:', err);
+        this.usersLoadingSignal.set(false);
+      },
+    });
+  }
+
+  loadUserStats(): void {
+    this.http.get<ApiResponse<UserStats>>(`${this.apiUrl}/admin/users/stats`).subscribe({
+      next: (response) => this.userStatsSignal.set(response.data),
+      error: (err) => console.error('Failed to load user stats:', err),
+    });
+  }
+
+  getUser(id: string): Promise<AdminUser> {
+    return new Promise((resolve, reject) => {
+      this.http.get<ApiResponse<AdminUser>>(`${this.apiUrl}/admin/users/${id}`).subscribe({
+        next: (response) => resolve(response.data),
+        error: reject,
+      });
+    });
+  }
+
+  updateUser(id: string, data: UpdateUserRequest): Promise<AdminUser> {
+    return new Promise((resolve, reject) => {
+      this.http.patch<ApiResponse<AdminUser>>(`${this.apiUrl}/admin/users/${id}`, data).subscribe({
+        next: (response) => {
+          // Update local state
+          this.usersSignal.update((users) =>
+            users.map((u) => (u.id === id ? response.data : u))
+          );
+          this.loadUserStats();
+          resolve(response.data);
+        },
+        error: reject,
+      });
+    });
+  }
+
+  deactivateUser(id: string): Promise<AdminUser> {
+    return new Promise((resolve, reject) => {
+      this.http.delete<ApiResponse<AdminUser>>(`${this.apiUrl}/admin/users/${id}`).subscribe({
+        next: (response) => {
+          // Update local state
+          this.usersSignal.update((users) =>
+            users.map((u) => (u.id === id ? response.data : u))
+          );
+          this.loadUserStats();
+          resolve(response.data);
+        },
+        error: reject,
+      });
+    });
+  }
+
+  forcePasswordReset(id: string): Promise<{ message: string }> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .post<{ message: string }>(`${this.apiUrl}/admin/users/${id}/force-password-reset`, {})
+        .subscribe({
+          next: (response) => resolve(response),
+          error: reject,
+        });
+    });
   }
 }
