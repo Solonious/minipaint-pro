@@ -39,13 +39,6 @@
       justify-content: center;
     }
 
-    .toggle-btn {
-      position: absolute;
-      right: var(--space-md);
-      top: 50%;
-      transform: translateY(-50%);
-    }
-
     .sidebar-footer {
       justify-content: center;
     }
@@ -105,13 +98,29 @@
 }
 
 .toggle-btn {
+  position: absolute;
+  right: -16px;
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--text-secondary);
   width: 32px;
   height: 32px;
+  border: 1px solid var(--border-dim) !important;
+  border-radius: 50%;
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: var(--bg-panel) !important;
+  z-index: 10;
 
   &:hover {
     color: var(--text-primary);
-    background-color: var(--bg-elevated);
+    background-color: var(--bg-elevated) !important;
+  }
+
+  &:focus,
+  &:focus-visible {
+    box-shadow: none !important;
+    outline: none !important;
   }
 }
 
