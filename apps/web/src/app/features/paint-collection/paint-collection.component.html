@@ -27,8 +27,8 @@
 
 <div class="filters-section">
   <div class="search-wrapper">
-    <span class="p-input-icon-left search-input-wrapper">
-      <i class="pi pi-search"></i>
+    <p-iconfield class="search-input-wrapper">
+      <p-inputicon styleClass="pi pi-search" />
       <input
         pInputText
         type="text"
@@ -36,7 +36,7 @@
         [ngModel]="searchQuery()"
         (ngModelChange)="onSearchChange($event)"
       />
-    </span>
+    </p-iconfield>
   </div>
 
   <div class="filter-controls">

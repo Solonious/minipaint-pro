@@ -2,6 +2,8 @@ import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@a
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { MiniatureService } from '../../core/services/miniature.service';
@@ -20,6 +22,8 @@ interface GameSystemOption {
   imports: [
     FormsModule,
     InputTextModule,
+    IconFieldModule,
+    InputIconModule,
     SelectModule,
     ButtonModule,
     MiniCardComponent,
@@ -33,15 +37,15 @@ interface GameSystemOption {
       </header>
 
       <div class="filters">
-        <span class="p-input-icon-left search-input">
-          <i class="pi pi-search"></i>
+        <p-iconfield class="search-input">
+          <p-inputicon styleClass="pi pi-search" />
           <input
             type="text"
             pInputText
             placeholder="Search miniatures..."
             [(ngModel)]="searchQuery"
           />
-        </span>
+        </p-iconfield>
 
         <p-select
           [options]="gameSystemOptions"

@@ -7,6 +7,8 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { ToggleButtonModule } from 'primeng/togglebutton';
@@ -38,6 +40,8 @@ const DIFFICULTY_OPTIONS: DifficultyOption[] = [
   imports: [
     FormsModule,
     InputTextModule,
+    IconFieldModule,
+    InputIconModule,
     SelectModule,
     ButtonModule,
     ToggleButtonModule,

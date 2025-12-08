@@ -7,6 +7,8 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { PaintBrand, PaintType, PaintWithOwnership } from '@minipaint-pro/types';
@@ -54,6 +56,8 @@ const OWNERSHIP_OPTIONS: SelectOption<PaintFilters['ownership']>[] = [
   imports: [
     FormsModule,
     InputTextModule,
+    IconFieldModule,
+    InputIconModule,
     SelectModule,
     SelectButtonModule,
     PaintCardComponent,
