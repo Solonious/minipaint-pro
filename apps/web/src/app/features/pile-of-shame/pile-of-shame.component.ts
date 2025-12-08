@@ -11,11 +11,13 @@ import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import {
   CreateMiniatureDto,
+  CreateUnitTemplateDto,
   Miniature,
   MiniatureStatus,
   UpdateMiniatureDto,
 } from '@minipaint-pro/types';
 import { MiniatureService } from '../../core/services/miniature.service';
+import { UnitTemplateService } from '../../core/services/unit-template.service';
 import {
   KanbanColumnComponent,
   STATUS_CONFIGS,
@@ -39,6 +41,7 @@ import { PageLoaderComponent } from '../../shared/components/loading-skeleton';
 })
 export class PileOfShameComponent {
   private readonly miniatureService = inject(MiniatureService);
+  private readonly unitTemplateService = inject(UnitTemplateService);
   private readonly router = inject(Router);
 
   readonly statusConfigs = STATUS_CONFIGS;
@@ -91,6 +94,10 @@ export class PileOfShameComponent {
 
   onDelete(id: string): void {
     this.miniatureService.delete(id);
+  }
+
+  onTemplateCreated(dto: CreateUnitTemplateDto): void {
+    this.unitTemplateService.findOrCreate(dto).subscribe();
   }
 
   onDrop(event: CdkDragDrop<MiniatureStatus, MiniatureStatus, Miniature>): void {

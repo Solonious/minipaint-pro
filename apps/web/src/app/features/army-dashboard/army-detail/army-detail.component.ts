@@ -15,12 +15,14 @@ import {
   ArmyWithProgress,
   CreateArmyDto,
   CreateMiniatureDto,
+  CreateUnitTemplateDto,
   Miniature,
   UpdateArmyDto,
   UpdateMiniatureDto,
 } from '@minipaint-pro/types';
 import { ArmyService } from '../../../core/services/army.service';
 import { MiniatureService } from '../../../core/services/miniature.service';
+import { UnitTemplateService } from '../../../core/services/unit-template.service';
 import { PageLoaderComponent } from '../../../shared/components/loading-skeleton/page-loader.component';
 import { ProgressRingComponent } from '../../../shared/components/progress-ring/progress-ring.component';
 import { PointsBadgeComponent } from '../../../shared/components/points-badge/points-badge.component';
@@ -60,6 +62,7 @@ export class ArmyDetailComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly armyService = inject(ArmyService);
   private readonly miniatureService = inject(MiniatureService);
+  private readonly unitTemplateService = inject(UnitTemplateService);
 
   readonly loading = signal(true);
   readonly army = signal<ArmyWithProgress | null>(null);
@@ -184,6 +187,10 @@ export class ArmyDetailComponent implements OnInit {
         this.loadArmy(currentArmy.id);
       }, 100);
     }
+  }
+
+  onTemplateCreated(dto: CreateUnitTemplateDto): void {
+    this.unitTemplateService.findOrCreate(dto).subscribe();
   }
 
   navigateToMiniatureDetail(miniature: Miniature): void {

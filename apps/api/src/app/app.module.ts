@@ -17,6 +17,7 @@ import { AdminModule } from '../modules/admin/admin.module';
 import { MiniatureImagesModule } from '../modules/miniature-images/miniature-images.module';
 import { TutorialsModule } from '../modules/tutorials/tutorials.module';
 import { ColorSchemesModule } from '../modules/color-schemes/color-schemes.module';
+import { UnitTemplatesModule } from '../modules/unit-templates/unit-templates.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ColorSchemesModule } from '../modules/color-schemes/color-schemes.modul
     MiniatureImagesModule,
     TutorialsModule,
     ColorSchemesModule,
+    UnitTemplatesModule,
   ],
   controllers: [AppController],
   providers: [
