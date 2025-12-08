@@ -449,6 +449,7 @@ export class MiniatureDialogComponent {
 
   visible = input.required<boolean>();
   miniature = input<Miniature | null>(null);
+  defaultArmyId = input<string | undefined>(undefined);
 
   visibleChange = output<boolean>();
   save = output<CreateMiniatureDto | UpdateMiniatureDto>();
@@ -525,22 +526,41 @@ export class MiniatureDialogComponent {
         }
       }
     } else {
+      // Pre-fill from default army if provided
+      const defaultArmy = this.defaultArmyId()
+        ? this.armyService.getById(this.defaultArmyId()!)
+        : undefined;
+
       this.formData = {
         name: '',
-        faction: '',
+        faction: defaultArmy?.faction ?? '',
         factionId: undefined,
-        gameSystem: undefined,
+        gameSystem: defaultArmy?.gameSystem,
         unitId: undefined,
         wahapediaUrl: undefined,
         points: 0,
         modelCount: 1,
         cost: undefined,
         status: 'unbuilt',
-        armyId: undefined,
+        armyId: this.defaultArmyId(),
         imageUrl: '',
         notes: '',
       };
-      this.selectedFactionId.set(undefined);
+
+      // If default army is warhammer40k, load data and set faction
+      if (defaultArmy?.gameSystem === 'warhammer40k') {
+        this.wahapediaService.loadData(defaultArmy.gameSystem);
+        // Try to find matching faction after data loads
+        const faction = this.wahapediaService
+          .factions()
+          .find((f) => f.name.toLowerCase() === defaultArmy.faction.toLowerCase());
+        if (faction) {
+          this.formData.factionId = faction.id;
+          this.selectedFactionId.set(faction.id);
+        }
+      } else {
+        this.selectedFactionId.set(undefined);
+      }
     }
   }
 

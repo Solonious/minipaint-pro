@@ -1,0 +1,136 @@
+<div class="detail-container">
+  @if (loading()) {
+    <app-page-loader />
+  } @else if (army()) {
+    <header class="detail-header">
+      <button
+        pButton
+        icon="pi pi-arrow-left"
+        class="p-button-text p-button-plain back-button"
+        (click)="goBack()"
+        pTooltip="Back to Armies"
+        aria-label="Back to Armies"
+      ></button>
+
+      <div class="header-content">
+        <div class="army-identity">
+          @if (army()!.iconEmoji) {
+            <div class="army-icon" [style.background-color]="army()!.colorHex || 'var(--bg-elevated)'">
+              <img
+                class="faction-icon"
+                [src]="'assets/icons/factions/' + army()!.iconEmoji + '.svg'"
+                [alt]="army()!.faction + ' icon'"
+              />
+            </div>
+          }
+          <div class="army-info">
+            <h1>{{ army()!.name }}</h1>
+            <div class="header-meta">
+              <span class="faction">{{ army()!.faction }}</span>
+              <span class="system">{{ gameSystemLabel() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button
+          pButton
+          icon="pi pi-pencil"
+          class="p-button-outlined"
+          pTooltip="Edit Army"
+          (click)="openEditArmyDialog()"
+        ></button>
+      </div>
+    </header>
+
+    <!-- Progress Section -->
+    <section class="progress-section">
+      <div class="progress-card">
+        <div class="progress-ring-container">
+          <app-progress-ring
+            [value]="army()!.progressPercentage"
+            [size]="100"
+            [strokeWidth]="8"
+          />
+        </div>
+        <div class="progress-stats">
+          <div class="stat">
+            <span class="stat-value">{{ army()!.completedCount }}</span>
+            <span class="stat-label">/ {{ army()!.miniatureCount }} units</span>
+            <span class="stat-description">painted</span>
+          </div>
+          <div class="stat">
+            <app-points-badge [points]="army()!.currentPoints" />
+            <span class="stat-label">/ {{ army()!.targetPoints }} pts</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Units Section -->
+    <section class="units-section">
+      <div class="section-header">
+        <h2><i class="pi pi-th-large"></i> Units in Army</h2>
+        <p-button
+          label="Add Unit"
+          icon="pi pi-plus"
+          size="small"
+          (onClick)="openAddMiniatureDialog()"
+          pTooltip="Add a new unit to this army"
+          tooltipPosition="left"
+        />
+      </div>
+
+      @if (armyMiniatures().length > 0) {
+        <div class="units-grid">
+          @for (miniature of armyMiniatures(); track miniature.id) {
+            <app-mini-card
+              [miniature]="miniature"
+              (viewClick)="navigateToMiniatureDetail(miniature)"
+              (editClick)="openEditMiniatureDialog(miniature)"
+            />
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="pi pi-box"></i>
+          </div>
+          <h3>No Units Yet</h3>
+          <p>Add your first unit to start building this army</p>
+          <p-button
+            label="Add First Unit"
+            icon="pi pi-plus"
+            (onClick)="openAddMiniatureDialog()"
+          />
+        </div>
+      }
+    </section>
+  } @else {
+    <div class="not-found">
+      <i class="pi pi-exclamation-circle"></i>
+      <p>Army not found</p>
+      <button pButton label="Back to Armies" (click)="goBack()"></button>
+    </div>
+  }
+</div>
+
+<!-- Army Edit Dialog -->
+<app-army-dialog
+  [visible]="armyDialogVisible()"
+  [army]="getBaseArmy()"
+  (visibleChange)="onArmyDialogVisibleChange($event)"
+  (save)="onArmySave($event)"
+  (delete)="onArmyDelete($event)"
+/>
+
+<!-- Miniature Dialog -->
+<app-miniature-dialog
+  [visible]="miniatureDialogVisible()"
+  [miniature]="selectedMiniature()"
+  [defaultArmyId]="army()?.id"
+  (visibleChange)="onMiniatureDialogVisibleChange($event)"
+  (save)="onMiniatureSave($event)"
+  (delete)="onMiniatureDelete($event)"
+/>

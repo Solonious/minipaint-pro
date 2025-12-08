@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { ArmyWithProgress } from '@minipaint-pro/types';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
 import { ProgressRingComponent } from '../progress-ring/progress-ring.component';
 import { PointsBadgeComponent } from '../points-badge/points-badge.component';
 
@@ -15,15 +17,12 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-army-card',
   standalone: true,
-  imports: [ProgressRingComponent, PointsBadgeComponent],
+  imports: [ButtonModule, TooltipModule, ProgressRingComponent, PointsBadgeComponent],
   template: `
     <div
       class="army-card"
       tabindex="0"
-      role="button"
-      (click)="cardClick.emit()"
-      (keydown.enter)="cardClick.emit()"
-      (keydown.space)="cardClick.emit()"
+      role="article"
     >
       <div class="icon-section" [style.background-color]="army().colorHex || 'var(--bg-elevated)'">
         @if (army().iconEmoji) {
@@ -58,6 +57,28 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
             <app-points-badge [points]="army().currentPoints" />
             <span class="target-points">/ {{ army().targetPoints }} pts</span>
           </div>
+        </div>
+        <div class="actions">
+          <p-button
+            icon="pi pi-eye"
+            [rounded]="true"
+            [text]="true"
+            severity="secondary"
+            size="small"
+            pTooltip="View army details"
+            tooltipPosition="top"
+            (onClick)="onViewClick($event)"
+          />
+          <p-button
+            icon="pi pi-pencil"
+            [rounded]="true"
+            [text]="true"
+            severity="secondary"
+            size="small"
+            pTooltip="Edit"
+            tooltipPosition="top"
+            (onClick)="onEditClick($event)"
+          />
         </div>
       </div>
     </div>
@@ -184,6 +205,24 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
       font-size: 0.75rem;
       color: var(--text-secondary);
     }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-xs);
+      margin-top: var(--space-sm);
+      padding-top: var(--space-sm);
+      border-top: 1px solid var(--border-dim);
+    }
+
+    .actions :host ::ng-deep .p-button {
+      width: 32px;
+      height: 32px;
+    }
+
+    .actions :host ::ng-deep .p-button-icon {
+      font-size: 0.875rem;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -191,6 +230,8 @@ export class ArmyCardComponent {
   army = input.required<ArmyWithProgress>();
 
   cardClick = output<void>();
+  viewClick = output<void>();
+  editClick = output<void>();
 
   gameSystemLabel = computed(() => GAME_SYSTEM_LABELS[this.army().gameSystem] || this.army().gameSystem);
   initials = computed(() => {
@@ -201,4 +242,14 @@ export class ArmyCardComponent {
       .join('')
       .toUpperCase();
   });
+
+  onViewClick(event: Event): void {
+    event.stopPropagation();
+    this.viewClick.emit();
+  }
+
+  onEditClick(event: Event): void {
+    event.stopPropagation();
+    this.editClick.emit();
+  }
 }

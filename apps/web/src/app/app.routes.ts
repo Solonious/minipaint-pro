@@ -81,6 +81,13 @@ export const appRoutes: Routes = [
           ),
       },
       {
+        path: 'armies/:id',
+        loadComponent: () =>
+          import('./features/army-dashboard/army-detail/army-detail.component').then(
+            (m) => m.ArmyDetailComponent
+          ),
+      },
+      {
         path: 'paints',
         loadComponent: () =>
           import('./features/paint-collection/paint-collection.component').then(

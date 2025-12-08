@@ -5,6 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import {
@@ -33,6 +34,7 @@ import { PageLoaderComponent } from '../../shared/components/loading-skeleton';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ArmyDashboardComponent {
+  private readonly router = inject(Router);
   private readonly armyService = inject(ArmyService);
 
   readonly loading = this.armyService.loading;
@@ -105,5 +107,9 @@ export class ArmyDashboardComponent {
 
   onDelete(id: string): void {
     this.armyService.delete(id);
+  }
+
+  navigateToDetail(army: ArmyWithProgress): void {
+    this.router.navigate(['/armies', army.id]);
   }
 }

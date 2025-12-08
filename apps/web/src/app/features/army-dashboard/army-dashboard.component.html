@@ -45,7 +45,8 @@
     @for (army of armiesWithProgress(); track army.id) {
       <app-army-card
         [army]="army"
-        (cardClick)="openEditDialog(army)"
+        (viewClick)="navigateToDetail(army)"
+        (editClick)="openEditDialog(army)"
       />
     }
   </div>

@@ -1,0 +1,259 @@
+.detail-container {
+  padding: var(--space-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--border-dim);
+
+  .back-button {
+    margin-top: var(--space-xs);
+  }
+
+  .header-content {
+    flex: 1;
+
+    .army-identity {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .army-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      .faction-icon {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+        filter: brightness(0) invert(1);
+        opacity: 0.9;
+      }
+    }
+
+    .army-info {
+      h1 {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        color: var(--gold);
+        margin: 0 0 var(--space-xs) 0;
+      }
+
+      .header-meta {
+        display: flex;
+        align-items: center;
+        gap: var(--space-md);
+        font-family: var(--font-body);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+
+        .faction {
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+
+        .system {
+          color: var(--text-dim);
+        }
+      }
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: var(--space-sm);
+  }
+}
+
+.progress-section {
+  margin-bottom: var(--space-xl);
+
+  .progress-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+
+    .progress-ring-container {
+      flex-shrink: 0;
+    }
+
+    .progress-stats {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+
+      .stat {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        font-family: var(--font-mono);
+        flex-wrap: wrap;
+
+        .stat-value {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: var(--success);
+        }
+
+        .stat-label {
+          font-size: 0.875rem;
+          color: var(--text-secondary);
+        }
+
+        .stat-description {
+          font-size: 0.75rem;
+          color: var(--text-dim);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          width: 100%;
+          margin-top: calc(-1 * var(--space-xs));
+        }
+      }
+    }
+  }
+}
+
+.units-section {
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      color: var(--text-primary);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+
+      i {
+        color: var(--gold);
+      }
+    }
+  }
+
+  .units-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-md);
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xxl);
+  background: var(--bg-card);
+  border: 1px dashed var(--border-dim);
+  border-radius: var(--radius-lg);
+  text-align: center;
+
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--bg-elevated);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-md);
+
+    i {
+      font-size: 2rem;
+      color: var(--text-dim);
+    }
+  }
+
+  h3 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin: 0 0 var(--space-sm) 0;
+  }
+
+  p {
+    color: var(--text-secondary);
+    margin: 0 0 var(--space-lg) 0;
+  }
+}
+
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xxl);
+  color: var(--text-secondary);
+
+  i {
+    font-size: 3rem;
+    margin-bottom: var(--space-md);
+    color: var(--error);
+  }
+
+  p {
+    font-size: 1.25rem;
+    margin: 0 0 var(--space-lg) 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-container {
+    padding: var(--space-md);
+  }
+
+  .detail-header {
+    flex-direction: column;
+    align-items: stretch;
+
+    .header-content {
+      .army-identity {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .army-info h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    .header-actions {
+      justify-content: flex-end;
+    }
+  }
+
+  .progress-section .progress-card {
+    flex-direction: column;
+    text-align: center;
+
+    .progress-stats {
+      align-items: center;
+    }
+  }
+
+  .units-section .units-grid {
+    grid-template-columns: 1fr;
+  }
+}
