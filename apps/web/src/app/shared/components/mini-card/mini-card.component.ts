@@ -18,11 +18,15 @@ import { AdminService } from '../../../core/services/admin.service';
       tabindex="0"
       role="article"
     >
-      @if (displayImageUrl()) {
-        <div class="image-container">
+      <div class="image-container">
+        @if (displayImageUrl()) {
           <img [src]="displayImageUrl()" [alt]="miniature().name" />
-        </div>
-      }
+        } @else {
+          <div class="image-placeholder">
+            <i class="pi pi-image"></i>
+          </div>
+        }
+      </div>
       <div class="content">
         <div class="header">
           <h4 class="name">{{ miniature().name }}</h4>
@@ -30,19 +34,17 @@ import { AdminService } from '../../../core/services/admin.service';
         </div>
         <div class="meta">
           <span class="faction">{{ miniature().faction }}</span>
-          @if (miniature().modelCount > 1) {
-            <span class="model-count">{{ miniature().modelsCompleted }}/{{ miniature().modelCount }} models</span>
-          }
+          <span class="model-count" [class.hidden]="miniature().modelCount <= 1">
+            {{ miniature().modelsCompleted }}/{{ miniature().modelCount }} models
+          </span>
         </div>
-        @if (showProgress()) {
-          <div class="progress-section">
-            <p-progressBar
-              [value]="progressPercent()"
-              [showValue]="false"
-              styleClass="mini-progress"
-            />
-          </div>
-        }
+        <div class="progress-section" [class.hidden]="!showProgress()">
+          <p-progressBar
+            [value]="progressPercent()"
+            [showValue]="false"
+            styleClass="mini-progress"
+          />
+        </div>
         <div class="footer">
           <app-status-badge [status]="miniature().status" />
           <div class="actions">
@@ -101,6 +103,7 @@ import { AdminService } from '../../../core/services/admin.service';
       overflow: hidden;
       cursor: pointer;
       transition: all var(--transition-fast);
+      height: 100%;
     }
 
     .mini-card:hover {
@@ -127,6 +130,19 @@ import { AdminService } from '../../../core/services/admin.service';
       object-fit: cover;
     }
 
+    .image-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-dim);
+    }
+
+    .image-placeholder i {
+      font-size: 2rem;
+    }
+
     .content {
       padding: var(--space-sm);
       display: flex;
@@ -149,6 +165,11 @@ import { AdminService } from '../../../core/services/admin.service';
       margin: 0;
       line-height: 1.2;
       flex: 1;
+      min-height: 2.4em;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .meta {
@@ -158,6 +179,7 @@ import { AdminService } from '../../../core/services/admin.service';
       font-family: var(--font-body);
       font-size: 0.75rem;
       color: var(--text-secondary);
+      min-height: 18px;
     }
 
     .faction {
@@ -172,19 +194,29 @@ import { AdminService } from '../../../core/services/admin.service';
       background: var(--bg-elevated);
       border-radius: var(--radius-sm);
       font-size: 0.625rem;
+
+      &.hidden {
+        visibility: hidden;
+      }
     }
 
     .progress-section {
       margin-top: var(--space-xs);
+      min-height: 4px;
+      height: 4px;
+
+      &.hidden {
+        visibility: hidden;
+      }
     }
 
-    .progress-section :host ::ng-deep .mini-progress {
+    :host ::ng-deep .mini-progress {
       height: 4px;
       background: var(--bg-elevated);
       border-radius: 2px;
     }
 
-    .progress-section :host ::ng-deep .mini-progress .p-progressbar-value {
+    :host ::ng-deep .mini-progress .p-progressbar-value {
       background: var(--gold);
     }
 
