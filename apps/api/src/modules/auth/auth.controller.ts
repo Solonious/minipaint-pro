@@ -7,6 +7,7 @@ import {
   Req,
   HttpCode,
   HttpStatus,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Response, Request } from 'express';
@@ -114,7 +115,7 @@ export class AuthController {
 
     if (!refreshToken) {
       this.clearTokenCookies(res);
-      return { message: 'No refresh token provided' };
+      throw new UnauthorizedException('No refresh token provided');
     }
 
     const userAgent = req.headers['user-agent'];

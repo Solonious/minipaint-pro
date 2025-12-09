@@ -43,8 +43,9 @@ export class AuthService {
   readonly isRefreshing$ = this.refreshing$.asObservable();
 
   constructor() {
-    // Check authentication status on service initialization
-    this.checkAuth();
+    // Check authentication status after a microtask to avoid circular dependency
+    // The interceptor injects AuthService, so we can't make HTTP calls during construction
+    Promise.resolve().then(() => this.checkAuth());
   }
 
   checkAuth(): void {
@@ -52,20 +53,19 @@ export class AuthService {
 
     this.http
       .get<MeResponse>(`${this.apiUrl}/auth/me`, { withCredentials: true })
-      .pipe(
-        tap((response) => {
+      .subscribe({
+        next: (response) => {
           this.userSignal.set(response.data);
           this.loadingSignal.set(false);
           this.initializedSignal.set(true);
-        }),
-        catchError(() => {
+        },
+        error: () => {
+          // This is called after interceptor retries have failed
           this.userSignal.set(null);
           this.loadingSignal.set(false);
           this.initializedSignal.set(true);
-          return of(null);
-        })
-      )
-      .subscribe();
+        },
+      });
   }
 
   login(credentials: LoginRequest): Promise<boolean> {

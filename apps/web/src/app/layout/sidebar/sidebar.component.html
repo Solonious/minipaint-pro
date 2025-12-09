@@ -65,7 +65,18 @@
   </nav>
 
   <div class="sidebar-footer">
-    @if (authService.isAuthenticated()) {
+    @if (!authService.initialized()) {
+      <!-- Skeleton loader while auth is initializing -->
+      <div class="skeleton-user">
+        <div class="skeleton skeleton-avatar"></div>
+        @if (expanded()) {
+          <div class="skeleton-details">
+            <div class="skeleton skeleton-name"></div>
+            <div class="skeleton skeleton-role"></div>
+          </div>
+        }
+      </div>
+    } @else if (authService.isAuthenticated()) {
       @if (expanded()) {
         <div class="user-info">
           <i class="pi pi-user"></i>

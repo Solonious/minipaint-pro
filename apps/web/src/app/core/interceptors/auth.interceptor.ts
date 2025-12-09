@@ -17,11 +17,11 @@ export const authInterceptor: HttpInterceptorFn = (
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       // Handle 401 errors (unauthorized)
+      // Exclude only refresh and login endpoints to avoid infinite loops
       if (
         error.status === 401 &&
         !req.url.includes('/auth/refresh') &&
-        !req.url.includes('/auth/login') &&
-        !req.url.includes('/auth/me')
+        !req.url.includes('/auth/login')
       ) {
         // Attempt to refresh the token
         return from(authService.refreshToken()).pipe(
