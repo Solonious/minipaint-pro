@@ -1,0 +1,123 @@
+// Liber Pigmenta Design Tokens
+// Grimdark Warhammer 40K Imperial Aesthetic
+
+:root {
+  // ============================================
+  // CORE BACKGROUNDS
+  // Dark, layered backgrounds for depth
+  // ============================================
+  --bg-void: #0a0a0f;      // Deepest void - page background
+  --bg-panel: #12121a;     // Sidebars, panels, dialogs
+  --bg-card: #1a1a25;      // Cards, list items
+  --bg-elevated: #222230;  // Hover states, elevated surfaces
+
+  // ============================================
+  // BORDERS
+  // ============================================
+  --border-dim: #2a2a3a;   // Default borders
+  --border-glow: #3a3a50;  // Hover/focus states
+
+  // ============================================
+  // IMPERIAL GOLD ACCENT
+  // The signature gold of the Imperium
+  // ============================================
+  --gold: #c9a227;         // Primary accent
+  --gold-bright: #e6c84a;  // Highlights, hover
+
+  // ============================================
+  // MINIATURE PAINTING STATUS
+  // Pipeline stages for hobby progress
+  // ============================================
+  --status-unbuilt: #4a4a55;    // Still on sprue
+  --status-assembled: #6b5b3d;  // Built, unpainted
+  --status-primed: #3d5a6b;     // Ready for paint
+  --status-wip: #6b3d5a;        // Work in progress
+  --status-painted: #3d6b4f;    // Painting complete
+  --status-complete: #c9a227;   // Fully finished
+
+  // ============================================
+  // SEMANTIC COLORS
+  // ============================================
+  --success: #5fa67a;
+  --error: #d93d5c;
+  --info: #3a7bd5;
+
+  // ============================================
+  // TEXT COLORS
+  // ============================================
+  --text-primary: #e8e6e3;    // Main body text
+  --text-secondary: #9a9890;  // Secondary info
+  --text-dim: #5a584f;        // Disabled, placeholder
+
+  // ============================================
+  // TYPOGRAPHY
+  // ============================================
+
+  // Font Families
+  --font-display: 'Cinzel', serif;       // Imperial gothic titles
+  --font-heading: 'Teko', sans-serif;    // Military headers
+  --font-body: 'Exo 2', sans-serif;      // Tech-forward body
+  --font-mono: 'Orbitron', monospace;    // Data display
+
+  // Font Sizes
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  // Line Heights
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  // Font Weights
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  // ============================================
+  // SPACING (4px scale)
+  // ============================================
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  // ============================================
+  // BORDER RADIUS
+  // ============================================
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  // ============================================
+  // TRANSITIONS
+  // ============================================
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 350ms ease;
+
+  // ============================================
+  // SHADOWS
+  // ============================================
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px rgba(201, 162, 39, 0.2);
+
+  // ============================================
+  // LAYOUT CONSTANTS
+  // ============================================
+  --sidebar-width: 260px;
+  --header-height: 64px;
+  --bottom-nav-height: 64px;
+}

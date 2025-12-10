@@ -1,0 +1,17 @@
+// Liber Pigmenta Theme
+// Main entry point for grimdark styling
+
+// Import all theme partials in order
+@import 'tokens';
+@import 'typography';
+@import 'primeng-overrides';
+@import 'utilities';
+
+// ============================================
+// USAGE:
+// Import this file in your styles.scss:
+// @import 'liber-pigmenta-angular/assets/theme/index';
+//
+// Or copy individual files to your project's
+// styles/ directory.
+// ============================================
