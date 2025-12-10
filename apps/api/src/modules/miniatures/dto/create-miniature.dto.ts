@@ -17,7 +17,7 @@ import {
   WipStage,
   MiniatureTag,
 } from '@prisma/client';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 
 // DTO for stage counts
 export class StageCountsDto {
@@ -128,6 +128,7 @@ export class CreateMiniatureDto {
   wahapediaUrl?: string;
 
   @ApiPropertyOptional({ example: 45.00, description: 'Cost paid for the miniature' })
+  @Transform(({ value }) => (value !== undefined && value !== null && value !== '' ? Number(value) : undefined))
   @IsNumber()
   @IsOptional()
   cost?: number;
