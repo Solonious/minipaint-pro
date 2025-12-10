@@ -78,26 +78,30 @@ export class AuthService {
     return this.initPromise;
   }
 
-  checkAuth(): void {
+  checkAuth(): Promise<boolean> {
     this.loadingSignal.set(true);
 
-    this.http
-      .get<MeResponse>(`${this.apiUrl}/auth/me`, { withCredentials: true })
-      .subscribe({
-        next: (response) => {
-          this.userSignal.set(response.data);
-          this.loadingSignal.set(false);
-          this.initializedSignal.set(true);
-          this.resolveInitPromise();
-        },
-        error: () => {
-          // This is called after interceptor retries have failed
-          this.userSignal.set(null);
-          this.loadingSignal.set(false);
-          this.initializedSignal.set(true);
-          this.resolveInitPromise();
-        },
-      });
+    return new Promise((resolve) => {
+      this.http
+        .get<MeResponse>(`${this.apiUrl}/auth/me`, { withCredentials: true })
+        .subscribe({
+          next: (response) => {
+            this.userSignal.set(response.data);
+            this.loadingSignal.set(false);
+            this.initializedSignal.set(true);
+            this.resolveInitPromise();
+            resolve(true);
+          },
+          error: () => {
+            // This is called after interceptor retries have failed
+            this.userSignal.set(null);
+            this.loadingSignal.set(false);
+            this.initializedSignal.set(true);
+            this.resolveInitPromise();
+            resolve(false);
+          },
+        });
+    });
   }
 
   private resolveInitPromise(): void {
@@ -107,7 +111,7 @@ export class AuthService {
     }
   }
 
-  login(credentials: LoginRequest): Promise<boolean> {
+  async login(credentials: LoginRequest): Promise<boolean> {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
@@ -117,9 +121,9 @@ export class AuthService {
           withCredentials: true,
         })
         .pipe(
-          tap(() => {
-            // Fetch user data after successful login
-            this.checkAuth();
+          tap(async () => {
+            // Fetch user data after successful login and wait for it to complete
+            await this.checkAuth();
             resolve(true);
           }),
           catchError((error) => {
