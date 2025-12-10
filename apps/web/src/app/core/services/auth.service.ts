@@ -58,10 +58,24 @@ export class AuthService {
   private refreshing$ = new BehaviorSubject<boolean>(false);
   readonly isRefreshing$ = this.refreshing$.asObservable();
 
+  // Promise that resolves when initial auth check completes
+  private initPromiseResolve: (() => void) | null = null;
+  private readonly initPromise = new Promise<void>((resolve) => {
+    this.initPromiseResolve = resolve;
+  });
+
   constructor() {
     // Check authentication status after a microtask to avoid circular dependency
     // The interceptor injects AuthService, so we can't make HTTP calls during construction
     Promise.resolve().then(() => this.checkAuth());
+  }
+
+  /**
+   * Returns a Promise that resolves when the initial authentication check completes.
+   * Use this for APP_INITIALIZER or to wait before rendering the app.
+   */
+  waitForInitialization(): Promise<void> {
+    return this.initPromise;
   }
 
   checkAuth(): void {
@@ -74,14 +88,23 @@ export class AuthService {
           this.userSignal.set(response.data);
           this.loadingSignal.set(false);
           this.initializedSignal.set(true);
+          this.resolveInitPromise();
         },
         error: () => {
           // This is called after interceptor retries have failed
           this.userSignal.set(null);
           this.loadingSignal.set(false);
           this.initializedSignal.set(true);
+          this.resolveInitPromise();
         },
       });
+  }
+
+  private resolveInitPromise(): void {
+    if (this.initPromiseResolve) {
+      this.initPromiseResolve();
+      this.initPromiseResolve = null;
+    }
   }
 
   login(credentials: LoginRequest): Promise<boolean> {
