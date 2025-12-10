@@ -6,7 +6,13 @@ import {
   GameSystem,
   Miniature,
   MiniatureStatus,
+  MiniatureTag,
+  ModelStageCounts,
+  MoveModelsDto,
+  UnbuiltState,
   UpdateMiniatureDto,
+  WipStage,
+  createDefaultStageCounts,
 } from '@minipaint-pro/types';
 import { environment } from '../../../environments/environment';
 
@@ -208,6 +214,32 @@ export class MiniatureService {
       .subscribe();
   }
 
+  moveModels(id: string, fromStage: MiniatureStatus, toStage: MiniatureStatus, count: number = 1): void {
+    const dto: MoveModelsDto = {
+      fromStage,
+      toStage,
+      count,
+    };
+
+    this.http
+      .post<ApiResponse<Miniature>>(`${this.apiUrl}/${id}/move-models`, this.mapMoveModelsToApi(dto))
+      .pipe(
+        map((response) => response.data),
+        tap((miniature) => {
+          const mapped = this.mapSingleFromApi(miniature);
+          this.miniaturesSignal.update((minis) =>
+            minis.map((m) => (m.id === id ? mapped : m))
+          );
+        }),
+        catchError((error) => {
+          console.error('Error moving models:', error);
+          this.errorSignal.set('Failed to move models');
+          return of(null);
+        })
+      )
+      .subscribe();
+  }
+
   getById(id: string): Miniature | undefined {
     return this.miniaturesSignal().find((m) => m.id === id);
   }
@@ -221,12 +253,28 @@ export class MiniatureService {
   }
 
   private mapSingleFromApi(miniature: Miniature): Miniature {
+    const status = this.mapStatusFromApi(miniature.status);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rawStageCounts = (miniature as any).stageCounts;
+
     return {
       ...miniature,
-      status: this.mapStatusFromApi(miniature.status),
+      status,
       gameSystem: miniature.gameSystem
         ? this.mapGameSystemFromApi(miniature.gameSystem)
         : undefined,
+      stageCounts: rawStageCounts
+        ? this.mapStageCountsFromApi(rawStageCounts)
+        : createDefaultStageCounts(miniature.modelCount, status),
+      unbuiltState: miniature.unbuiltState
+        ? this.mapUnbuiltStateFromApi(miniature.unbuiltState)
+        : undefined,
+      wipStage: miniature.wipStage
+        ? this.mapWipStageFromApi(miniature.wipStage)
+        : undefined,
+      tags: miniature.tags
+        ? this.mapTagsFromApi(miniature.tags)
+        : [],
     };
   }
 
@@ -241,6 +289,18 @@ export class MiniatureService {
 
     if (dto.gameSystem) {
       result['gameSystem'] = this.mapGameSystemToApi(dto.gameSystem);
+    }
+
+    if (dto.unbuiltState) {
+      result['unbuiltState'] = this.mapUnbuiltStateToApi(dto.unbuiltState);
+    }
+
+    if (dto.wipStage) {
+      result['wipStage'] = this.mapWipStageToApi(dto.wipStage);
+    }
+
+    if (dto.tags && dto.tags.length > 0) {
+      result['tags'] = this.mapTagsToApi(dto.tags);
     }
 
     return result;
@@ -292,6 +352,101 @@ export class MiniatureService {
       other: 'OTHER',
     };
     return mapping[gameSystem] || 'OTHER';
+  }
+
+  private mapStageCountsFromApi(stageCounts: Record<string, number>): ModelStageCounts {
+    return {
+      unbuilt: stageCounts['unbuilt'] ?? 0,
+      assembled: stageCounts['assembled'] ?? 0,
+      primed: stageCounts['primed'] ?? 0,
+      wip: stageCounts['wip'] ?? 0,
+      painted: stageCounts['painted'] ?? 0,
+      complete: stageCounts['complete'] ?? 0,
+    };
+  }
+
+  private mapUnbuiltStateFromApi(state: string): UnbuiltState {
+    const mapping: Record<string, UnbuiltState> = {
+      INBOX: 'inbox',
+      ON_SPRUE: 'on_sprue',
+      CLIPPED: 'clipped',
+      READY: 'ready',
+    };
+    return mapping[state] || 'inbox';
+  }
+
+  private mapUnbuiltStateToApi(state: UnbuiltState): string {
+    const mapping: Record<UnbuiltState, string> = {
+      inbox: 'INBOX',
+      on_sprue: 'ON_SPRUE',
+      clipped: 'CLIPPED',
+      ready: 'READY',
+    };
+    return mapping[state];
+  }
+
+  private mapWipStageFromApi(stage: string): WipStage {
+    const mapping: Record<string, WipStage> = {
+      BASE_COATED: 'base_coated',
+      BLOCKING: 'blocking',
+      LAYERING: 'layering',
+      WASHING: 'washing',
+      HIGHLIGHTING: 'highlighting',
+      DETAILING: 'detailing',
+      BASING: 'basing',
+    };
+    return mapping[stage] || 'base_coated';
+  }
+
+  private mapWipStageToApi(stage: WipStage): string {
+    const mapping: Record<WipStage, string> = {
+      base_coated: 'BASE_COATED',
+      blocking: 'BLOCKING',
+      layering: 'LAYERING',
+      washing: 'WASHING',
+      highlighting: 'HIGHLIGHTING',
+      detailing: 'DETAILING',
+      basing: 'BASING',
+    };
+    return mapping[stage];
+  }
+
+  private mapTagsFromApi(tags: string[]): MiniatureTag[] {
+    const mapping: Record<string, MiniatureTag> = {
+      MAGNETIZED: 'magnetized',
+      PINNED: 'pinned',
+      SUB_ASSEMBLIES: 'sub_assemblies',
+      BASED: 'based',
+      CONTRAST_METHOD: 'contrast_method',
+      VARNISHED: 'varnished',
+      DECALS_APPLIED: 'decals_applied',
+      DISPLAY_QUALITY: 'display_quality',
+      TABLETOP_READY: 'tabletop_ready',
+    };
+    return tags.map((t) => mapping[t] || 'magnetized').filter(Boolean);
+  }
+
+  private mapTagsToApi(tags: MiniatureTag[]): string[] {
+    const mapping: Record<MiniatureTag, string> = {
+      magnetized: 'MAGNETIZED',
+      pinned: 'PINNED',
+      sub_assemblies: 'SUB_ASSEMBLIES',
+      based: 'BASED',
+      contrast_method: 'CONTRAST_METHOD',
+      varnished: 'VARNISHED',
+      decals_applied: 'DECALS_APPLIED',
+      display_quality: 'DISPLAY_QUALITY',
+      tabletop_ready: 'TABLETOP_READY',
+    };
+    return tags.map((t) => mapping[t]);
+  }
+
+  private mapMoveModelsToApi(dto: MoveModelsDto): Record<string, unknown> {
+    return {
+      fromStage: this.mapStatusToApi(dto.fromStage),
+      toStage: this.mapStatusToApi(dto.toStage),
+      count: dto.count,
+    };
   }
 
   /**

@@ -1,11 +1,78 @@
 import { ChangeDetectionStrategy, Component, input, output, inject, signal, computed, OnInit, effect } from '@angular/core';
-import { Miniature } from '@minipaint-pro/types';
+import { Miniature, MiniatureStatus, MiniatureTag, ModelStageCounts, UnbuiltState, WipStage, createDefaultStageCounts } from '@minipaint-pro/types';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { PointsBadgeComponent } from '../points-badge/points-badge.component';
 import { StatusBadgeComponent } from '../status-badge/status-badge.component';
 import { AdminService } from '../../../core/services/admin.service';
+
+// Stage display configuration
+interface StageDisplay {
+  key: MiniatureStatus;
+  label: string;
+  shortLabel: string;
+  color: string;
+}
+
+// Unbuilt state display configuration
+interface UnbuiltStateDisplay {
+  value: UnbuiltState;
+  label: string;
+  icon: string;
+}
+
+// WIP stage display configuration
+interface WipStageDisplay {
+  value: WipStage;
+  label: string;
+  icon: string;
+}
+
+// Tag display configuration
+interface TagDisplay {
+  value: MiniatureTag;
+  label: string;
+  icon: string;
+}
+
+const UNBUILT_STATE_DISPLAYS: UnbuiltStateDisplay[] = [
+  { value: 'inbox', label: 'Inbox', icon: 'pi-inbox' },
+  { value: 'on_sprue', label: 'On Sprue', icon: 'pi-th-large' },
+  { value: 'clipped', label: 'Clipped', icon: 'pi-scissors' },
+  { value: 'ready', label: 'Ready to Build', icon: 'pi-check-circle' },
+];
+
+const WIP_STAGE_DISPLAYS: WipStageDisplay[] = [
+  { value: 'base_coated', label: 'Base Coated', icon: 'pi-circle-fill' },
+  { value: 'blocking', label: 'Blocking', icon: 'pi-stop' },
+  { value: 'layering', label: 'Layering', icon: 'pi-bars' },
+  { value: 'washing', label: 'Washing', icon: 'pi-filter' },
+  { value: 'highlighting', label: 'Highlighting', icon: 'pi-sun' },
+  { value: 'detailing', label: 'Detailing', icon: 'pi-pencil' },
+  { value: 'basing', label: 'Basing', icon: 'pi-box' },
+];
+
+const TAG_DISPLAYS: TagDisplay[] = [
+  { value: 'magnetized', label: 'Magnetized', icon: 'pi-link' },
+  { value: 'pinned', label: 'Pinned', icon: 'pi-map-marker' },
+  { value: 'sub_assemblies', label: 'Sub-assemblies', icon: 'pi-sitemap' },
+  { value: 'based', label: 'Based', icon: 'pi-box' },
+  { value: 'contrast_method', label: 'Contrast', icon: 'pi-palette' },
+  { value: 'varnished', label: 'Varnished', icon: 'pi-shield' },
+  { value: 'decals_applied', label: 'Decals', icon: 'pi-image' },
+  { value: 'display_quality', label: 'Display Quality', icon: 'pi-star' },
+  { value: 'tabletop_ready', label: 'Tabletop Ready', icon: 'pi-play' },
+];
+
+const STAGE_DISPLAYS: StageDisplay[] = [
+  { key: 'unbuilt', label: 'Unbuilt', shortLabel: 'U', color: 'var(--status-unbuilt)' },
+  { key: 'assembled', label: 'Assembled', shortLabel: 'A', color: 'var(--status-assembled)' },
+  { key: 'primed', label: 'Primed', shortLabel: 'P', color: 'var(--status-primed)' },
+  { key: 'wip', label: 'WIP', shortLabel: 'W', color: 'var(--status-wip)' },
+  { key: 'painted', label: 'Painted', shortLabel: 'D', color: 'var(--status-painted)' },
+  { key: 'complete', label: 'Complete', shortLabel: '✓', color: 'var(--status-complete)' },
+];
 
 @Component({
   selector: 'app-mini-card',
@@ -26,6 +93,15 @@ import { AdminService } from '../../../core/services/admin.service';
             <i class="pi pi-image"></i>
           </div>
         }
+        @if (displayTags().length > 0) {
+          <div class="tag-badges">
+            @for (tag of displayTags(); track tag.value) {
+              <span class="tag-badge" [pTooltip]="tag.label" tooltipPosition="top">
+                <i class="pi {{ tag.icon }}"></i>
+              </span>
+            }
+          </div>
+        }
       </div>
       <div class="content">
         <div class="header">
@@ -38,13 +114,29 @@ import { AdminService } from '../../../core/services/admin.service';
             {{ miniature().modelsCompleted }}/{{ miniature().modelCount }} models
           </span>
         </div>
-        <div class="progress-section" [class.hidden]="!showProgress()">
-          <p-progressBar
-            [value]="progressPercent()"
-            [showValue]="false"
-            styleClass="mini-progress"
-          />
-        </div>
+        @if (showProgress()) {
+          <div class="stage-progress">
+            <div class="stage-bar">
+              @for (segment of stageSegments(); track segment.key) {
+                @if (segment.count > 0) {
+                  <div
+                    class="segment"
+                    [style.width.%]="segment.percent"
+                    [style.background]="segment.color"
+                    [pTooltip]="segment.label + ': ' + segment.count"
+                    tooltipPosition="top"
+                  ></div>
+                }
+              }
+            </div>
+          </div>
+        }
+        @if (substateDisplay()) {
+          <div class="substate-indicator" [class]="'substate-' + miniature().status">
+            <i class="pi {{ substateDisplay()!.icon }}"></i>
+            <span>{{ substateDisplay()!.label }}</span>
+          </div>
+        }
         <div class="footer">
           <app-status-badge [status]="miniature().status" />
           <div class="actions">
@@ -122,6 +214,7 @@ import { AdminService } from '../../../core/services/admin.service';
       height: 120px;
       overflow: hidden;
       background: var(--bg-elevated);
+      position: relative;
     }
 
     .image-container img {
@@ -141,6 +234,35 @@ import { AdminService } from '../../../core/services/admin.service';
 
     .image-placeholder i {
       font-size: 2rem;
+    }
+
+    .tag-badges {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      max-width: 80%;
+      justify-content: flex-end;
+    }
+
+    .tag-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.625rem;
+      backdrop-filter: blur(4px);
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.85);
+        color: var(--text-primary);
+      }
     }
 
     .content {
@@ -200,24 +322,52 @@ import { AdminService } from '../../../core/services/admin.service';
       }
     }
 
-    .progress-section {
+    .stage-progress {
       margin-top: var(--space-xs);
-      min-height: 4px;
-      height: 4px;
-
-      &.hidden {
-        visibility: hidden;
-      }
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
 
-    :host ::ng-deep .mini-progress {
-      height: 4px;
+    .stage-bar {
+      height: 6px;
+      display: flex;
+      border-radius: 3px;
+      overflow: hidden;
       background: var(--bg-elevated);
-      border-radius: 2px;
     }
 
-    :host ::ng-deep .mini-progress .p-progressbar-value {
-      background: var(--gold);
+    .stage-bar .segment {
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+
+    .substate-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 6px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-sm);
+      font-size: 0.625rem;
+      color: var(--text-secondary);
+      width: fit-content;
+
+      i {
+        font-size: 0.625rem;
+      }
+
+      span {
+        text-transform: capitalize;
+      }
+
+      &.substate-unbuilt {
+        border-left: 2px solid var(--status-unbuilt);
+      }
+
+      &.substate-wip {
+        border-left: 2px solid var(--status-wip);
+      }
     }
 
     .footer {
@@ -260,6 +410,58 @@ export class MiniCardComponent implements OnInit {
     const mini = this.miniature();
     if (mini.modelCount <= 1) return 0;
     return Math.round((mini.modelsCompleted / mini.modelCount) * 100);
+  });
+
+  readonly stageCounts = computed((): ModelStageCounts => {
+    const mini = this.miniature();
+    return mini.stageCounts ?? createDefaultStageCounts(mini.modelCount, mini.status);
+  });
+
+  readonly stageSegments = computed(() => {
+    const counts = this.stageCounts();
+    const total = this.miniature().modelCount;
+
+    return STAGE_DISPLAYS.map((stage) => ({
+      key: stage.key,
+      label: stage.label,
+      shortLabel: stage.shortLabel,
+      color: stage.color,
+      count: counts[stage.key],
+      percent: total > 0 ? (counts[stage.key] / total) * 100 : 0,
+    }));
+  });
+
+  readonly wipStageLabel = computed(() => {
+    const mini = this.miniature();
+    if (!mini.wipStage) return null;
+    return mini.wipStage.replace(/_/g, ' ');
+  });
+
+  readonly tags = computed(() => {
+    return this.miniature().tags ?? [];
+  });
+
+  readonly displayTags = computed(() => {
+    const tagValues = this.tags();
+    return TAG_DISPLAYS.filter((t) => tagValues.includes(t.value));
+  });
+
+  readonly substateDisplay = computed((): { label: string; icon: string } | null => {
+    const mini = this.miniature();
+
+    // Show unbuiltState if status is 'unbuilt' and unbuiltState is set
+    if (mini.status === 'unbuilt' && mini.unbuiltState) {
+      const display = UNBUILT_STATE_DISPLAYS.find((d) => d.value === mini.unbuiltState);
+      return display ? { label: display.label, icon: display.icon } : null;
+    }
+
+    // Show wipStage if status is 'wip' and wipStage is set
+    if (mini.status === 'wip' && mini.wipStage) {
+      const display = WIP_STAGE_DISPLAYS.find((d) => d.value === mini.wipStage);
+      return display ? { label: display.label, icon: display.icon } : null;
+    }
+
+    return null;
   });
 
   private readonly localImageUrl = signal<string | null>(null);

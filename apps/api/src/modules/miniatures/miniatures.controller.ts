@@ -13,6 +13,7 @@ import { MiniaturesService } from './miniatures.service';
 import { CreateMiniatureDto } from './dto/create-miniature.dto';
 import { UpdateMiniatureDto } from './dto/update-miniature.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
+import { MoveModelsDto } from './dto/move-models.dto';
 import { MiniatureStatus } from '@prisma/client';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
@@ -96,6 +97,16 @@ export class MiniaturesController {
   @ApiOperation({ summary: 'Decrement the number of completed models by 1' })
   decrementCompleted(@CurrentUser('id') userId: string, @Param('id') id: string) {
     return this.miniaturesService.decrementCompleted(userId, id);
+  }
+
+  @Post(':id/move-models')
+  @ApiOperation({ summary: 'Move models between stages' })
+  moveModels(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+    @Body() moveModelsDto: MoveModelsDto
+  ) {
+    return this.miniaturesService.moveModels(userId, id, moveModelsDto);
   }
 
   @Delete(':id')

@@ -1,6 +1,50 @@
-import { IsString, IsInt, IsOptional, IsEnum, IsNumber, Min } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsOptional,
+  IsEnum,
+  IsNumber,
+  Min,
+  IsArray,
+  IsObject,
+  ValidateNested,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { MiniatureStatus, GameSystem } from '@prisma/client';
+import {
+  MiniatureStatus,
+  GameSystem,
+  UnbuiltState,
+  WipStage,
+  MiniatureTag,
+} from '@prisma/client';
+import { Type } from 'class-transformer';
+
+// DTO for stage counts
+export class StageCountsDto {
+  @IsInt()
+  @Min(0)
+  unbuilt: number = 0;
+
+  @IsInt()
+  @Min(0)
+  assembled: number = 0;
+
+  @IsInt()
+  @Min(0)
+  primed: number = 0;
+
+  @IsInt()
+  @Min(0)
+  wip: number = 0;
+
+  @IsInt()
+  @Min(0)
+  painted: number = 0;
+
+  @IsInt()
+  @Min(0)
+  complete: number = 0;
+}
 
 export class CreateMiniatureDto {
   @ApiProperty({ example: 'Intercessor Squad', description: 'Name of the miniature or unit' })
@@ -32,6 +76,36 @@ export class CreateMiniatureDto {
   @IsEnum(MiniatureStatus)
   @IsOptional()
   status?: MiniatureStatus = MiniatureStatus.UNBUILT;
+
+  @ApiPropertyOptional({
+    description: 'Stage counts for multi-model tracking',
+    example: { unbuilt: 5, assembled: 0, primed: 0, wip: 0, painted: 0, complete: 0 },
+  })
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => StageCountsDto)
+  stageCounts?: StageCountsDto;
+
+  @ApiPropertyOptional({ enum: UnbuiltState, description: 'Substate for unbuilt models' })
+  @IsEnum(UnbuiltState)
+  @IsOptional()
+  unbuiltState?: UnbuiltState;
+
+  @ApiPropertyOptional({ enum: WipStage, description: 'Current WIP painting stage' })
+  @IsEnum(WipStage)
+  @IsOptional()
+  wipStage?: WipStage;
+
+  @ApiPropertyOptional({
+    enum: MiniatureTag,
+    isArray: true,
+    description: 'Tags that apply to the miniature',
+  })
+  @IsArray()
+  @IsEnum(MiniatureTag, { each: true })
+  @IsOptional()
+  tags?: MiniatureTag[] = [];
 
   @ApiPropertyOptional({ enum: GameSystem, description: 'Game system (Warhammer 40K, Kill Team, etc.)' })
   @IsEnum(GameSystem)

@@ -15,6 +15,7 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { TextareaModule } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -26,8 +27,11 @@ import {
   GameSystem,
   Miniature,
   MiniatureStatus,
+  MiniatureTag,
+  UnbuiltState,
   UnitTemplate,
   UpdateMiniatureDto,
+  WipStage,
 } from '@minipaint-pro/types';
 import { ArmyService } from '../../../core/services/army.service';
 import {
@@ -73,6 +77,50 @@ const GAME_SYSTEM_OPTIONS: GameSystemOption[] = [
   { label: 'Other', value: 'other' },
 ];
 
+interface UnbuiltStateOption {
+  label: string;
+  value: UnbuiltState;
+}
+
+interface WipStageOption {
+  label: string;
+  value: WipStage;
+}
+
+interface TagOption {
+  label: string;
+  value: MiniatureTag;
+}
+
+const UNBUILT_STATE_OPTIONS: UnbuiltStateOption[] = [
+  { label: 'Inbox (unopened)', value: 'inbox' },
+  { label: 'On Sprue', value: 'on_sprue' },
+  { label: 'Clipped', value: 'clipped' },
+  { label: 'Ready to Build', value: 'ready' },
+];
+
+const WIP_STAGE_OPTIONS: WipStageOption[] = [
+  { label: 'Base Coated', value: 'base_coated' },
+  { label: 'Blocking In', value: 'blocking' },
+  { label: 'Layering', value: 'layering' },
+  { label: 'Washing', value: 'washing' },
+  { label: 'Highlighting', value: 'highlighting' },
+  { label: 'Detailing', value: 'detailing' },
+  { label: 'Basing', value: 'basing' },
+];
+
+const TAG_OPTIONS: TagOption[] = [
+  { label: 'Magnetized', value: 'magnetized' },
+  { label: 'Pinned', value: 'pinned' },
+  { label: 'Sub-assemblies', value: 'sub_assemblies' },
+  { label: 'Based', value: 'based' },
+  { label: 'Contrast Method', value: 'contrast_method' },
+  { label: 'Varnished', value: 'varnished' },
+  { label: 'Decals Applied', value: 'decals_applied' },
+  { label: 'Display Quality', value: 'display_quality' },
+  { label: 'Tabletop Ready', value: 'tabletop_ready' },
+];
+
 @Component({
   selector: 'app-miniature-dialog',
   standalone: true,
@@ -87,6 +135,7 @@ const GAME_SYSTEM_OPTIONS: GameSystemOption[] = [
     ButtonModule,
     ProgressSpinnerModule,
     DividerModule,
+    MultiSelectModule,
   ],
   template: `
     <p-dialog
@@ -418,6 +467,55 @@ const GAME_SYSTEM_OPTIONS: GameSystemOption[] = [
                 appendTo="body"
               />
             </div>
+          </div>
+
+          @if (formData.status === 'unbuilt') {
+            <div class="form-field">
+              <label for="unbuiltState">Unbuilt State</label>
+              <p-select
+                id="unbuiltState"
+                [(ngModel)]="formData.unbuiltState"
+                name="unbuiltState"
+                [options]="unbuiltStateOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select state"
+                [showClear]="true"
+                appendTo="body"
+              />
+            </div>
+          }
+
+          @if (formData.status === 'wip') {
+            <div class="form-field">
+              <label for="wipStage">Painting Stage</label>
+              <p-select
+                id="wipStage"
+                [(ngModel)]="formData.wipStage"
+                name="wipStage"
+                [options]="wipStageOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select stage"
+                [showClear]="true"
+                appendTo="body"
+              />
+            </div>
+          }
+
+          <div class="form-field">
+            <label for="tags">Tags</label>
+            <p-multiselect
+              id="tags"
+              [(ngModel)]="formData.tags"
+              name="tags"
+              [options]="tagOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select tags"
+              appendTo="body"
+              display="chip"
+            />
           </div>
 
           @if (formData.wahapediaUrl) {
@@ -802,6 +900,9 @@ export class MiniatureDialogComponent {
 
   readonly statusOptions = STATUS_OPTIONS;
   readonly gameSystemOptions = GAME_SYSTEM_OPTIONS;
+  readonly unbuiltStateOptions = UNBUILT_STATE_OPTIONS;
+  readonly wipStageOptions = WIP_STAGE_OPTIONS;
+  readonly tagOptions = TAG_OPTIONS;
 
   readonly armyOptions = computed<Army[]>(() => this.armyService.armies());
 
@@ -867,6 +968,9 @@ export class MiniatureDialogComponent {
     modelsCompleted: 0,
     cost: undefined as number | undefined,
     status: 'unbuilt' as MiniatureStatus,
+    unbuiltState: undefined as UnbuiltState | undefined,
+    wipStage: undefined as WipStage | undefined,
+    tags: [] as MiniatureTag[],
     armyId: undefined as string | undefined,
     imageUrl: '',
     notes: '',
@@ -898,6 +1002,9 @@ export class MiniatureDialogComponent {
         modelsCompleted: mini.modelsCompleted,
         cost: mini.cost,
         status: mini.status,
+        unbuiltState: mini.unbuiltState,
+        wipStage: mini.wipStage,
+        tags: mini.tags ?? [],
         armyId: mini.armyId,
         imageUrl: mini.imageUrl ?? '',
         notes: mini.notes ?? '',
@@ -935,6 +1042,9 @@ export class MiniatureDialogComponent {
         modelsCompleted: 0,
         cost: undefined,
         status: 'unbuilt',
+        unbuiltState: undefined,
+        wipStage: undefined,
+        tags: [],
         armyId: this.defaultArmyId(),
         imageUrl: '',
         notes: '',
@@ -1121,6 +1231,9 @@ export class MiniatureDialogComponent {
       modelsCompleted: this.formData.modelsCompleted,
       cost: this.formData.cost,
       status: this.formData.status,
+      unbuiltState: this.formData.status === 'unbuilt' ? this.formData.unbuiltState : undefined,
+      wipStage: this.formData.status === 'wip' ? this.formData.wipStage : undefined,
+      tags: this.formData.tags,
       armyId: this.formData.armyId,
       imageUrl: this.formData.imageUrl.trim() || undefined,
       notes: this.formData.notes.trim() || undefined,

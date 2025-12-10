@@ -121,6 +121,18 @@ model Miniature {
   modelCount      Int              @default(1)
   modelsCompleted Int              @default(0)
   status          MiniatureStatus  @default(UNBUILT)
+
+  // Multi-model stage tracking (JSON object with counts per stage)
+  // Format: { "unbuilt": 1, "assembled": 0, "primed": 0, "wip": 0, "painted": 0, "complete": 0 }
+  stageCounts     Json?
+
+  // Substates for detailed tracking
+  unbuiltState    UnbuiltState?    // For models in 'unbuilt' stage
+  wipStage        WipStage?        // For models in 'wip' stage
+
+  // Tags that apply to the entire unit
+  tags            MiniatureTag[]   @default([])
+
   cost            Decimal?         @db.Decimal(10, 2)
   notes           String?
   imageUrl        String?
@@ -143,6 +155,38 @@ enum MiniatureStatus {
   WIP
   PAINTED
   COMPLETE
+}
+
+// Substates for UNBUILT status
+enum UnbuiltState {
+  INBOX       // Just received, unopened
+  ON_SPRUE    // Still on the sprue/frame
+  CLIPPED     // Off sprue, needs cleanup
+  READY       // Ready to build
+}
+
+// Substates for WIP status (painting stages)
+enum WipStage {
+  BASE_COATED   // Base colors applied
+  BLOCKING      // Blocking in main colors
+  LAYERING      // Layering highlights
+  WASHING       // Applying washes/shades
+  HIGHLIGHTING  // Edge highlighting
+  DETAILING     // Fine details
+  BASING        // Base decoration
+}
+
+// Tags that can apply to any miniature regardless of status
+enum MiniatureTag {
+  MAGNETIZED       // Has magnets for swappable parts
+  PINNED           // Has metal pins for stability
+  SUB_ASSEMBLIES   // Built in sub-assemblies for easier painting
+  BASED            // Base decoration done
+  CONTRAST_METHOD  // Using contrast/speedpaint method
+  VARNISHED        // Has protective varnish coat
+  DECALS_APPLIED   // Transfers/decals done
+  DISPLAY_QUALITY  // High quality display piece
+  TABLETOP_READY   // Good enough for gaming
 }
 
 // ============================================
