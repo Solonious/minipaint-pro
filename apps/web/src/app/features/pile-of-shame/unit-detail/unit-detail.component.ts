@@ -379,6 +379,10 @@ export class UnitDetailComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // Ensure data is loaded before accessing
+    this.miniatureService.loadAll();
+    this.armyService.loadAll();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.loadMiniature(id);

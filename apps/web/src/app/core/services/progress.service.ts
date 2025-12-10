@@ -447,4 +447,25 @@ export class ProgressService {
     };
     return labels[type] ?? type;
   }
+
+  /**
+   * Clears all user-specific progress data.
+   * Should be called on user logout to reset state for the next user.
+   */
+  clearData(): void {
+    this.progressSignal.set({
+      id: `progress_${Date.now()}`,
+      currentStreak: 0,
+      bestStreak: 0,
+      lastPaintedDate: null,
+      totalModelsPainted: 0,
+      totalHoursPainted: 0,
+      updatedAt: new Date().toISOString(),
+      achievements: [],
+      goals: [],
+      events: [],
+    });
+    this.goalsSignal.set([]);
+    this.unlockedAchievementIds.set(new Set());
+  }
 }

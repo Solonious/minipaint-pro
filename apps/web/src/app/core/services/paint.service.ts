@@ -346,4 +346,12 @@ export class PaintService {
   getPaintById(id: string): PaintWithOwnership | undefined {
     return this.paintsWithOwnership().find((p) => p.id === id);
   }
+
+  /**
+   * Clears all user-specific paint ownership data.
+   * Should be called on user logout to reset state for the next user.
+   */
+  clearData(): void {
+    this.ownershipSignal.set(new Map());
+  }
 }

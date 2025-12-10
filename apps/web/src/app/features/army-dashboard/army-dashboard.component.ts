@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   inject,
+  OnInit,
   signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
@@ -33,9 +34,13 @@ import { PageLoaderComponent } from '../../shared/components/loading-skeleton';
   styleUrl: './army-dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ArmyDashboardComponent {
+export class ArmyDashboardComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly armyService = inject(ArmyService);
+
+  ngOnInit(): void {
+    this.armyService.loadAll();
+  }
 
   readonly loading = this.armyService.loading;
   readonly armiesWithProgress = this.armyService.armiesWithProgress;

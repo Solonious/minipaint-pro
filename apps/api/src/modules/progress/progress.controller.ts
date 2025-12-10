@@ -6,43 +6,40 @@ import {
   Patch,
   Param,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ProgressService } from './progress.service';
 import { LogSessionDto } from './dto/log-session.dto';
 import { UpdateGoalDto } from './dto/update-goal.dto';
-import { Public } from '../auth/decorators/public.decorator';
-
-// For MVP without auth, use a visitor ID
-const TEMP_VISITOR_ID = 'default-visitor';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('progress')
+@ApiBearerAuth()
 @Controller('progress')
-@Public()
 export class ProgressController {
   constructor(private readonly progressService: ProgressService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get user progress with achievements and goals' })
-  getProgress() {
-    return this.progressService.getProgress(TEMP_VISITOR_ID);
+  getProgress(@CurrentUser('id') userId: string) {
+    return this.progressService.getProgress(userId);
   }
 
   @Post('session')
   @ApiOperation({ summary: 'Log a painting session - updates streak and checks achievements' })
-  logSession(@Body() dto: LogSessionDto) {
-    return this.progressService.logSession(TEMP_VISITOR_ID, dto);
+  logSession(@CurrentUser('id') userId: string, @Body() dto: LogSessionDto) {
+    return this.progressService.logSession(userId, dto);
   }
 
   @Get('achievements')
   @ApiOperation({ summary: 'Get all achievements with unlock status' })
-  getAchievements() {
-    return this.progressService.getAchievementsWithStatus(TEMP_VISITOR_ID);
+  getAchievements(@CurrentUser('id') userId: string) {
+    return this.progressService.getAchievementsWithStatus(userId);
   }
 
   @Get('goals')
   @ApiOperation({ summary: 'Get current week goals' })
-  getGoals() {
-    return this.progressService.getGoals(TEMP_VISITOR_ID);
+  getGoals(@CurrentUser('id') userId: string) {
+    return this.progressService.getGoals(userId);
   }
 
   @Patch('goals/:id')

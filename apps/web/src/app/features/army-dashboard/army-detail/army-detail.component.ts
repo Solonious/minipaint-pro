@@ -87,6 +87,10 @@ export class ArmyDetailComponent implements OnInit {
   selectedMiniature = signal<Miniature | null>(null);
 
   ngOnInit(): void {
+    // Ensure data is loaded before accessing
+    this.armyService.loadAll();
+    this.miniatureService.loadAll();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.loadArmy(id);

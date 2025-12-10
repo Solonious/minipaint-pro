@@ -20,7 +20,31 @@ type ColorSchemeWithRelations = ColorScheme & {
 export class ColorSchemesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateColorSchemeDto): Promise<ColorSchemeWithRelations> {
+  private async verifyMiniatureOwnership(userId: string, miniatureId: string): Promise<void> {
+    const miniature = await this.prisma.miniature.findFirst({
+      where: { id: miniatureId, userId },
+    });
+
+    if (!miniature) {
+      throw new NotFoundException(`Miniature with ID ${miniatureId} not found`);
+    }
+  }
+
+  private async verifySchemeOwnership(userId: string, schemeId: string): Promise<void> {
+    const scheme = await this.prisma.colorScheme.findUnique({
+      where: { id: schemeId },
+      include: { miniature: true },
+    });
+
+    if (!scheme || scheme.miniature.userId !== userId) {
+      throw new NotFoundException(`Color scheme with ID ${schemeId} not found`);
+    }
+  }
+
+  async create(userId: string, dto: CreateColorSchemeDto): Promise<ColorSchemeWithRelations> {
+    // Verify miniature belongs to user
+    await this.verifyMiniatureOwnership(userId, dto.miniatureId);
+
     // Check if scheme already exists for this miniature
     const existing = await this.prisma.colorScheme.findUnique({
       where: { miniatureId: dto.miniatureId },
@@ -28,15 +52,6 @@ export class ColorSchemesService {
 
     if (existing) {
       throw new ConflictException(`Color scheme already exists for miniature ${dto.miniatureId}`);
-    }
-
-    // Verify miniature exists
-    const miniature = await this.prisma.miniature.findUnique({
-      where: { id: dto.miniatureId },
-    });
-
-    if (!miniature) {
-      throw new NotFoundException(`Miniature with ID ${dto.miniatureId} not found`);
     }
 
     // Create scheme with nested sections and paints
@@ -77,7 +92,9 @@ export class ColorSchemesService {
     });
   }
 
-  async findByMiniature(miniatureId: string): Promise<ColorSchemeWithRelations | null> {
+  async findByMiniature(userId: string, miniatureId: string): Promise<ColorSchemeWithRelations | null> {
+    await this.verifyMiniatureOwnership(userId, miniatureId);
+
     return this.prisma.colorScheme.findUnique({
       where: { miniatureId },
       include: {
@@ -98,10 +115,11 @@ export class ColorSchemesService {
     });
   }
 
-  async findOne(id: string): Promise<ColorSchemeWithRelations> {
+  async findOne(userId: string, id: string): Promise<ColorSchemeWithRelations> {
     const scheme = await this.prisma.colorScheme.findUnique({
       where: { id },
       include: {
+        miniature: true,
         sections: {
           orderBy: { order: 'asc' },
           include: {
@@ -118,15 +136,15 @@ export class ColorSchemesService {
       },
     });
 
-    if (!scheme) {
+    if (!scheme || scheme.miniature.userId !== userId) {
       throw new NotFoundException(`Color scheme with ID ${id} not found`);
     }
 
     return scheme;
   }
 
-  async update(id: string, dto: UpdateColorSchemeDto): Promise<ColorSchemeWithRelations> {
-    await this.findOne(id);
+  async update(userId: string, id: string, dto: UpdateColorSchemeDto): Promise<ColorSchemeWithRelations> {
+    await this.findOne(userId, id);
 
     return this.prisma.colorScheme.update({
       where: { id },
@@ -151,8 +169,8 @@ export class ColorSchemesService {
     });
   }
 
-  async remove(id: string): Promise<void> {
-    await this.findOne(id);
+  async remove(userId: string, id: string): Promise<void> {
+    await this.findOne(userId, id);
 
     await this.prisma.colorScheme.delete({
       where: { id },
@@ -160,8 +178,8 @@ export class ColorSchemesService {
   }
 
   // Section operations
-  async addSection(schemeId: string, dto: AddSectionDto): Promise<ColorSchemeSection> {
-    await this.findOne(schemeId);
+  async addSection(userId: string, schemeId: string, dto: AddSectionDto): Promise<ColorSchemeSection> {
+    await this.verifySchemeOwnership(userId, schemeId);
 
     const maxOrder = await this.prisma.colorSchemeSection.aggregate({
       where: { schemeId },
@@ -199,14 +217,30 @@ export class ColorSchemesService {
     });
   }
 
-  async updateSection(sectionId: string, dto: UpdateColorSchemeSectionDto): Promise<ColorSchemeSection> {
+  private async verifySectionOwnership(userId: string, sectionId: string): Promise<void> {
     const section = await this.prisma.colorSchemeSection.findUnique({
       where: { id: sectionId },
+      include: { scheme: { include: { miniature: true } } },
     });
 
-    if (!section) {
+    if (!section || section.scheme.miniature.userId !== userId) {
       throw new NotFoundException(`Section with ID ${sectionId} not found`);
     }
+  }
+
+  private async verifySectionPaintOwnership(userId: string, paintId: string): Promise<void> {
+    const paint = await this.prisma.sectionPaint.findUnique({
+      where: { id: paintId },
+      include: { section: { include: { scheme: { include: { miniature: true } } } } },
+    });
+
+    if (!paint || paint.section.scheme.miniature.userId !== userId) {
+      throw new NotFoundException(`Section paint with ID ${paintId} not found`);
+    }
+  }
+
+  async updateSection(userId: string, sectionId: string, dto: UpdateColorSchemeSectionDto): Promise<ColorSchemeSection> {
+    await this.verifySectionOwnership(userId, sectionId);
 
     return this.prisma.colorSchemeSection.update({
       where: { id: sectionId },
@@ -227,14 +261,8 @@ export class ColorSchemesService {
     });
   }
 
-  async removeSection(sectionId: string): Promise<void> {
-    const section = await this.prisma.colorSchemeSection.findUnique({
-      where: { id: sectionId },
-    });
-
-    if (!section) {
-      throw new NotFoundException(`Section with ID ${sectionId} not found`);
-    }
+  async removeSection(userId: string, sectionId: string): Promise<void> {
+    await this.verifySectionOwnership(userId, sectionId);
 
     await this.prisma.colorSchemeSection.delete({
       where: { id: sectionId },
@@ -242,14 +270,8 @@ export class ColorSchemesService {
   }
 
   // Paint operations within sections
-  async addPaintToSection(sectionId: string, dto: AddSectionPaintDto): Promise<SectionPaint> {
-    const section = await this.prisma.colorSchemeSection.findUnique({
-      where: { id: sectionId },
-    });
-
-    if (!section) {
-      throw new NotFoundException(`Section with ID ${sectionId} not found`);
-    }
+  async addPaintToSection(userId: string, sectionId: string, dto: AddSectionPaintDto): Promise<SectionPaint> {
+    await this.verifySectionOwnership(userId, sectionId);
 
     const maxOrder = await this.prisma.sectionPaint.aggregate({
       where: { sectionId },
@@ -272,14 +294,8 @@ export class ColorSchemesService {
     });
   }
 
-  async updateSectionPaint(paintId: string, dto: UpdateSectionPaintDto): Promise<SectionPaint> {
-    const paint = await this.prisma.sectionPaint.findUnique({
-      where: { id: paintId },
-    });
-
-    if (!paint) {
-      throw new NotFoundException(`Section paint with ID ${paintId} not found`);
-    }
+  async updateSectionPaint(userId: string, paintId: string, dto: UpdateSectionPaintDto): Promise<SectionPaint> {
+    await this.verifySectionPaintOwnership(userId, paintId);
 
     return this.prisma.sectionPaint.update({
       where: { id: paintId },
@@ -296,14 +312,8 @@ export class ColorSchemesService {
     });
   }
 
-  async removeSectionPaint(paintId: string): Promise<void> {
-    const paint = await this.prisma.sectionPaint.findUnique({
-      where: { id: paintId },
-    });
-
-    if (!paint) {
-      throw new NotFoundException(`Section paint with ID ${paintId} not found`);
-    }
+  async removeSectionPaint(userId: string, paintId: string): Promise<void> {
+    await this.verifySectionPaintOwnership(userId, paintId);
 
     await this.prisma.sectionPaint.delete({
       where: { id: paintId },

@@ -13,9 +13,9 @@ interface AchievementWithStatus extends Achievement {
 export class ProgressService {
   constructor(private prisma: PrismaService) {}
 
-  async getProgress(visitorId: string) {
+  async getProgress(userId: string) {
     let progress = await this.prisma.userProgress.findUnique({
-      where: { visitorId },
+      where: { userId },
       include: {
         achievements: {
           include: { achievement: true },
@@ -27,13 +27,13 @@ export class ProgressService {
     });
 
     if (!progress) {
-      progress = await this.createProgressWithDefaultGoals(visitorId);
+      progress = await this.createProgressWithDefaultGoals(userId);
     } else {
       // Check if we need to reset weekly goals
       await this.checkAndResetWeeklyGoals(progress.id);
       // Re-fetch with updated goals
       progress = await this.prisma.userProgress.findUnique({
-        where: { visitorId },
+        where: { userId },
         include: {
           achievements: {
             include: { achievement: true },
@@ -48,12 +48,12 @@ export class ProgressService {
     return progress!;
   }
 
-  private async createProgressWithDefaultGoals(visitorId: string) {
+  private async createProgressWithDefaultGoals(userId: string) {
     const { weekStart, weekEnd } = this.getCurrentWeekBounds();
 
     const progress = await this.prisma.userProgress.create({
       data: {
-        visitorId,
+        userId,
         goals: {
           create: [
             {
@@ -146,19 +146,19 @@ export class ProgressService {
     }
   }
 
-  async logSession(visitorId: string, dto: LogSessionDto) {
+  async logSession(userId: string, dto: LogSessionDto) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     let progress = await this.prisma.userProgress.findUnique({
-      where: { visitorId },
+      where: { userId },
       include: {
         achievements: true,
       },
     });
 
     if (!progress) {
-      const created = await this.createProgressWithDefaultGoals(visitorId);
+      const created = await this.createProgressWithDefaultGoals(userId);
       progress = await this.prisma.userProgress.findUnique({
         where: { id: created.id },
         include: { achievements: true },
@@ -190,7 +190,7 @@ export class ProgressService {
 
     // Update progress
     await this.prisma.userProgress.update({
-      where: { visitorId },
+      where: { userId },
       data: {
         currentStreak: newStreak,
         bestStreak: Math.max(newStreak, progress!.bestStreak),
@@ -213,7 +213,7 @@ export class ProgressService {
 
     // Fetch updated progress
     const updatedProgress = await this.prisma.userProgress.findUnique({
-      where: { visitorId },
+      where: { userId },
       include: {
         achievements: {
           include: { achievement: true },
@@ -308,7 +308,7 @@ export class ProgressService {
     return newlyUnlocked;
   }
 
-  async getAchievementsWithStatus(visitorId: string): Promise<AchievementWithStatus[]> {
+  async getAchievementsWithStatus(userId: string): Promise<AchievementWithStatus[]> {
     const allAchievements = await this.prisma.achievement.findMany({
       orderBy: [
         { requirementType: 'asc' },
@@ -317,7 +317,7 @@ export class ProgressService {
     });
 
     const progress = await this.prisma.userProgress.findUnique({
-      where: { visitorId },
+      where: { userId },
       include: {
         achievements: true,
       },
@@ -337,8 +337,8 @@ export class ProgressService {
     }));
   }
 
-  async getGoals(visitorId: string) {
-    const progress = await this.getProgress(visitorId);
+  async getGoals(userId: string) {
+    const progress = await this.getProgress(userId);
 
     return progress.goals.map((goal) => ({
       ...goal,

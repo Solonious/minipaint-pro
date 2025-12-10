@@ -430,4 +430,12 @@ export class RecipeService {
     const mins = minutes % 60;
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
   }
+
+  /**
+   * Clears all user-specific saved recipe data.
+   * Should be called on user logout to reset state for the next user.
+   */
+  clearData(): void {
+    this.savedRecipeIds.set(new Set());
+  }
 }

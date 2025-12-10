@@ -26,10 +26,12 @@ export class ArmyService {
   private readonly armiesSignal = signal<Army[]>([]);
   private readonly loadingSignal = signal<boolean>(false);
   private readonly errorSignal = signal<string | null>(null);
+  private readonly loadedSignal = signal<boolean>(false);
 
   readonly armies = this.armiesSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
+  readonly loaded = this.loadedSignal.asReadonly();
 
   readonly armiesWithProgress = computed<ArmyWithProgress[]>(() => {
     const armies = this.armiesSignal();
@@ -53,11 +55,11 @@ export class ArmyService {
     });
   });
 
-  constructor() {
-    this.loadAll();
-  }
-
   loadAll(): void {
+    if (this.loadedSignal() || this.loadingSignal()) {
+      return;
+    }
+
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
@@ -68,6 +70,7 @@ export class ArmyService {
         tap((armies) => {
           this.armiesSignal.set(this.mapFromApi(armies));
           this.loadingSignal.set(false);
+          this.loadedSignal.set(true);
         }),
         catchError((error) => {
           console.error('Error loading armies:', error);
@@ -186,5 +189,15 @@ export class ArmyService {
       other: 'OTHER',
     };
     return mapping[gameSystem];
+  }
+
+  /**
+   * Clears all army data.
+   * Should be called on user logout to reset state for the next user.
+   */
+  clearData(): void {
+    this.armiesSignal.set([]);
+    this.errorSignal.set(null);
+    this.loadedSignal.set(false);
   }
 }

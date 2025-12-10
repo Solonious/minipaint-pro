@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { Response } from 'express';
 import { MiniatureImagesService } from './miniature-images.service';
 import {
@@ -23,6 +23,7 @@ import {
   UpdateMiniatureImageDto,
   ReorderImagesDto,
 } from './dto/create-miniature-image.dto';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 
 interface MulterFile {
@@ -35,8 +36,8 @@ interface MulterFile {
 }
 
 @ApiTags('Miniature Images')
+@ApiBearerAuth()
 @Controller('miniature-images')
-@Public()
 export class MiniatureImagesController {
   constructor(private readonly miniatureImagesService: MiniatureImagesService) {}
 
@@ -58,6 +59,7 @@ export class MiniatureImagesController {
   })
   @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
   async uploadImage(
+    @CurrentUser('id') userId: string,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -70,40 +72,48 @@ export class MiniatureImagesController {
     file: MulterFile,
     @Body() dto: CreateMiniatureImageDto
   ) {
-    return { data: await this.miniatureImagesService.uploadImage(file, dto) };
+    return { data: await this.miniatureImagesService.uploadImage(userId, file, dto) };
   }
 
   @Get('miniature/:miniatureId')
   @ApiOperation({ summary: 'Get all images for a miniature' })
-  async findByMiniature(@Param('miniatureId') miniatureId: string) {
-    return { data: await this.miniatureImagesService.findByMiniature(miniatureId) };
+  async findByMiniature(
+    @CurrentUser('id') userId: string,
+    @Param('miniatureId') miniatureId: string
+  ) {
+    return { data: await this.miniatureImagesService.findByMiniature(userId, miniatureId) };
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get an image by ID' })
-  async findOne(@Param('id') id: string) {
-    return { data: await this.miniatureImagesService.findOne(id) };
+  async findOne(@CurrentUser('id') userId: string, @Param('id') id: string) {
+    return { data: await this.miniatureImagesService.findOne(userId, id) };
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update image metadata' })
-  async update(@Param('id') id: string, @Body() dto: UpdateMiniatureImageDto) {
-    return { data: await this.miniatureImagesService.update(id, dto) };
+  async update(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateMiniatureImageDto
+  ) {
+    return { data: await this.miniatureImagesService.update(userId, id, dto) };
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete an image' })
-  async remove(@Param('id') id: string) {
-    await this.miniatureImagesService.remove(id);
+  async remove(@CurrentUser('id') userId: string, @Param('id') id: string) {
+    await this.miniatureImagesService.remove(userId, id);
     return { message: 'Image deleted successfully' };
   }
 
   @Post('reorder')
   @ApiOperation({ summary: 'Reorder images for a miniature' })
-  async reorder(@Body() dto: ReorderImagesDto) {
-    return { data: await this.miniatureImagesService.reorder(dto.miniatureId, dto.imageIds) };
+  async reorder(@CurrentUser('id') userId: string, @Body() dto: ReorderImagesDto) {
+    return { data: await this.miniatureImagesService.reorder(userId, dto.miniatureId, dto.imageIds) };
   }
 
+  @Public()
   @Get('file/:filename')
   @ApiOperation({ summary: 'Serve an image file' })
   async serveImage(@Param('filename') filename: string, @Res() res: Response) {

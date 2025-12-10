@@ -8,26 +8,23 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { RecipesService } from './recipes.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { RecipeDifficulty } from '@prisma/client';
-import { Public } from '../auth/decorators/public.decorator';
-
-// For MVP without auth, use null userId
-const TEMP_USER_ID = null;
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('recipes')
+@ApiBearerAuth()
 @Controller('recipes')
-@Public()
 export class RecipesController {
   constructor(private readonly recipesService: RecipesService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new recipe' })
-  create(@Body() createRecipeDto: CreateRecipeDto) {
-    return this.recipesService.create(createRecipeDto);
+  create(@CurrentUser('id') userId: string, @Body() createRecipeDto: CreateRecipeDto) {
+    return this.recipesService.create(userId, createRecipeDto);
   }
 
   @Get()
@@ -41,10 +38,16 @@ export class RecipesController {
     return this.recipesService.findAll({ difficulty, tag });
   }
 
+  @Get('mine')
+  @ApiOperation({ summary: 'Get my recipes' })
+  getMyRecipes(@CurrentUser('id') userId: string) {
+    return this.recipesService.findMyRecipes(userId);
+  }
+
   @Get('saved')
   @ApiOperation({ summary: 'Get saved recipes' })
-  getSaved() {
-    return this.recipesService.getSavedRecipes(TEMP_USER_ID);
+  getSaved(@CurrentUser('id') userId: string) {
+    return this.recipesService.getSavedRecipes(userId);
   }
 
   @Get(':id')
@@ -55,25 +58,29 @@ export class RecipesController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a recipe' })
-  update(@Param('id') id: string, @Body() updateRecipeDto: UpdateRecipeDto) {
-    return this.recipesService.update(id, updateRecipeDto);
+  update(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+    @Body() updateRecipeDto: UpdateRecipeDto
+  ) {
+    return this.recipesService.update(userId, id, updateRecipeDto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a recipe' })
-  remove(@Param('id') id: string) {
-    return this.recipesService.remove(id);
+  remove(@CurrentUser('id') userId: string, @Param('id') id: string) {
+    return this.recipesService.remove(userId, id);
   }
 
   @Post(':id/save')
   @ApiOperation({ summary: 'Save a recipe' })
-  save(@Param('id') id: string) {
-    return this.recipesService.save(id, TEMP_USER_ID);
+  save(@CurrentUser('id') userId: string, @Param('id') id: string) {
+    return this.recipesService.save(id, userId);
   }
 
   @Delete(':id/save')
   @ApiOperation({ summary: 'Unsave a recipe' })
-  unsave(@Param('id') id: string) {
-    return this.recipesService.unsave(id, TEMP_USER_ID);
+  unsave(@CurrentUser('id') userId: string, @Param('id') id: string) {
+    return this.recipesService.unsave(id, userId);
   }
 }

@@ -18,14 +18,18 @@ interface ArmyWithStats extends Army {
 export class ArmiesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createArmyDto: CreateArmyDto): Promise<Army> {
+  async create(userId: string, createArmyDto: CreateArmyDto): Promise<Army> {
     return this.prisma.army.create({
-      data: createArmyDto,
+      data: {
+        ...createArmyDto,
+        userId,
+      },
     });
   }
 
-  async findAll(): Promise<ArmyWithStats[]> {
+  async findAll(userId: string): Promise<ArmyWithStats[]> {
     const armies = await this.prisma.army.findMany({
+      where: { userId },
       include: {
         miniatures: true,
       },
@@ -37,9 +41,9 @@ export class ArmiesService {
     return armies.map((army) => this.calculateArmyStats(army));
   }
 
-  async findOne(id: string): Promise<ArmyWithStats> {
-    const army = await this.prisma.army.findUnique({
-      where: { id },
+  async findOne(userId: string, id: string): Promise<ArmyWithStats> {
+    const army = await this.prisma.army.findFirst({
+      where: { id, userId },
       include: {
         miniatures: true,
       },
@@ -52,8 +56,8 @@ export class ArmiesService {
     return this.calculateArmyStats(army);
   }
 
-  async update(id: string, updateArmyDto: UpdateArmyDto): Promise<Army> {
-    await this.findOne(id);
+  async update(userId: string, id: string, updateArmyDto: UpdateArmyDto): Promise<Army> {
+    await this.findOne(userId, id);
 
     return this.prisma.army.update({
       where: { id },
@@ -61,8 +65,8 @@ export class ArmiesService {
     });
   }
 
-  async remove(id: string): Promise<Army> {
-    await this.findOne(id);
+  async remove(userId: string, id: string): Promise<Army> {
+    await this.findOne(userId, id);
 
     return this.prisma.army.delete({
       where: { id },

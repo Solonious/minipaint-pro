@@ -8,24 +8,27 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { MiniaturesService } from './miniatures.service';
 import { CreateMiniatureDto } from './dto/create-miniature.dto';
 import { UpdateMiniatureDto } from './dto/update-miniature.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { MiniatureStatus } from '@prisma/client';
-import { Public } from '../auth/decorators/public.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('miniatures')
+@ApiBearerAuth()
 @Controller('miniatures')
-@Public()
 export class MiniaturesController {
   constructor(private readonly miniaturesService: MiniaturesService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new miniature' })
-  create(@Body() createMiniatureDto: CreateMiniatureDto) {
-    return this.miniaturesService.create(createMiniatureDto);
+  create(
+    @CurrentUser('id') userId: string,
+    @Body() createMiniatureDto: CreateMiniatureDto
+  ) {
+    return this.miniaturesService.create(userId, createMiniatureDto);
   }
 
   @Get()
@@ -34,58 +37,70 @@ export class MiniaturesController {
   @ApiQuery({ name: 'armyId', required: false })
   @ApiQuery({ name: 'faction', required: false })
   findAll(
+    @CurrentUser('id') userId: string,
     @Query('status') status?: MiniatureStatus,
     @Query('armyId') armyId?: string,
     @Query('faction') faction?: string
   ) {
-    return this.miniaturesService.findAll({ status, armyId, faction });
+    return this.miniaturesService.findAll(userId, { status, armyId, faction });
   }
 
   @Get('stats')
   @ApiOperation({ summary: 'Get miniature counts by status' })
-  getStats() {
-    return this.miniaturesService.getStatsByStatus();
+  getStats(@CurrentUser('id') userId: string) {
+    return this.miniaturesService.getStatsByStatus(userId);
   }
 
   @Get(':id/library')
   @ApiOperation({ summary: 'Get a miniature with all library data (images, color scheme, tutorials)' })
-  async findOneWithLibrary(@Param('id') id: string) {
-    return { data: await this.miniaturesService.findOneWithLibrary(id) };
+  async findOneWithLibrary(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string
+  ) {
+    return { data: await this.miniaturesService.findOneWithLibrary(userId, id) };
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a miniature by ID' })
-  findOne(@Param('id') id: string) {
-    return this.miniaturesService.findOne(id);
+  findOne(@CurrentUser('id') userId: string, @Param('id') id: string) {
+    return this.miniaturesService.findOne(userId, id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a miniature' })
-  update(@Param('id') id: string, @Body() updateMiniatureDto: UpdateMiniatureDto) {
-    return this.miniaturesService.update(id, updateMiniatureDto);
+  update(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+    @Body() updateMiniatureDto: UpdateMiniatureDto
+  ) {
+    return this.miniaturesService.update(userId, id, updateMiniatureDto);
   }
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update miniature status' })
-  updateStatus(@Param('id') id: string, @Body() updateStatusDto: UpdateStatusDto) {
-    return this.miniaturesService.updateStatus(id, updateStatusDto);
+  updateStatus(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+    @Body() updateStatusDto: UpdateStatusDto
+  ) {
+    return this.miniaturesService.updateStatus(userId, id, updateStatusDto);
   }
 
   @Post(':id/increment-completed')
   @ApiOperation({ summary: 'Increment the number of completed models by 1' })
-  incrementCompleted(@Param('id') id: string) {
-    return this.miniaturesService.incrementCompleted(id);
+  incrementCompleted(@CurrentUser('id') userId: string, @Param('id') id: string) {
+    return this.miniaturesService.incrementCompleted(userId, id);
   }
 
   @Post(':id/decrement-completed')
   @ApiOperation({ summary: 'Decrement the number of completed models by 1' })
-  decrementCompleted(@Param('id') id: string) {
-    return this.miniaturesService.decrementCompleted(id);
+  decrementCompleted(@CurrentUser('id') userId: string, @Param('id') id: string) {
+    return this.miniaturesService.decrementCompleted(userId, id);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a miniature' })
-  remove(@Param('id') id: string) {
-    return this.miniaturesService.remove(id);
+  remove(@CurrentUser('id') userId: string, @Param('id') id: string) {
+    return this.miniaturesService.remove(userId, id);
   }
 }

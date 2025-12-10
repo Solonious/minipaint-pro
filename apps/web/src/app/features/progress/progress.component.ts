@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   inject,
+  OnInit,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -16,6 +17,7 @@ import {
   ProgressService,
   AchievementWithStatus,
 } from '../../core/services/progress.service';
+import { MiniatureService } from '../../core/services/miniature.service';
 import { AchievementBadgeComponent } from '../../shared/components/achievement-badge/achievement-badge.component';
 import { GoalProgressComponent } from '../../shared/components/goal-progress/goal-progress.component';
 import { ProgressRingComponent } from '../../shared/components/progress-ring/progress-ring.component';
@@ -50,8 +52,14 @@ const GOAL_TYPE_OPTIONS: GoalTypeOption[] = [
   styleUrl: './progress.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProgressComponent {
+export class ProgressComponent implements OnInit {
   private readonly progressService = inject(ProgressService);
+  private readonly miniatureService = inject(MiniatureService);
+
+  ngOnInit(): void {
+    // Load miniatures for progress calculations
+    this.miniatureService.loadAll();
+  }
 
   readonly goalTypeOptions = GOAL_TYPE_OPTIONS;
 

@@ -8,10 +8,13 @@ import { UnitTemplate, GameSystem, Prisma } from '@prisma/client';
 export class UnitTemplatesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createUnitTemplateDto: CreateUnitTemplateDto): Promise<UnitTemplate> {
+  async create(userId: string, createUnitTemplateDto: CreateUnitTemplateDto): Promise<UnitTemplate> {
     try {
       return await this.prisma.unitTemplate.create({
-        data: createUnitTemplateDto,
+        data: {
+          ...createUnitTemplateDto,
+          userId,
+        },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -23,12 +26,12 @@ export class UnitTemplatesService {
     }
   }
 
-  async findAll(filters?: {
+  async findAll(userId: string, filters?: {
     gameSystem?: GameSystem;
     faction?: string;
     search?: string;
   }): Promise<UnitTemplate[]> {
-    const where: Prisma.UnitTemplateWhereInput = {};
+    const where: Prisma.UnitTemplateWhereInput = { userId };
 
     if (filters?.gameSystem) {
       where.gameSystem = filters.gameSystem;
@@ -55,8 +58,9 @@ export class UnitTemplatesService {
     });
   }
 
-  async search(query: string, gameSystem?: GameSystem): Promise<UnitTemplate[]> {
+  async search(userId: string, query: string, gameSystem?: GameSystem): Promise<UnitTemplate[]> {
     const where: Prisma.UnitTemplateWhereInput = {
+      userId,
       OR: [
         { name: { contains: query, mode: 'insensitive' } },
         { faction: { contains: query, mode: 'insensitive' } },
@@ -77,9 +81,9 @@ export class UnitTemplatesService {
     });
   }
 
-  async findOne(id: string): Promise<UnitTemplate> {
-    const template = await this.prisma.unitTemplate.findUnique({
-      where: { id },
+  async findOne(userId: string, id: string): Promise<UnitTemplate> {
+    const template = await this.prisma.unitTemplate.findFirst({
+      where: { id, userId },
     });
 
     if (!template) {
@@ -89,9 +93,10 @@ export class UnitTemplatesService {
     return template;
   }
 
-  async findOrCreate(createDto: CreateUnitTemplateDto): Promise<UnitTemplate> {
+  async findOrCreate(userId: string, createDto: CreateUnitTemplateDto): Promise<UnitTemplate> {
     const existing = await this.prisma.unitTemplate.findFirst({
       where: {
+        userId,
         name: { equals: createDto.name, mode: 'insensitive' },
         faction: { equals: createDto.faction, mode: 'insensitive' },
         gameSystem: createDto.gameSystem,
@@ -102,11 +107,11 @@ export class UnitTemplatesService {
       return existing;
     }
 
-    return this.create(createDto);
+    return this.create(userId, createDto);
   }
 
-  async update(id: string, updateUnitTemplateDto: UpdateUnitTemplateDto): Promise<UnitTemplate> {
-    await this.findOne(id);
+  async update(userId: string, id: string, updateUnitTemplateDto: UpdateUnitTemplateDto): Promise<UnitTemplate> {
+    await this.findOne(userId, id);
 
     try {
       return await this.prisma.unitTemplate.update({
@@ -123,7 +128,9 @@ export class UnitTemplatesService {
     }
   }
 
-  async incrementUsage(id: string): Promise<UnitTemplate> {
+  async incrementUsage(userId: string, id: string): Promise<UnitTemplate> {
+    await this.findOne(userId, id);
+
     return this.prisma.unitTemplate.update({
       where: { id },
       data: {
@@ -133,8 +140,8 @@ export class UnitTemplatesService {
     });
   }
 
-  async remove(id: string): Promise<UnitTemplate> {
-    await this.findOne(id);
+  async remove(userId: string, id: string): Promise<UnitTemplate> {
+    await this.findOne(userId, id);
 
     return this.prisma.unitTemplate.delete({
       where: { id },

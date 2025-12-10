@@ -25,18 +25,23 @@ export class MiniatureImagesService {
     }
   }
 
-  async uploadImage(
-    file: MulterFile,
-    dto: CreateMiniatureImageDto
-  ): Promise<MiniatureImage> {
-    // Verify miniature exists
-    const miniature = await this.prisma.miniature.findUnique({
-      where: { id: dto.miniatureId },
+  private async verifyMiniatureOwnership(userId: string, miniatureId: string): Promise<void> {
+    const miniature = await this.prisma.miniature.findFirst({
+      where: { id: miniatureId, userId },
     });
 
     if (!miniature) {
-      throw new NotFoundException(`Miniature with ID ${dto.miniatureId} not found`);
+      throw new NotFoundException(`Miniature with ID ${miniatureId} not found`);
     }
+  }
+
+  async uploadImage(
+    userId: string,
+    file: MulterFile,
+    dto: CreateMiniatureImageDto
+  ): Promise<MiniatureImage> {
+    // Verify miniature belongs to user
+    await this.verifyMiniatureOwnership(userId, dto.miniatureId);
 
     // Generate unique filename
     const ext = path.extname(file.originalname);
@@ -69,27 +74,30 @@ export class MiniatureImagesService {
     });
   }
 
-  async findByMiniature(miniatureId: string): Promise<MiniatureImage[]> {
+  async findByMiniature(userId: string, miniatureId: string): Promise<MiniatureImage[]> {
+    await this.verifyMiniatureOwnership(userId, miniatureId);
+
     return this.prisma.miniatureImage.findMany({
       where: { miniatureId },
       orderBy: { order: 'asc' },
     });
   }
 
-  async findOne(id: string): Promise<MiniatureImage> {
+  async findOne(userId: string, id: string): Promise<MiniatureImage> {
     const image = await this.prisma.miniatureImage.findUnique({
       where: { id },
+      include: { miniature: true },
     });
 
-    if (!image) {
+    if (!image || image.miniature.userId !== userId) {
       throw new NotFoundException(`Image with ID ${id} not found`);
     }
 
     return image;
   }
 
-  async update(id: string, dto: UpdateMiniatureImageDto): Promise<MiniatureImage> {
-    await this.findOne(id);
+  async update(userId: string, id: string, dto: UpdateMiniatureImageDto): Promise<MiniatureImage> {
+    await this.findOne(userId, id);
 
     return this.prisma.miniatureImage.update({
       where: { id },
@@ -101,8 +109,8 @@ export class MiniatureImagesService {
     });
   }
 
-  async remove(id: string): Promise<void> {
-    const image = await this.findOne(id);
+  async remove(userId: string, id: string): Promise<void> {
+    const image = await this.findOne(userId, id);
 
     // Delete file
     const filepath = path.join(this.uploadDir, image.filename);
@@ -116,7 +124,9 @@ export class MiniatureImagesService {
     });
   }
 
-  async reorder(miniatureId: string, imageIds: string[]): Promise<MiniatureImage[]> {
+  async reorder(userId: string, miniatureId: string, imageIds: string[]): Promise<MiniatureImage[]> {
+    await this.verifyMiniatureOwnership(userId, miniatureId);
+
     // Update order for each image
     await Promise.all(
       imageIds.map((id, index) =>
@@ -127,7 +137,7 @@ export class MiniatureImagesService {
       )
     );
 
-    return this.findByMiniature(miniatureId);
+    return this.findByMiniature(userId, miniatureId);
   }
 
   getImageFilePath(filename: string): string {

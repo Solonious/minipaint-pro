@@ -24,10 +24,12 @@ export class MiniatureService {
   private readonly miniaturesSignal = signal<Miniature[]>([]);
   private readonly loadingSignal = signal<boolean>(false);
   private readonly errorSignal = signal<string | null>(null);
+  private readonly loadedSignal = signal<boolean>(false);
 
   readonly miniatures = this.miniaturesSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
+  readonly loaded = this.loadedSignal.asReadonly();
 
   readonly miniaturesByStatus = computed(() => {
     const minis = this.miniaturesSignal();
@@ -57,11 +59,11 @@ export class MiniatureService {
     () => this.miniaturesSignal().filter((m) => m.status === 'complete').length
   );
 
-  constructor() {
-    this.loadAll();
-  }
-
   loadAll(): void {
+    if (this.loadedSignal() || this.loadingSignal()) {
+      return;
+    }
+
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
@@ -72,6 +74,7 @@ export class MiniatureService {
         tap((miniatures) => {
           this.miniaturesSignal.set(this.mapFromApi(miniatures));
           this.loadingSignal.set(false);
+          this.loadedSignal.set(true);
         }),
         catchError((error) => {
           console.error('Error loading miniatures:', error);
@@ -289,5 +292,15 @@ export class MiniatureService {
       other: 'OTHER',
     };
     return mapping[gameSystem] || 'OTHER';
+  }
+
+  /**
+   * Clears all miniature data.
+   * Should be called on user logout to reset state for the next user.
+   */
+  clearData(): void {
+    this.miniaturesSignal.set([]);
+    this.errorSignal.set(null);
+    this.loadedSignal.set(false);
   }
 }

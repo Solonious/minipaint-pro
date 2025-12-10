@@ -7,20 +7,16 @@ import {
   Param,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { PaintsService } from './paints.service';
 import { CreatePaintDto } from './dto/create-paint.dto';
 import { ToggleOwnedDto, ToggleWishlistDto } from './dto/toggle-paint.dto';
 import { PaintBrand, PaintType } from '@prisma/client';
-import { Public } from '../auth/decorators/public.decorator';
-
-// For MVP without auth, use null userId
-// This will be replaced with actual user ID from JWT when auth is implemented
-const TEMP_USER_ID = null;
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('paints')
+@ApiBearerAuth()
 @Controller('paints')
-@Public()
 export class PaintsController {
   constructor(private readonly paintsService: PaintsService) {}
 
@@ -43,19 +39,27 @@ export class PaintsController {
 
   @Get('collection')
   @ApiOperation({ summary: 'Get user paint collection with owned/wishlist status' })
-  getUserCollection() {
-    return this.paintsService.getUserCollection(TEMP_USER_ID);
+  getUserCollection(@CurrentUser('id') userId: string) {
+    return this.paintsService.getUserCollection(userId);
   }
 
   @Patch(':id/owned')
   @ApiOperation({ summary: 'Toggle paint owned status' })
-  toggleOwned(@Param('id') id: string, @Body() dto: ToggleOwnedDto) {
-    return this.paintsService.toggleOwned(id, TEMP_USER_ID, dto.owned);
+  toggleOwned(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+    @Body() dto: ToggleOwnedDto
+  ) {
+    return this.paintsService.toggleOwned(id, userId, dto.owned);
   }
 
   @Patch(':id/wishlist')
   @ApiOperation({ summary: 'Toggle paint wishlist status' })
-  toggleWishlist(@Param('id') id: string, @Body() dto: ToggleWishlistDto) {
-    return this.paintsService.toggleWishlist(id, TEMP_USER_ID, dto.wishlist);
+  toggleWishlist(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+    @Body() dto: ToggleWishlistDto
+  ) {
+    return this.paintsService.toggleWishlist(id, userId, dto.wishlist);
   }
 }

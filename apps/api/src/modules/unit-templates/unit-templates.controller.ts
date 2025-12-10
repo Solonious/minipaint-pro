@@ -8,71 +8,75 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UnitTemplatesService } from './unit-templates.service';
 import { CreateUnitTemplateDto } from './dto/create-unit-template.dto';
 import { UpdateUnitTemplateDto } from './dto/update-unit-template.dto';
 import { GameSystem } from '@prisma/client';
-import { Public } from '../auth/decorators/public.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
+@ApiTags('unit-templates')
+@ApiBearerAuth()
 @Controller('unit-templates')
 export class UnitTemplatesController {
   constructor(private readonly unitTemplatesService: UnitTemplatesService) {}
 
   @Post()
-  @Public()
-  create(@Body() createUnitTemplateDto: CreateUnitTemplateDto) {
-    return this.unitTemplatesService.create(createUnitTemplateDto);
+  create(
+    @CurrentUser('id') userId: string,
+    @Body() createUnitTemplateDto: CreateUnitTemplateDto
+  ) {
+    return this.unitTemplatesService.create(userId, createUnitTemplateDto);
   }
 
   @Get()
-  @Public()
   findAll(
+    @CurrentUser('id') userId: string,
     @Query('gameSystem') gameSystem?: GameSystem,
     @Query('faction') faction?: string,
     @Query('search') search?: string,
   ) {
-    return this.unitTemplatesService.findAll({ gameSystem, faction, search });
+    return this.unitTemplatesService.findAll(userId, { gameSystem, faction, search });
   }
 
   @Get('search')
-  @Public()
   search(
+    @CurrentUser('id') userId: string,
     @Query('q') query: string,
     @Query('gameSystem') gameSystem?: GameSystem,
   ) {
-    return this.unitTemplatesService.search(query || '', gameSystem);
+    return this.unitTemplatesService.search(userId, query || '', gameSystem);
   }
 
   @Get(':id')
-  @Public()
-  findOne(@Param('id') id: string) {
-    return this.unitTemplatesService.findOne(id);
+  findOne(@CurrentUser('id') userId: string, @Param('id') id: string) {
+    return this.unitTemplatesService.findOne(userId, id);
   }
 
   @Post('find-or-create')
-  @Public()
-  findOrCreate(@Body() createUnitTemplateDto: CreateUnitTemplateDto) {
-    return this.unitTemplatesService.findOrCreate(createUnitTemplateDto);
+  findOrCreate(
+    @CurrentUser('id') userId: string,
+    @Body() createUnitTemplateDto: CreateUnitTemplateDto
+  ) {
+    return this.unitTemplatesService.findOrCreate(userId, createUnitTemplateDto);
   }
 
   @Patch(':id')
-  @Public()
   update(
+    @CurrentUser('id') userId: string,
     @Param('id') id: string,
     @Body() updateUnitTemplateDto: UpdateUnitTemplateDto,
   ) {
-    return this.unitTemplatesService.update(id, updateUnitTemplateDto);
+    return this.unitTemplatesService.update(userId, id, updateUnitTemplateDto);
   }
 
   @Post(':id/increment-usage')
-  @Public()
-  incrementUsage(@Param('id') id: string) {
-    return this.unitTemplatesService.incrementUsage(id);
+  incrementUsage(@CurrentUser('id') userId: string, @Param('id') id: string) {
+    return this.unitTemplatesService.incrementUsage(userId, id);
   }
 
   @Delete(':id')
-  @Public()
-  remove(@Param('id') id: string) {
-    return this.unitTemplatesService.remove(id);
+  remove(@CurrentUser('id') userId: string, @Param('id') id: string) {
+    return this.unitTemplatesService.remove(userId, id);
   }
 }

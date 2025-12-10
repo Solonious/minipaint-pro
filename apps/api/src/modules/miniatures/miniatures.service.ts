@@ -9,19 +9,23 @@ import { Miniature, MiniatureStatus } from '@prisma/client';
 export class MiniaturesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createMiniatureDto: CreateMiniatureDto): Promise<Miniature> {
+  async create(userId: string, createMiniatureDto: CreateMiniatureDto): Promise<Miniature> {
     return this.prisma.miniature.create({
-      data: createMiniatureDto,
+      data: {
+        ...createMiniatureDto,
+        userId,
+      },
     });
   }
 
-  async findAll(filters?: {
+  async findAll(userId: string, filters?: {
     status?: MiniatureStatus;
     armyId?: string;
     faction?: string;
   }): Promise<Miniature[]> {
     return this.prisma.miniature.findMany({
       where: {
+        userId,
         ...(filters?.status && { status: filters.status }),
         ...(filters?.armyId && { armyId: filters.armyId }),
         ...(filters?.faction && { faction: filters.faction }),
@@ -35,9 +39,9 @@ export class MiniaturesService {
     });
   }
 
-  async findOne(id: string): Promise<Miniature> {
-    const miniature = await this.prisma.miniature.findUnique({
-      where: { id },
+  async findOne(userId: string, id: string): Promise<Miniature> {
+    const miniature = await this.prisma.miniature.findFirst({
+      where: { id, userId },
       include: {
         army: true,
       },
@@ -50,8 +54,8 @@ export class MiniaturesService {
     return miniature;
   }
 
-  async update(id: string, updateMiniatureDto: UpdateMiniatureDto): Promise<Miniature> {
-    await this.findOne(id);
+  async update(userId: string, id: string, updateMiniatureDto: UpdateMiniatureDto): Promise<Miniature> {
+    await this.findOne(userId, id);
 
     return this.prisma.miniature.update({
       where: { id },
@@ -59,8 +63,8 @@ export class MiniaturesService {
     });
   }
 
-  async updateStatus(id: string, updateStatusDto: UpdateStatusDto): Promise<Miniature> {
-    await this.findOne(id);
+  async updateStatus(userId: string, id: string, updateStatusDto: UpdateStatusDto): Promise<Miniature> {
+    await this.findOne(userId, id);
 
     return this.prisma.miniature.update({
       where: { id },
@@ -68,17 +72,18 @@ export class MiniaturesService {
     });
   }
 
-  async remove(id: string): Promise<Miniature> {
-    await this.findOne(id);
+  async remove(userId: string, id: string): Promise<Miniature> {
+    await this.findOne(userId, id);
 
     return this.prisma.miniature.delete({
       where: { id },
     });
   }
 
-  async getStatsByStatus(): Promise<Record<MiniatureStatus, number>> {
+  async getStatsByStatus(userId: string): Promise<Record<MiniatureStatus, number>> {
     const counts = await this.prisma.miniature.groupBy({
       by: ['status'],
+      where: { userId },
       _count: true,
     });
 
@@ -94,8 +99,8 @@ export class MiniaturesService {
     return stats;
   }
 
-  async incrementCompleted(id: string): Promise<Miniature> {
-    const miniature = await this.findOne(id);
+  async incrementCompleted(userId: string, id: string): Promise<Miniature> {
+    const miniature = await this.findOne(userId, id);
 
     // Don't exceed modelCount
     const newCompleted = Math.min(miniature.modelsCompleted + 1, miniature.modelCount);
@@ -114,8 +119,8 @@ export class MiniaturesService {
     });
   }
 
-  async decrementCompleted(id: string): Promise<Miniature> {
-    const miniature = await this.findOne(id);
+  async decrementCompleted(userId: string, id: string): Promise<Miniature> {
+    const miniature = await this.findOne(userId, id);
 
     // Don't go below 0
     const newCompleted = Math.max(miniature.modelsCompleted - 1, 0);
@@ -134,9 +139,9 @@ export class MiniaturesService {
     });
   }
 
-  async findOneWithLibrary(id: string) {
-    const miniature = await this.prisma.miniature.findUnique({
-      where: { id },
+  async findOneWithLibrary(userId: string, id: string) {
+    const miniature = await this.prisma.miniature.findFirst({
+      where: { id, userId },
       include: {
         army: true,
         images: {

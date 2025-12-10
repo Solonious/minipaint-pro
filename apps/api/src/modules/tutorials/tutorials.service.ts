@@ -7,15 +7,19 @@ import { CreateTutorialDto, UpdateTutorialDto } from './dto/create-tutorial.dto'
 export class TutorialsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateTutorialDto): Promise<MiniatureTutorial> {
-    // Verify miniature exists
-    const miniature = await this.prisma.miniature.findUnique({
-      where: { id: dto.miniatureId },
+  private async verifyMiniatureOwnership(userId: string, miniatureId: string): Promise<void> {
+    const miniature = await this.prisma.miniature.findFirst({
+      where: { id: miniatureId, userId },
     });
 
     if (!miniature) {
-      throw new NotFoundException(`Miniature with ID ${dto.miniatureId} not found`);
+      throw new NotFoundException(`Miniature with ID ${miniatureId} not found`);
     }
+  }
+
+  async create(userId: string, dto: CreateTutorialDto): Promise<MiniatureTutorial> {
+    // Verify miniature belongs to user
+    await this.verifyMiniatureOwnership(userId, dto.miniatureId);
 
     // Get current max order
     const maxOrder = await this.prisma.miniatureTutorial.aggregate({
@@ -41,27 +45,30 @@ export class TutorialsService {
     });
   }
 
-  async findByMiniature(miniatureId: string): Promise<MiniatureTutorial[]> {
+  async findByMiniature(userId: string, miniatureId: string): Promise<MiniatureTutorial[]> {
+    await this.verifyMiniatureOwnership(userId, miniatureId);
+
     return this.prisma.miniatureTutorial.findMany({
       where: { miniatureId },
       orderBy: { order: 'asc' },
     });
   }
 
-  async findOne(id: string): Promise<MiniatureTutorial> {
+  async findOne(userId: string, id: string): Promise<MiniatureTutorial> {
     const tutorial = await this.prisma.miniatureTutorial.findUnique({
       where: { id },
+      include: { miniature: true },
     });
 
-    if (!tutorial) {
+    if (!tutorial || tutorial.miniature.userId !== userId) {
       throw new NotFoundException(`Tutorial with ID ${id} not found`);
     }
 
     return tutorial;
   }
 
-  async update(id: string, dto: UpdateTutorialDto): Promise<MiniatureTutorial> {
-    await this.findOne(id);
+  async update(userId: string, id: string, dto: UpdateTutorialDto): Promise<MiniatureTutorial> {
+    await this.findOne(userId, id);
 
     // Detect platform if URL changed
     let platform = dto.platform;
@@ -82,15 +89,17 @@ export class TutorialsService {
     });
   }
 
-  async remove(id: string): Promise<void> {
-    await this.findOne(id);
+  async remove(userId: string, id: string): Promise<void> {
+    await this.findOne(userId, id);
 
     await this.prisma.miniatureTutorial.delete({
       where: { id },
     });
   }
 
-  async reorder(miniatureId: string, tutorialIds: string[]): Promise<MiniatureTutorial[]> {
+  async reorder(userId: string, miniatureId: string, tutorialIds: string[]): Promise<MiniatureTutorial[]> {
+    await this.verifyMiniatureOwnership(userId, miniatureId);
+
     await Promise.all(
       tutorialIds.map((id, index) =>
         this.prisma.miniatureTutorial.update({
@@ -100,7 +109,7 @@ export class TutorialsService {
       )
     );
 
-    return this.findByMiniature(miniatureId);
+    return this.findByMiniature(userId, miniatureId);
   }
 
   private detectPlatform(url: string): VideoPlatform {

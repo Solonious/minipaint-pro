@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, Injector, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, tap, of, BehaviorSubject } from 'rxjs';
@@ -12,6 +12,20 @@ import {
   AuthResponse,
   MeResponse,
 } from '@minipaint-pro/types';
+import { StorageService } from './storage.service';
+import { MiniatureService } from './miniature.service';
+import { ArmyService } from './army.service';
+import { PaintService } from './paint.service';
+import { ProgressService } from './progress.service';
+import { RecipeService } from './recipe.service';
+
+// Storage keys for user-specific data that need to be cleared on logout
+const USER_STORAGE_KEYS = [
+  'minipaint_paint_ownership',
+  'minipaint_progress',
+  'minipaint_goals',
+  'minipaint_saved_recipes',
+] as const;
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +33,8 @@ import {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly storage = inject(StorageService);
+  private readonly injector = inject(Injector);
   private readonly apiUrl = environment.apiUrl;
 
   // Signals for state management
@@ -129,12 +145,12 @@ export class AuthService {
         .post<AuthResponse>(`${this.apiUrl}/auth/logout`, {}, { withCredentials: true })
         .pipe(
           tap(() => {
-            this.userSignal.set(null);
+            this.clearUserContext();
             this.router.navigate(['/auth/login']);
             resolve();
           }),
           catchError(() => {
-            this.userSignal.set(null);
+            this.clearUserContext();
             this.router.navigate(['/auth/login']);
             resolve();
             return of(null);
@@ -150,12 +166,12 @@ export class AuthService {
         .post<AuthResponse>(`${this.apiUrl}/auth/logout-all`, {}, { withCredentials: true })
         .pipe(
           tap(() => {
-            this.userSignal.set(null);
+            this.clearUserContext();
             this.router.navigate(['/auth/login']);
             resolve();
           }),
           catchError(() => {
-            this.userSignal.set(null);
+            this.clearUserContext();
             this.router.navigate(['/auth/login']);
             resolve();
             return of(null);
@@ -311,5 +327,30 @@ export class AuthService {
 
   clearError(): void {
     this.errorSignal.set(null);
+  }
+
+  /**
+   * Clears all user-specific context on logout.
+   * This includes:
+   * - User signal state
+   * - All user-specific localStorage data (paint ownership, progress, goals, saved recipes)
+   * - All service signals containing user data
+   */
+  private clearUserContext(): void {
+    // Clear user signal
+    this.userSignal.set(null);
+
+    // Clear all user-specific localStorage data
+    for (const key of USER_STORAGE_KEYS) {
+      this.storage.remove(key);
+    }
+
+    // Clear all service signals using lazy injection to avoid circular dependencies
+    // These services are retrieved lazily to prevent issues during initialization
+    this.injector.get(MiniatureService).clearData();
+    this.injector.get(ArmyService).clearData();
+    this.injector.get(PaintService).clearData();
+    this.injector.get(ProgressService).clearData();
+    this.injector.get(RecipeService).clearData();
   }
 }

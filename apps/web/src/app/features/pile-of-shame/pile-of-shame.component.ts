@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   inject,
+  OnInit,
   signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
@@ -39,10 +40,14 @@ import { PageLoaderComponent } from '../../shared/components/loading-skeleton';
   styleUrl: './pile-of-shame.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PileOfShameComponent {
+export class PileOfShameComponent implements OnInit {
   private readonly miniatureService = inject(MiniatureService);
   private readonly unitTemplateService = inject(UnitTemplateService);
   private readonly router = inject(Router);
+
+  ngOnInit(): void {
+    this.miniatureService.loadAll();
+  }
 
   readonly statusConfigs = STATUS_CONFIGS;
   readonly connectedListIds = STATUS_CONFIGS.map((c) => c.status);

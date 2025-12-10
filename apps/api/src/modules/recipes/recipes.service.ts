@@ -8,12 +8,13 @@ import { Recipe, RecipeDifficulty } from '@prisma/client';
 export class RecipesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createRecipeDto: CreateRecipeDto): Promise<Recipe> {
+  async create(userId: string, createRecipeDto: CreateRecipeDto): Promise<Recipe> {
     const { steps, ...recipeData } = createRecipeDto;
 
     return this.prisma.recipe.create({
       data: {
         ...recipeData,
+        userId,
         steps: {
           create: steps,
         },
@@ -48,6 +49,21 @@ export class RecipesService {
     });
   }
 
+  async findMyRecipes(userId: string): Promise<Recipe[]> {
+    return this.prisma.recipe.findMany({
+      where: { userId },
+      include: {
+        steps: {
+          include: { paint: true },
+          orderBy: { order: 'asc' },
+        },
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+    });
+  }
+
   async findOne(id: string): Promise<Recipe> {
     const recipe = await this.prisma.recipe.findUnique({
       where: { id },
@@ -66,8 +82,14 @@ export class RecipesService {
     return recipe;
   }
 
-  async update(id: string, updateRecipeDto: UpdateRecipeDto): Promise<Recipe> {
-    await this.findOne(id);
+  async update(userId: string, id: string, updateRecipeDto: UpdateRecipeDto): Promise<Recipe> {
+    const recipe = await this.prisma.recipe.findFirst({
+      where: { id, userId },
+    });
+
+    if (!recipe) {
+      throw new NotFoundException(`Recipe with ID ${id} not found`);
+    }
 
     const { steps, ...recipeData } = updateRecipeDto;
 
@@ -96,8 +118,14 @@ export class RecipesService {
     });
   }
 
-  async remove(id: string): Promise<Recipe> {
-    await this.findOne(id);
+  async remove(userId: string, id: string): Promise<Recipe> {
+    const recipe = await this.prisma.recipe.findFirst({
+      where: { id, userId },
+    });
+
+    if (!recipe) {
+      throw new NotFoundException(`Recipe with ID ${id} not found`);
+    }
 
     return this.prisma.recipe.delete({
       where: { id },
