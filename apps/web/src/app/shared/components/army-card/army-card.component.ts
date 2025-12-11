@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { ArmyWithProgress } from '@minipaint-pro/types';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { ProgressRingComponent } from '../progress-ring/progress-ring.component';
 import { PointsBadgeComponent } from '../points-badge/points-badge.component';
+import { FactionImageService } from '../../../core/services/faction-image.service';
 
 const GAME_SYSTEM_LABELS: Record<string, string> = {
   warhammer40k: 'Warhammer 40K',
@@ -23,63 +24,77 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
       class="army-card"
       tabindex="0"
       role="article"
+      (click)="onCardClick()"
     >
-      <div class="icon-section" [style.background-color]="army().colorHex || 'var(--bg-elevated)'">
-        @if (army().iconEmoji) {
-          <img
-            class="faction-icon"
-            [src]="'assets/icons/factions/' + army().iconEmoji + '.svg'"
-            [alt]="army().faction + ' icon'"
-          />
-        } @else {
-          <span class="placeholder">{{ initials() }}</span>
-        }
+      <!-- Hero Image Section -->
+      <div
+        class="hero-section"
+        [style.background-image]="heroBackground()"
+        [style.background-color]="army().colorHex || 'var(--bg-elevated)'"
+      >
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          @if (army().iconEmoji) {
+            <img
+              class="faction-icon"
+              [src]="'assets/icons/factions/' + army().iconEmoji + '.svg'"
+              [alt]="army().faction + ' icon'"
+            />
+          }
+          <div class="hero-text">
+            <h3 class="name">{{ army().name }}</h3>
+            <div class="meta">
+              <span class="faction">{{ army().faction }}</span>
+              <span class="separator">•</span>
+              <span class="system">{{ gameSystemLabel() }}</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="content">
-        <div class="header">
-          <h3 class="name">{{ army().name }}</h3>
+
+      <!-- Progress Section -->
+      <div class="progress-section">
+        <div class="progress-ring-wrapper">
           <app-progress-ring
             [value]="army().progressPercentage"
-            [size]="48"
-            [strokeWidth]="4"
+            [size]="80"
+            [strokeWidth]="6"
           />
         </div>
-        <div class="meta">
-          <span class="faction">{{ army().faction }}</span>
-          <span class="system">{{ gameSystemLabel() }}</span>
-        </div>
-        <div class="stats">
-          <div class="stat">
-            <span class="stat-value">{{ army().completedCount }}</span>
-            <span class="stat-label">/ {{ army().miniatureCount }} painted</span>
+        <div class="progress-details">
+          <div class="progress-stat">
+            <span class="stat-value painted">{{ army().completedCount }}</span>
+            <span class="stat-label">/ {{ army().miniatureCount }} units painted</span>
           </div>
-          <div class="points">
-            <app-points-badge [points]="army().currentPoints" />
-            <span class="target-points">/ {{ army().targetPoints }} pts</span>
+          <div class="progress-stat">
+            <app-points-badge [points]="army().currentPoints" size="large" />
+            <span class="stat-label">/ {{ army().targetPoints }} pts</span>
           </div>
         </div>
-        <div class="actions">
-          <p-button
-            icon="pi pi-eye"
-            [rounded]="true"
-            [text]="true"
-            severity="secondary"
-            size="small"
-            pTooltip="View army details"
-            tooltipPosition="top"
-            (onClick)="onViewClick($event)"
-          />
-          <p-button
-            icon="pi pi-pencil"
-            [rounded]="true"
-            [text]="true"
-            severity="secondary"
-            size="small"
-            pTooltip="Edit"
-            tooltipPosition="top"
-            (onClick)="onEditClick($event)"
-          />
-        </div>
+      </div>
+
+      <!-- Actions Section -->
+      <div class="actions-section">
+        <p-button
+          label="View Details"
+          icon="pi pi-eye"
+          [outlined]="true"
+          severity="secondary"
+          size="small"
+          pTooltip="View army details"
+          tooltipPosition="top"
+          (onClick)="onViewClick($event)"
+        />
+        <p-button
+          icon="pi pi-pencil"
+          [rounded]="true"
+          [text]="true"
+          severity="secondary"
+          size="small"
+          pTooltip="Edit army"
+          tooltipPosition="top"
+          (onClick)="onEditClick($event)"
+        />
       </div>
     </div>
   `,
@@ -91,7 +106,9 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
 
     .army-card {
       display: flex;
+      flex-direction: column;
       height: 100%;
+      min-height: 360px;
       background: var(--bg-card);
       border: 1px solid var(--border-dim);
       border-radius: var(--radius-lg);
@@ -103,62 +120,81 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
     .army-card:hover {
       border-color: var(--gold);
       box-shadow: var(--shadow-glow);
-      transform: translateY(-2px);
+      transform: translateY(-4px);
     }
 
-    .icon-section {
-      width: 80px;
-      min-height: 120px;
+    .army-card:hover .hero-overlay {
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.3) 0%,
+        rgba(0, 0, 0, 0.7) 100%
+      );
+    }
+
+    /* Hero Section */
+    .hero-section {
+      position: relative;
+      height: 180px;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      align-self: stretch;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.2) 0%,
+        rgba(0, 0, 0, 0.8) 100%
+      );
+      transition: background var(--transition-fast);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-end;
+      gap: var(--space-md);
+      padding: var(--space-lg);
     }
 
     .faction-icon {
-      width: 48px;
-      height: 48px;
+      width: 56px;
+      height: 56px;
       object-fit: contain;
       filter: brightness(0) invert(1);
-      opacity: 0.9;
+      opacity: 0.95;
+      flex-shrink: 0;
     }
 
-    .placeholder {
-      font-family: var(--font-display);
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text-dim);
-    }
-
-    .content {
+    .hero-text {
       flex: 1;
-      padding: var(--space-md);
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-sm);
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: var(--space-md);
+      min-width: 0;
     }
 
     .name {
       font-family: var(--font-display);
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: var(--text-primary);
+      font-size: 1.375rem;
+      font-weight: 700;
+      color: #ffffff;
       margin: 0;
       line-height: 1.2;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .meta {
       display: flex;
-      flex-direction: column;
+      align-items: center;
       gap: var(--space-xs);
+      margin-top: var(--space-xs);
       font-family: var(--font-body);
       font-size: 0.75rem;
       text-transform: uppercase;
@@ -166,67 +202,98 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
     }
 
     .faction {
-      color: var(--gold);
+      color: var(--gold-bright);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .separator {
+      color: var(--text-dim);
     }
 
     .system {
-      color: var(--text-secondary);
+      color: rgba(255, 255, 255, 0.7);
     }
 
-    .stats {
+    /* Progress Section */
+    .progress-section {
+      flex: 1;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-top: auto;
+      gap: var(--space-lg);
+      padding: var(--space-lg);
+      background: var(--bg-card);
     }
 
-    .stat {
+    .progress-ring-wrapper {
+      flex-shrink: 0;
+    }
+
+    .progress-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .progress-stat {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
       font-family: var(--font-mono);
-      font-size: 0.75rem;
+      font-size: 0.875rem;
     }
 
     .stat-value {
       font-weight: 700;
+      font-size: 1.125rem;
+    }
+
+    .stat-value.painted {
       color: var(--success);
     }
 
     .stat-label {
       color: var(--text-secondary);
+      font-size: 0.8125rem;
     }
 
-    .points {
+    /* Actions Section */
+    .actions-section {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: var(--space-xs);
-    }
-
-    .target-points {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-    }
-
-    .actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: var(--space-xs);
-      margin-top: var(--space-sm);
-      padding-top: var(--space-sm);
+      padding: var(--space-md) var(--space-lg);
       border-top: 1px solid var(--border-dim);
+      background: var(--bg-panel);
     }
 
-    .actions :host ::ng-deep .p-button {
-      width: 32px;
-      height: 32px;
-    }
+    :host ::ng-deep .actions-section {
+      .p-button-outlined {
+        border-color: var(--border-glow);
+        color: var(--text-primary);
 
-    .actions :host ::ng-deep .p-button-icon {
-      font-size: 0.875rem;
+        &:hover {
+          border-color: var(--gold);
+          background: rgba(201, 162, 39, 0.1);
+          color: var(--gold);
+        }
+      }
+
+      .p-button-text {
+        color: var(--text-secondary);
+
+        &:hover {
+          color: var(--gold);
+          background: rgba(201, 162, 39, 0.1);
+        }
+      }
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ArmyCardComponent {
+  private readonly factionImageService = inject(FactionImageService);
+
   army = input.required<ArmyWithProgress>();
 
   cardClick = output<void>();
@@ -234,14 +301,25 @@ export class ArmyCardComponent {
   editClick = output<void>();
 
   gameSystemLabel = computed(() => GAME_SYSTEM_LABELS[this.army().gameSystem] || this.army().gameSystem);
-  initials = computed(() => {
-    const words = this.army().name.split(' ');
-    return words
-      .slice(0, 2)
-      .map((w) => w[0])
-      .join('')
-      .toUpperCase();
+
+  heroBackground = computed(() => {
+    const army = this.army();
+
+    // Priority: 1. Custom background URL, 2. Default faction image, 3. None (use color)
+    const imageUrl =
+      army.backgroundImageUrl ||
+      this.factionImageService.getDefaultImageForFaction(army.iconEmoji);
+
+    if (imageUrl) {
+      return `url('${imageUrl}')`;
+    }
+
+    return 'none';
   });
+
+  onCardClick(): void {
+    this.viewClick.emit();
+  }
 
   onViewClick(event: Event): void {
     event.stopPropagation();

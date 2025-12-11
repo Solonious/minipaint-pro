@@ -6,6 +6,7 @@ import {
   inject,
   input,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { ColorPicker } from 'primeng/colorpicker';
@@ -17,6 +18,7 @@ import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { ColorPickerModule } from 'primeng/colorpicker';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TooltipModule } from 'primeng/tooltip';
 import {
   Army,
   CreateArmyDto,
@@ -24,6 +26,7 @@ import {
   UpdateArmyDto,
 } from '@minipaint-pro/types';
 import { WahapediaService } from '../../../core/services/wahapedia.service';
+import { FactionImageService } from '../../../core/services/faction-image.service';
 
 interface GameSystemOption {
   label: string;
@@ -152,6 +155,7 @@ const FACTION_OPTIONS: FactionOption[] = [
     ButtonModule,
     ColorPickerModule,
     ProgressSpinnerModule,
+    TooltipModule,
   ],
   template: `
     <p-dialog
@@ -301,6 +305,69 @@ const FACTION_OPTIONS: FactionOption[] = [
                 class="preview-icon"
               />
               <span class="preview-label">{{ formData.faction }}</span>
+            </div>
+          </div>
+        }
+
+        <!-- Background Image Section -->
+        <div class="form-field">
+          <label for="backgroundImageUrl">Background Image URL</label>
+          <div class="image-url-input">
+            <input
+              pInputText
+              id="backgroundImageUrl"
+              [(ngModel)]="formData.backgroundImageUrl"
+              name="backgroundImageUrl"
+              placeholder="Paste image URL here..."
+            />
+            <p-button
+              icon="pi pi-external-link"
+              [rounded]="true"
+              [text]="true"
+              severity="secondary"
+              size="small"
+              pTooltip="Search for images"
+              tooltipPosition="top"
+              (onClick)="openImageSearch()"
+            />
+          </div>
+          <span class="field-hint">
+            Find artwork on
+            <a [href]="searchUrl()" target="_blank" rel="noopener">WallpaperFlare</a>
+            or
+            <a [href]="alphaCodersSearchUrl()" target="_blank" rel="noopener">Alpha Coders</a>
+          </span>
+        </div>
+
+        @if (formData.backgroundImageUrl || defaultImageUrl()) {
+          <div class="form-field">
+            <span class="field-label">Image Preview</span>
+            <div class="image-preview-container">
+              <img
+                [src]="formData.backgroundImageUrl || defaultImageUrl()"
+                alt="Army background preview"
+                class="image-preview"
+                (error)="onImageError()"
+              />
+              @if (imageError()) {
+                <div class="image-error">
+                  <i class="pi pi-exclamation-triangle"></i>
+                  <span>Unable to load image</span>
+                </div>
+              }
+              @if (formData.backgroundImageUrl) {
+                <p-button
+                  icon="pi pi-times"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="danger"
+                  size="small"
+                  class="clear-image-btn"
+                  pTooltip="Use default image"
+                  tooltipPosition="top"
+                  (onClick)="clearBackgroundImage()"
+                />
+              }
             </div>
           </div>
         }
@@ -467,11 +534,76 @@ const FACTION_OPTIONS: FactionOption[] = [
       gap: var(--space-sm);
       margin-left: auto;
     }
+
+    .image-url-input {
+      display: flex;
+      gap: var(--space-xs);
+      align-items: center;
+
+      input {
+        flex: 1;
+      }
+    }
+
+    .field-hint {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-top: var(--space-xs);
+
+      a {
+        color: var(--gold);
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .image-preview-container {
+      position: relative;
+      width: 100%;
+      height: 140px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-dim);
+      background: var(--bg-elevated);
+    }
+
+    .image-preview {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .image-error {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+      background: rgba(0, 0, 0, 0.7);
+      color: var(--error);
+      font-size: 0.75rem;
+
+      i {
+        font-size: 1.5rem;
+      }
+    }
+
+    .clear-image-btn {
+      position: absolute;
+      top: var(--space-xs);
+      right: var(--space-xs);
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ArmyDialogComponent {
   readonly wahapediaService = inject(WahapediaService);
+  private readonly factionImageService = inject(FactionImageService);
 
   visible = input.required<boolean>();
   army = input<Army | null>(null);
@@ -485,8 +617,22 @@ export class ArmyDialogComponent {
   readonly gameSystemOptions = GAME_SYSTEM_OPTIONS;
   readonly factionOptions = FACTION_OPTIONS;
 
+  readonly imageError = signal<boolean>(false);
+
   readonly dialogTitle = computed(() =>
     this.army() ? 'Edit Army' : 'Create Army'
+  );
+
+  readonly searchUrl = computed(() =>
+    this.factionImageService.getSearchUrl(this.formData.iconEmoji)
+  );
+
+  readonly alphaCodersSearchUrl = computed(() =>
+    this.factionImageService.getAlphaCodersSearchUrl(this.formData.iconEmoji)
+  );
+
+  readonly defaultImageUrl = computed(() =>
+    this.factionImageService.getDefaultImageForFaction(this.formData.iconEmoji)
   );
 
   formData = {
@@ -497,6 +643,7 @@ export class ArmyDialogComponent {
     targetPoints: 2000,
     iconEmoji: undefined as string | undefined,
     colorHex: '#3d5a6b',
+    backgroundImageUrl: undefined as string | undefined,
   };
 
   constructor() {
@@ -508,6 +655,7 @@ export class ArmyDialogComponent {
   }
 
   private resetForm(): void {
+    this.imageError.set(false);
     const existingArmy = this.army();
     if (existingArmy) {
       this.formData = {
@@ -518,6 +666,7 @@ export class ArmyDialogComponent {
         targetPoints: existingArmy.targetPoints,
         iconEmoji: existingArmy.iconEmoji,
         colorHex: existingArmy.colorHex ?? '#3d5a6b',
+        backgroundImageUrl: existingArmy.backgroundImageUrl,
       };
 
       // Load Wahapedia data and find matching faction for 40K armies
@@ -539,6 +688,7 @@ export class ArmyDialogComponent {
         targetPoints: 2000,
         iconEmoji: undefined,
         colorHex: '#3d5a6b',
+        backgroundImageUrl: undefined,
       };
     }
   }
@@ -610,10 +760,24 @@ export class ArmyDialogComponent {
       targetPoints: this.formData.targetPoints,
       iconEmoji: this.formData.iconEmoji,
       colorHex: this.formData.colorHex || undefined,
+      backgroundImageUrl: this.formData.backgroundImageUrl || undefined,
     };
 
     this.save.emit(dto);
     this.visibleChange.emit(false);
+  }
+
+  openImageSearch(): void {
+    window.open(this.searchUrl(), '_blank', 'noopener');
+  }
+
+  onImageError(): void {
+    this.imageError.set(true);
+  }
+
+  clearBackgroundImage(): void {
+    this.formData.backgroundImageUrl = undefined;
+    this.imageError.set(false);
   }
 
   onCancel(): void {

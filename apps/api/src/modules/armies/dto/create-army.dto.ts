@@ -1,4 +1,4 @@
-import { IsString, IsInt, IsOptional, IsEnum, Min } from 'class-validator';
+import { IsString, IsInt, IsOptional, IsEnum, Min, IsUrl } from 'class-validator';
 import { GameSystem } from '@prisma/client';
 
 export class CreateArmyDto {
@@ -23,4 +23,8 @@ export class CreateArmyDto {
   @IsString()
   @IsOptional()
   colorHex?: string;
+
+  @IsUrl()
+  @IsOptional()
+  backgroundImageUrl?: string;
 }

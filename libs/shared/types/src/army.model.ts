@@ -15,6 +15,7 @@ export interface Army {
   targetPoints: number;
   iconEmoji?: string;
   colorHex?: string;
+  backgroundImageUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -33,6 +34,7 @@ export interface CreateArmyDto {
   targetPoints: number;
   iconEmoji?: string;
   colorHex?: string;
+  backgroundImageUrl?: string;
 }
 
 export interface UpdateArmyDto {
@@ -42,4 +44,5 @@ export interface UpdateArmyDto {
   targetPoints?: number;
   iconEmoji?: string | null;
   colorHex?: string | null;
+  backgroundImageUrl?: string | null;
 }
