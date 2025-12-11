@@ -111,7 +111,7 @@ export const appRoutes: Routes = [
           ),
       },
       {
-        path: 'admin',
+        path: 'admin/images',
         canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/admin/admin.component').then(

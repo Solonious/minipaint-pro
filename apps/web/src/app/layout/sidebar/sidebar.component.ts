@@ -33,7 +33,7 @@ export class SidebarComponent {
     { label: 'Recipes', icon: 'pi pi-book', route: '/recipes' },
     { label: 'Progress', icon: 'pi pi-chart-line', route: '/progress' },
     { label: 'Users', icon: 'pi pi-user-edit', route: '/admin/users', adminOnly: true },
-    { label: 'Unit Images', icon: 'pi pi-image', route: '/admin', adminOnly: true },
+    { label: 'Unit Images', icon: 'pi pi-image', route: '/admin/images', adminOnly: true },
     { label: 'Library Admin', icon: 'pi pi-cog', route: '/library-admin', adminOnly: true },
   ];
 
