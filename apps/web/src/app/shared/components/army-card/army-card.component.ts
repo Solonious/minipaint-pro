@@ -52,63 +52,65 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
         </div>
       </div>
 
-      <!-- Progress Section -->
-      <div class="progress-section">
-        <div class="progress-ring-wrapper">
-          <app-progress-ring
-            [value]="army().progressPercentage"
-            [size]="80"
-            [strokeWidth]="6"
+      <!-- Content Section -->
+      <div class="content-section">
+        <!-- Progress Section -->
+        <div class="progress-section">
+          <div class="progress-ring-wrapper">
+            <app-progress-ring
+              [value]="army().progressPercentage"
+              [size]="80"
+              [strokeWidth]="6"
+            />
+          </div>
+          <div class="progress-details">
+            <div class="progress-stat">
+              <span class="stat-value painted">{{ army().completedCount }}</span>
+              <span class="stat-label">/ {{ army().miniatureCount }} units painted</span>
+            </div>
+            <div class="progress-stat">
+              <app-points-badge [points]="army().currentPoints" size="large" />
+              <span class="stat-label">/ {{ army().targetPoints }} pts</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions Section -->
+        <div class="actions-section">
+          <p-button
+            label="View Details"
+            icon="pi pi-eye"
+            [outlined]="true"
+            severity="secondary"
+            size="small"
+            pTooltip="View army details"
+            tooltipPosition="top"
+            (onClick)="onViewClick($event)"
+          />
+          <p-button
+            icon="pi pi-pencil"
+            [rounded]="true"
+            [text]="true"
+            severity="secondary"
+            size="small"
+            pTooltip="Edit army"
+            tooltipPosition="top"
+            (onClick)="onEditClick($event)"
           />
         </div>
-        <div class="progress-details">
-          <div class="progress-stat">
-            <span class="stat-value painted">{{ army().completedCount }}</span>
-            <span class="stat-label">/ {{ army().miniatureCount }} units painted</span>
-          </div>
-          <div class="progress-stat">
-            <app-points-badge [points]="army().currentPoints" size="large" />
-            <span class="stat-label">/ {{ army().targetPoints }} pts</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Actions Section -->
-      <div class="actions-section">
-        <p-button
-          label="View Details"
-          icon="pi pi-eye"
-          [outlined]="true"
-          severity="secondary"
-          size="small"
-          pTooltip="View army details"
-          tooltipPosition="top"
-          (onClick)="onViewClick($event)"
-        />
-        <p-button
-          icon="pi pi-pencil"
-          [rounded]="true"
-          [text]="true"
-          severity="secondary"
-          size="small"
-          pTooltip="Edit army"
-          tooltipPosition="top"
-          (onClick)="onEditClick($event)"
-        />
       </div>
     </div>
   `,
   styles: `
     :host {
       display: block;
-      height: 100%;
+      width: 100%;
     }
 
     .army-card {
       display: flex;
-      flex-direction: column;
-      height: 100%;
-      min-height: 360px;
+      flex-direction: row;
+      height: 180px;
       background: var(--bg-card);
       border: 1px solid var(--border-dim);
       border-radius: var(--radius-lg);
@@ -120,12 +122,12 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
     .army-card:hover {
       border-color: var(--gold);
       box-shadow: var(--shadow-glow);
-      transform: translateY(-4px);
+      transform: translateY(-2px);
     }
 
     .army-card:hover .hero-overlay {
       background: linear-gradient(
-        to bottom,
+        to right,
         rgba(0, 0, 0, 0.3) 0%,
         rgba(0, 0, 0, 0.7) 100%
       );
@@ -134,7 +136,8 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
     /* Hero Section */
     .hero-section {
       position: relative;
-      height: 180px;
+      width: 400px;
+      flex-shrink: 0;
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -147,7 +150,7 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
       position: absolute;
       inset: 0;
       background: linear-gradient(
-        to bottom,
+        to right,
         rgba(0, 0, 0, 0.2) 0%,
         rgba(0, 0, 0, 0.8) 100%
       );
@@ -164,8 +167,8 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
     }
 
     .faction-icon {
-      width: 56px;
-      height: 56px;
+      width: 48px;
+      height: 48px;
       object-fit: contain;
       filter: brightness(0) invert(1);
       opacity: 0.95;
@@ -179,7 +182,7 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
 
     .name {
       font-family: var(--font-display);
-      font-size: 1.375rem;
+      font-size: 1.25rem;
       font-weight: 700;
       color: #ffffff;
       margin: 0;
@@ -214,14 +217,22 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
       color: rgba(255, 255, 255, 0.7);
     }
 
-    /* Progress Section */
-    .progress-section {
+    /* Content Section */
+    .content-section {
       flex: 1;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: var(--space-lg);
       padding: var(--space-lg);
-      background: var(--bg-card);
+      min-width: 0;
+    }
+
+    /* Progress Section */
+    .progress-section {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
     }
 
     .progress-ring-wrapper {
@@ -229,7 +240,6 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
     }
 
     .progress-details {
-      flex: 1;
       display: flex;
       flex-direction: column;
       gap: var(--space-md);
@@ -260,11 +270,9 @@ const GAME_SYSTEM_LABELS: Record<string, string> = {
     /* Actions Section */
     .actions-section {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: var(--space-md) var(--space-lg);
-      border-top: 1px solid var(--border-dim);
-      background: var(--bg-panel);
+      gap: var(--space-sm);
+      flex-shrink: 0;
     }
 
     :host ::ng-deep .actions-section {
