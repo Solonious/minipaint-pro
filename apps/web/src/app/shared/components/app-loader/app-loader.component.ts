@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, computed } from '@angular/core';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-loader',
@@ -10,7 +11,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         <div class="logo-container">
           <img
             class="logo"
-            src="assets/icons/logo.svg"
+            [src]="logoSrc()"
             alt="Liber Pigmentum"
           />
           <div class="logo-glow"></div>
@@ -131,4 +132,12 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppLoaderComponent {}
+export class AppLoaderComponent {
+  private readonly themeService = inject(ThemeService);
+
+  readonly logoSrc = computed(() => {
+    return this.themeService.theme() === 'dark'
+      ? 'assets/icons/logo.svg'
+      : 'assets/icons/logo-dark.svg';
+  });
+}

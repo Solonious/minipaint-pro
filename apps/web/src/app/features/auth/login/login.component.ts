@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -8,6 +8,7 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { MessageModule } from 'primeng/message';
 import { AuthService } from '../../../core/services/auth.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-login',
@@ -29,8 +30,15 @@ export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   readonly authService = inject(AuthService);
+  private readonly themeService = inject(ThemeService);
 
   readonly errorMessage = signal<string | null>(null);
+
+  readonly logoSrc = computed(() => {
+    return this.themeService.theme() === 'dark'
+      ? 'assets/icons/logo.svg'
+      : 'assets/icons/logo-dark.svg';
+  });
 
   loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
