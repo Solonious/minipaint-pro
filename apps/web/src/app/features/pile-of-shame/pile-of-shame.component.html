@@ -6,15 +6,21 @@
     </div>
     <div class="header-stats">
       <div class="stat">
-        <span class="stat-value">{{ totalCount() }}</span>
-        <span class="stat-label">Total</span>
+        <span class="stat-value">{{ filteredCount() }}</span>
+        <span class="stat-label">@if (hasActiveFilters()) { Showing } @else { Total }</span>
       </div>
+      @if (hasActiveFilters()) {
+        <div class="stat">
+          <span class="stat-value">{{ totalCount() }}</span>
+          <span class="stat-label">Total</span>
+        </div>
+      }
       <div class="stat">
-        <span class="stat-value">{{ completedCount() }}</span>
+        <span class="stat-value">{{ filteredCompletedCount() }}</span>
         <span class="stat-label">Complete</span>
       </div>
       <div class="stat">
-        <span class="stat-value">{{ totalPoints() }}</span>
+        <span class="stat-value">{{ filteredTotalPoints() }}</span>
         <span class="stat-label">Points</span>
       </div>
       <div class="stat progress">
@@ -33,6 +39,117 @@
       appendTo="body"
     />
   </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+  <div class="filter-controls">
+    <!-- Search Input -->
+    <p-iconfield class="filter-search">
+      <p-inputicon styleClass="pi pi-search" />
+      <input
+        type="text"
+        pInputText
+        placeholder="Search name or faction..."
+        [value]="searchQuery()"
+        (input)="onSearchChange($event)"
+      />
+    </p-iconfield>
+
+    <!-- Game System Select -->
+    <p-select
+      [options]="gameSystemOptions"
+      [ngModel]="selectedGameSystem()"
+      (ngModelChange)="onGameSystemChange($event)"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Game System"
+      [showClear]="true"
+      appendTo="body"
+      styleClass="filter-select"
+    />
+
+    <!-- Faction Select -->
+    <p-select
+      [options]="factionOptions()"
+      [ngModel]="selectedFaction()"
+      (ngModelChange)="onFactionChange($event)"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Faction"
+      [showClear]="true"
+      [filter]="true"
+      filterPlaceholder="Search faction..."
+      appendTo="body"
+      styleClass="filter-select"
+    />
+
+    <!-- Army Select -->
+    <p-select
+      [options]="armyOptions()"
+      [ngModel]="selectedArmy()"
+      (ngModelChange)="onArmyChange($event)"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Army"
+      [showClear]="true"
+      [filter]="true"
+      filterPlaceholder="Search army..."
+      appendTo="body"
+      styleClass="filter-select"
+    />
+
+    <!-- Clear All Button -->
+    @if (hasActiveFilters()) {
+      <p-button
+        label="Clear"
+        icon="pi pi-times"
+        severity="secondary"
+        [text]="true"
+        (onClick)="clearFilters()"
+        pTooltip="Clear all filters"
+        tooltipPosition="bottom"
+      />
+    }
+  </div>
+
+  <!-- Active Filters Chips -->
+  @if (hasActiveFilters()) {
+    <div class="active-filters">
+      @if (searchQuery()) {
+        <p-chip
+          [label]="'Search: ' + searchQuery()"
+          [removable]="true"
+          (onRemove)="clearSearch()"
+          styleClass="filter-chip"
+        />
+      }
+      @if (selectedGameSystem()) {
+        <p-chip
+          [label]="getGameSystemLabel(selectedGameSystem()!)"
+          [removable]="true"
+          (onRemove)="clearGameSystem()"
+          styleClass="filter-chip"
+        />
+      }
+      @if (selectedFaction()) {
+        <p-chip
+          [label]="selectedFaction()!"
+          [removable]="true"
+          (onRemove)="clearFaction()"
+          styleClass="filter-chip"
+        />
+      }
+      @if (selectedArmy()) {
+        <p-chip
+          [label]="getArmyLabel(selectedArmy()!)"
+          [removable]="true"
+          (onRemove)="clearArmy()"
+          styleClass="filter-chip"
+        />
+      }
+    </div>
+  }
 </div>
 
 @if (loading()) {

@@ -166,3 +166,11 @@ export interface MoveModelsDto {
 export interface UpdateStageCountsDto {
   stageCounts: ModelStageCounts;
 }
+
+// Filter interface for advanced filtering (Phase 1)
+export interface MiniatureFilters {
+  search: string;
+  gameSystem: GameSystem | null;
+  faction: string | null;
+  armyId: string | null;
+}

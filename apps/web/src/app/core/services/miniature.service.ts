@@ -5,6 +5,7 @@ import {
   CreateMiniatureDto,
   GameSystem,
   Miniature,
+  MiniatureFilters,
   MiniatureStatus,
   MiniatureTag,
   ModelStageCounts,
@@ -246,6 +247,42 @@ export class MiniatureService {
 
   getByArmyId(armyId: string): Miniature[] {
     return this.miniaturesSignal().filter((m) => m.armyId === armyId);
+  }
+
+  getFilteredMiniatures(filters: MiniatureFilters): Miniature[] {
+    let result = this.miniaturesSignal();
+
+    // Text search (name or faction)
+    if (filters.search) {
+      const query = filters.search.toLowerCase();
+      result = result.filter(
+        (m) =>
+          m.name.toLowerCase().includes(query) ||
+          m.faction.toLowerCase().includes(query)
+      );
+    }
+
+    // Game system filter
+    if (filters.gameSystem) {
+      result = result.filter((m) => m.gameSystem === filters.gameSystem);
+    }
+
+    // Faction filter
+    if (filters.faction) {
+      result = result.filter((m) => m.faction === filters.faction);
+    }
+
+    // Army filter
+    if (filters.armyId) {
+      result = result.filter((m) => m.armyId === filters.armyId);
+    }
+
+    return result;
+  }
+
+  getUniqueFactions(): string[] {
+    const factions = this.miniaturesSignal().map((m) => m.faction);
+    return [...new Set(factions)].sort();
   }
 
   private mapFromApi(miniatures: Miniature[]): Miniature[] {

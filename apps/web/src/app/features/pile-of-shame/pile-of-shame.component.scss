@@ -82,6 +82,93 @@
   flex-shrink: 0;
 }
 
+// Filter Bar
+.filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-md);
+}
+
+.filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.filter-search {
+  flex: 1;
+  min-width: 200px;
+  max-width: 300px;
+
+  input {
+    width: 100%;
+  }
+}
+
+:host ::ng-deep {
+  .filter-select {
+    min-width: 150px;
+
+    @media (max-width: 768px) {
+      min-width: 100%;
+    }
+  }
+
+  .filter-chip {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-glow);
+    font-size: 0.75rem;
+
+    .p-chip-label {
+      color: var(--text-primary);
+    }
+
+    .p-chip-remove-icon {
+      color: var(--text-secondary);
+
+      &:hover {
+        color: var(--error);
+      }
+    }
+  }
+
+  .p-iconfield {
+    .p-inputtext {
+      padding-left: 2.5rem;
+    }
+
+    .p-inputicon {
+      color: var(--text-dim);
+    }
+  }
+}
+
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--border-dim);
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .filter-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-search {
+    max-width: none;
+  }
+}
+
 .kanban-board {
   display: flex;
   gap: var(--space-sm);
