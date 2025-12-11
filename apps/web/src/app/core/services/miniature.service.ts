@@ -368,27 +368,11 @@ export class MiniatureService {
   }
 
   private mapGameSystemFromApi(gameSystem: string): GameSystem {
-    const mapping: Record<string, GameSystem> = {
-      WARHAMMER_40K: 'warhammer40k',
-      AGE_OF_SIGMAR: 'ageOfSigmar',
-      KILL_TEAM: 'killTeam',
-      NECROMUNDA: 'necromunda',
-      HORUS_HERESY: 'horusHeresy',
-      OTHER: 'other',
-    };
-    return mapping[gameSystem] || 'other';
+    return gameSystem as GameSystem;
   }
 
   private mapGameSystemToApi(gameSystem: string): string {
-    const mapping: Record<string, string> = {
-      warhammer40k: 'WARHAMMER_40K',
-      ageOfSigmar: 'AGE_OF_SIGMAR',
-      killTeam: 'KILL_TEAM',
-      necromunda: 'NECROMUNDA',
-      horusHeresy: 'HORUS_HERESY',
-      other: 'OTHER',
-    };
-    return mapping[gameSystem] || 'OTHER';
+    return gameSystem;
   }
 
   private mapStageCountsFromApi(stageCounts: Record<string, number>): ModelStageCounts {

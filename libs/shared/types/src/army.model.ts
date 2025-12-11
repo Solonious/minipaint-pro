@@ -1,10 +1,10 @@
 export type GameSystem =
-  | 'warhammer40k'
-  | 'ageOfSigmar'
-  | 'killTeam'
-  | 'necromunda'
-  | 'horusHeresy'
-  | 'other';
+  | 'WARHAMMER_40K'
+  | 'AGE_OF_SIGMAR'
+  | 'KILL_TEAM'
+  | 'NECROMUNDA'
+  | 'HORUS_HERESY'
+  | 'OTHER';
 
 export interface Army {
   id: string;

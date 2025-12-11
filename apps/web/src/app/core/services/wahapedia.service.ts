@@ -28,11 +28,11 @@ const FACTIONS_CACHE_KEY = 'wahapedia_factions';
 const UNITS_CACHE_KEY = 'wahapedia_units';
 
 const GAME_SYSTEM_TO_WAHAPEDIA: Record<string, string> = {
-  warhammer40k: 'wh40k10ed',
-  killTeam: 'kill-team',
-  ageOfSigmar: 'aos3',
-  horusHeresy: 'horus-heresy',
-  necromunda: 'necromunda',
+  WARHAMMER_40K: 'wh40k10ed',
+  KILL_TEAM: 'kill-team',
+  AGE_OF_SIGMAR: 'aos3',
+  HORUS_HERESY: 'horus-heresy',
+  NECROMUNDA: 'necromunda',
 };
 
 @Injectable({

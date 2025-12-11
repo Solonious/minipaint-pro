@@ -69,12 +69,12 @@ const STATUS_OPTIONS: StatusOption[] = [
 ];
 
 const GAME_SYSTEM_OPTIONS: GameSystemOption[] = [
-  { label: 'Warhammer 40K', value: 'warhammer40k' },
-  { label: 'Age of Sigmar', value: 'ageOfSigmar' },
-  { label: 'Kill Team', value: 'killTeam' },
-  { label: 'Necromunda', value: 'necromunda' },
-  { label: 'Horus Heresy', value: 'horusHeresy' },
-  { label: 'Other', value: 'other' },
+  { label: 'Warhammer 40K', value: 'WARHAMMER_40K' },
+  { label: 'Age of Sigmar', value: 'AGE_OF_SIGMAR' },
+  { label: 'Kill Team', value: 'KILL_TEAM' },
+  { label: 'Necromunda', value: 'NECROMUNDA' },
+  { label: 'Horus Heresy', value: 'HORUS_HERESY' },
+  { label: 'Other', value: 'OTHER' },
 ];
 
 interface UnbuiltStateOption {
@@ -324,7 +324,7 @@ const TAG_OPTIONS: TagOption[] = [
             </div>
           </div>
 
-          @if (formData.gameSystem === 'warhammer40k') {
+          @if (formData.gameSystem === 'WARHAMMER_40K') {
             <div class="form-row">
               <div class="form-field">
                 <label for="faction">Faction</label>
@@ -1010,7 +1010,7 @@ export class MiniatureDialogComponent {
         notes: mini.notes ?? '',
       };
 
-      if (mini.gameSystem === 'warhammer40k') {
+      if (mini.gameSystem === 'WARHAMMER_40K') {
         this.wahapediaService.loadData(mini.gameSystem);
         const faction = this.wahapediaService
           .factions()
@@ -1050,7 +1050,7 @@ export class MiniatureDialogComponent {
         notes: '',
       };
 
-      if (defaultArmy?.gameSystem === 'warhammer40k') {
+      if (defaultArmy?.gameSystem === 'WARHAMMER_40K') {
         this.wahapediaService.loadData(defaultArmy.gameSystem);
         const faction = this.wahapediaService
           .factions()
@@ -1066,7 +1066,7 @@ export class MiniatureDialogComponent {
       }
 
       // Load Wahapedia data for search
-      this.wahapediaService.loadData('warhammer40k');
+      this.wahapediaService.loadData('WARHAMMER_40K');
     }
   }
 
@@ -1089,7 +1089,7 @@ export class MiniatureDialogComponent {
       unitId: template.wahapediaUnitId,
     };
 
-    if (template.gameSystem === 'warhammer40k') {
+    if (template.gameSystem === 'WARHAMMER_40K') {
       this.wahapediaService.loadData(template.gameSystem);
       const faction = this.wahapediaService
         .factions()
@@ -1113,7 +1113,7 @@ export class MiniatureDialogComponent {
       name: unit.name,
       faction: faction?.name ?? '',
       factionId: unit.factionId,
-      gameSystem: 'warhammer40k',
+      gameSystem: 'WARHAMMER_40K',
       unitId: unit.id,
       wahapediaUrl: unit.link,
     };
@@ -1148,7 +1148,7 @@ export class MiniatureDialogComponent {
     this.formData.wahapediaUrl = undefined;
     this.selectedFactionId.set(undefined);
 
-    if (gameSystem === 'warhammer40k') {
+    if (gameSystem === 'WARHAMMER_40K') {
       this.wahapediaService.loadData(gameSystem);
     }
   }
@@ -1166,7 +1166,7 @@ export class MiniatureDialogComponent {
     if (army.faction) {
       this.formData.faction = army.faction;
 
-      if (this.formData.gameSystem === 'warhammer40k') {
+      if (this.formData.gameSystem === 'WARHAMMER_40K') {
         const faction = this.wahapediaService
           .factions()
           .find((f) => f.name.toLowerCase() === army.faction.toLowerCase());
@@ -1200,7 +1200,7 @@ export class MiniatureDialogComponent {
   isFormValid(): boolean {
     const hasName = this.formData.name.trim().length > 0;
     const hasFaction =
-      this.formData.gameSystem === 'warhammer40k'
+      this.formData.gameSystem === 'WARHAMMER_40K'
         ? !!this.formData.factionId
         : this.formData.faction.trim().length > 0;
     const hasPoints = this.formData.points >= 0;

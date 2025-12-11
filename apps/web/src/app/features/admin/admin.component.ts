@@ -22,10 +22,11 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { AdminService, UnitImage } from '../../core/services/admin.service';
 import { WahapediaService, WahapediaFaction, WahapediaUnit } from '../../core/services/wahapedia.service';
+import { GameSystem } from '@minipaint-pro/types';
 
 interface GameSystemOption {
   label: string;
-  value: string;
+  value: GameSystem;
 }
 
 const GAME_SYSTEMS: GameSystemOption[] = [
@@ -73,7 +74,7 @@ export class AdminComponent implements OnInit {
   readonly factions = this.wahapediaService.factions;
   readonly wahapediaLoading = this.wahapediaService.loading;
 
-  readonly selectedGameSystem = signal<string>('WARHAMMER_40K');
+  readonly selectedGameSystem = signal<GameSystem>('WARHAMMER_40K');
   readonly selectedFaction = signal<WahapediaFaction | null>(null);
   readonly selectedUnit = signal<WahapediaUnit | null>(null);
   readonly importUrl = signal('');
@@ -110,7 +111,7 @@ export class AdminComponent implements OnInit {
     this.loadWahapediaData();
   }
 
-  onGameSystemChange(value: string): void {
+  onGameSystemChange(value: GameSystem): void {
     this.selectedGameSystem.set(value);
     this.selectedFaction.set(null);
     this.selectedUnit.set(null);
@@ -277,20 +278,8 @@ export class AdminComponent implements OnInit {
 
   private loadWahapediaData(): void {
     const gameSystem = this.selectedGameSystem();
-    const mappedSystem = this.mapGameSystemToWahapedia(gameSystem);
-    if (mappedSystem) {
-      this.wahapediaService.loadData(mappedSystem as 'warhammer40k');
+    if (gameSystem) {
+      this.wahapediaService.loadData(gameSystem);
     }
-  }
-
-  private mapGameSystemToWahapedia(gameSystem: string): string | null {
-    const mapping: Record<string, string> = {
-      WARHAMMER_40K: 'warhammer40k',
-      KILL_TEAM: 'killTeam',
-      AGE_OF_SIGMAR: 'ageOfSigmar',
-      HORUS_HERESY: 'horusHeresy',
-      NECROMUNDA: 'necromunda',
-    };
-    return mapping[gameSystem] || null;
   }
 }

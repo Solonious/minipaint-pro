@@ -11,6 +11,7 @@ import {
   CreateColorSchemeDto,
   UpdateMiniatureImageDto,
   UpdateMiniatureTutorialDto,
+  GameSystem,
 } from '@minipaint-pro/types';
 import { environment } from '../../../environments/environment';
 
@@ -316,16 +317,8 @@ export class MiniatureLibraryService {
     return statusMap[status] || 'unbuilt';
   }
 
-  private mapGameSystemFromApi(gameSystem: string): 'warhammer40k' | 'ageOfSigmar' | 'killTeam' | 'necromunda' | 'horusHeresy' | 'other' {
-    const gameSystemMap: Record<string, 'warhammer40k' | 'ageOfSigmar' | 'killTeam' | 'necromunda' | 'horusHeresy' | 'other'> = {
-      WARHAMMER_40K: 'warhammer40k',
-      AGE_OF_SIGMAR: 'ageOfSigmar',
-      KILL_TEAM: 'killTeam',
-      NECROMUNDA: 'necromunda',
-      HORUS_HERESY: 'horusHeresy',
-      OTHER: 'other',
-    };
-    return gameSystemMap[gameSystem] || 'other';
+  private mapGameSystemFromApi(gameSystem: string): GameSystem {
+    return gameSystem as GameSystem;
   }
 
   private mapImageTypeFromApi(imageType: string): 'reference' | 'wip' | 'completed' | 'detail' {

@@ -34,12 +34,12 @@ interface GameSystemOption {
 }
 
 const GAME_SYSTEM_OPTIONS: GameSystemOption[] = [
-  { label: 'Warhammer 40K', value: 'warhammer40k' },
-  { label: 'Age of Sigmar', value: 'ageOfSigmar' },
-  { label: 'Kill Team', value: 'killTeam' },
-  { label: 'Necromunda', value: 'necromunda' },
-  { label: 'Horus Heresy', value: 'horusHeresy' },
-  { label: 'Other', value: 'other' },
+  { label: 'Warhammer 40K', value: 'WARHAMMER_40K' },
+  { label: 'Age of Sigmar', value: 'AGE_OF_SIGMAR' },
+  { label: 'Kill Team', value: 'KILL_TEAM' },
+  { label: 'Necromunda', value: 'NECROMUNDA' },
+  { label: 'Horus Heresy', value: 'HORUS_HERESY' },
+  { label: 'Other', value: 'OTHER' },
 ];
 
 interface FactionOption {
@@ -199,7 +199,7 @@ const FACTION_OPTIONS: FactionOption[] = [
         @if (formData.gameSystem) {
           <div class="form-field">
             <label for="faction">Faction *</label>
-            @if (formData.gameSystem === 'warhammer40k') {
+            @if (formData.gameSystem === 'WARHAMMER_40K') {
               @if (wahapediaService.loading()) {
                 <div class="loading-indicator">
                   <p-progressSpinner
@@ -670,7 +670,7 @@ export class ArmyDialogComponent {
       };
 
       // Load Wahapedia data and find matching faction for 40K armies
-      if (existingArmy.gameSystem === 'warhammer40k') {
+      if (existingArmy.gameSystem === 'WARHAMMER_40K') {
         this.wahapediaService.loadData(existingArmy.gameSystem);
         const faction = this.wahapediaService
           .factions()
@@ -697,7 +697,7 @@ export class ArmyDialogComponent {
     const hasName = this.formData.name.trim().length > 0;
     const hasGameSystem = !!this.formData.gameSystem;
     const hasFaction =
-      this.formData.gameSystem === 'warhammer40k'
+      this.formData.gameSystem === 'WARHAMMER_40K'
         ? !!this.formData.factionId
         : this.formData.faction.trim().length > 0;
     const hasTargetPoints = this.formData.targetPoints > 0;
@@ -716,7 +716,7 @@ export class ArmyDialogComponent {
     this.formData.iconEmoji = undefined;
 
     // Load Wahapedia data for 40K
-    if (gameSystem === 'warhammer40k') {
+    if (gameSystem === 'WARHAMMER_40K') {
       this.wahapediaService.loadData(gameSystem);
     }
   }

@@ -37,12 +37,12 @@ interface SelectOption<T> {
 
 const GAME_SYSTEM_OPTIONS: SelectOption<GameSystem | null>[] = [
   { label: 'None', value: null },
-  { label: 'Warhammer 40K', value: 'warhammer40k' },
-  { label: 'Age of Sigmar', value: 'ageOfSigmar' },
-  { label: 'Kill Team', value: 'killTeam' },
-  { label: 'Necromunda', value: 'necromunda' },
-  { label: 'Horus Heresy', value: 'horusHeresy' },
-  { label: 'Other', value: 'other' },
+  { label: 'Warhammer 40K', value: 'WARHAMMER_40K' },
+  { label: 'Age of Sigmar', value: 'AGE_OF_SIGMAR' },
+  { label: 'Kill Team', value: 'KILL_TEAM' },
+  { label: 'Necromunda', value: 'NECROMUNDA' },
+  { label: 'Horus Heresy', value: 'HORUS_HERESY' },
+  { label: 'Other', value: 'OTHER' },
 ];
 
 const PAINT_BRAND_OPTIONS: SelectOption<PaintBrand | null>[] = [
