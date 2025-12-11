@@ -1,0 +1,405 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="settings-container">
+  <header class="settings-header">
+    <h1>Account Settings</h1>
+    <p class="settings-subtitle">Manage your profile, security, and preferences</p>
+  </header>
+
+  <div class="settings-card">
+    <p-tabs value="0">
+      <p-tablist>
+        <p-tab value="0">Profile</p-tab>
+        <p-tab value="1">Security</p-tab>
+        <p-tab value="2">Preferences</p-tab>
+        <p-tab value="3">Account</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <!-- Profile Tab -->
+        <p-tabpanel value="0">
+          <div class="tab-content">
+            <div class="section-card">
+              <div class="section-header">
+                <i class="pi pi-user"></i>
+                <span>Profile Information</span>
+              </div>
+              <div class="section-body">
+                @if (profileLoading()) {
+                <div class="loading-state">
+                  <i class="pi pi-spin pi-spinner"></i>
+                  <span>Loading profile...</span>
+                </div>
+                } @else {
+                <div class="form-grid">
+                  <div class="form-field">
+                    <label for="displayName">Display Name</label>
+                    <input
+                      pInputText
+                      id="displayName"
+                      [(ngModel)]="profileForm.displayName"
+                      placeholder="Your display name"
+                    />
+                  </div>
+
+                  <div class="form-field">
+                    <label for="email">Email Address</label>
+                    <input
+                      pInputText
+                      id="email"
+                      type="email"
+                      [(ngModel)]="profileForm.email"
+                      placeholder="your@email.com"
+                    />
+                    @if (profile()?.emailVerified) {
+                      <small class="verified"><i class="pi pi-check-circle"></i> Verified</small>
+                    } @else {
+                      <small class="not-verified"><i class="pi pi-exclamation-circle"></i> Not verified</small>
+                    }
+                  </div>
+                </div>
+
+                <div class="account-info">
+                  <div class="info-item">
+                    <span class="label">Member since</span>
+                    <span class="value">{{ memberSince() }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="label">Last login</span>
+                    <span class="value">{{ lastLogin() }}</span>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <p-button
+                    label="Save Changes"
+                    icon="pi pi-check"
+                    (click)="onSaveProfile()"
+                    [loading]="profileLoading()"
+                  />
+                </div>
+                }
+              </div>
+            </div>
+          </div>
+        </p-tabpanel>
+
+        <!-- Security Tab -->
+        <p-tabpanel value="1">
+          <div class="tab-content">
+            <!-- Password Change -->
+            <div class="section-card">
+              <div class="section-header">
+                <i class="pi pi-lock"></i>
+                <span>Change Password</span>
+              </div>
+              <div class="section-body">
+                <div class="form-grid">
+                  <div class="form-field">
+                    <label for="currentPassword">Current Password</label>
+                    <p-password
+                      id="currentPassword"
+                      [(ngModel)]="passwordForm.currentPassword"
+                      [feedback]="false"
+                      [toggleMask]="true"
+                      placeholder="Enter current password"
+                    />
+                  </div>
+
+                  <div class="form-field">
+                    <label for="newPassword">New Password</label>
+                    <p-password
+                      id="newPassword"
+                      [(ngModel)]="passwordForm.newPassword"
+                      [toggleMask]="true"
+                      placeholder="Enter new password"
+                    />
+                    <small>Minimum 8 characters</small>
+                  </div>
+
+                  <div class="form-field">
+                    <label for="confirmPassword">Confirm New Password</label>
+                    <p-password
+                      id="confirmPassword"
+                      [(ngModel)]="passwordForm.confirmPassword"
+                      [feedback]="false"
+                      [toggleMask]="true"
+                      placeholder="Confirm new password"
+                    />
+                    @if (passwordForm.newPassword && passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword) {
+                      <small class="error">Passwords do not match</small>
+                    }
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <p-button
+                    label="Change Password"
+                    icon="pi pi-key"
+                    (click)="onChangePassword()"
+                    [disabled]="!isPasswordFormValid()"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Sessions -->
+            <div class="section-card">
+              <div class="section-header">
+                <i class="pi pi-desktop"></i>
+                <span>Active Sessions</span>
+              </div>
+              <div class="section-body">
+                @if (sessionsLoading()) {
+                  <div class="loading-state">
+                    <i class="pi pi-spin pi-spinner"></i>
+                    <span>Loading sessions...</span>
+                  </div>
+                } @else {
+                  <div class="sessions-list">
+                    @for (session of sessions(); track session.id) {
+                      <div class="session-item" [class.current]="session.isCurrent">
+                        <div class="session-info">
+                          <div class="session-device">
+                            <i class="pi pi-desktop"></i>
+                            <span>{{ formatUserAgent(session.userAgent) }}</span>
+                            @if (session.isCurrent) {
+                              <span class="current-badge">Current</span>
+                            }
+                          </div>
+                          <div class="session-details">
+                            <span class="ip">{{ session.ipAddress || 'Unknown IP' }}</span>
+                            <span class="date">Created: {{ formatSessionDate(session.createdAt) }}</span>
+                          </div>
+                        </div>
+                        @if (!session.isCurrent) {
+                          <p-button
+                            icon="pi pi-times"
+                            severity="danger"
+                            [text]="true"
+                            (click)="onRevokeSession(session.id)"
+                            pTooltip="Revoke session"
+                          />
+                        }
+                      </div>
+                    } @empty {
+                      <div class="empty-state">
+                        <p>No active sessions found.</p>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="form-actions">
+                    <p-button
+                      label="Logout All Devices"
+                      icon="pi pi-sign-out"
+                      severity="danger"
+                      [outlined]="true"
+                      (click)="onLogoutAll()"
+                    />
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </p-tabpanel>
+
+        <!-- Preferences Tab -->
+        <p-tabpanel value="2">
+          <div class="tab-content">
+            <div class="section-card">
+              <div class="section-header">
+                <i class="pi pi-sliders-h"></i>
+                <span>Display Preferences</span>
+              </div>
+              <div class="section-body">
+                @if (preferencesLoading()) {
+                  <div class="loading-state">
+                    <i class="pi pi-spin pi-spinner"></i>
+                    <span>Loading preferences...</span>
+                  </div>
+                } @else {
+                  <div class="form-grid">
+                    <div class="form-field">
+                      <label for="defaultGameSystem">Default Game System</label>
+                      <p-select
+                        id="defaultGameSystem"
+                        [(ngModel)]="preferencesForm.defaultGameSystem"
+                        [options]="gameSystemOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Select game system"
+                        appendTo="body"
+                      />
+                      <small>Used when creating new miniatures</small>
+                    </div>
+
+                    <div class="form-field">
+                      <label for="defaultPaintBrand">Default Paint Brand Filter</label>
+                      <p-select
+                        id="defaultPaintBrand"
+                        [(ngModel)]="preferencesForm.defaultPaintBrand"
+                        [options]="paintBrandOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Select paint brand"
+                        appendTo="body"
+                      />
+                      <small>Filter paints by brand by default</small>
+                    </div>
+
+                    <div class="form-field">
+                      <label for="itemsPerPage">Items Per Page</label>
+                      <p-select
+                        id="itemsPerPage"
+                        [(ngModel)]="preferencesForm.itemsPerPage"
+                        [options]="itemsPerPageOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        appendTo="body"
+                      />
+                    </div>
+
+                    <div class="form-field">
+                      <label for="defaultViewMode">Default View Mode</label>
+                      <p-select
+                        id="defaultViewMode"
+                        [(ngModel)]="preferencesForm.defaultViewMode"
+                        [options]="viewModeOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        appendTo="body"
+                      />
+                    </div>
+
+                    <div class="form-field">
+                      <label for="defaultSortOrder">Default Sort Order</label>
+                      <p-select
+                        id="defaultSortOrder"
+                        [(ngModel)]="preferencesForm.defaultSortOrder"
+                        [options]="sortOrderOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        appendTo="body"
+                      />
+                    </div>
+
+                    <div class="form-field toggle-field">
+                      <label for="showCompletedMinis">Show Completed Miniatures</label>
+                      <p-toggleSwitch
+                        id="showCompletedMinis"
+                        [(ngModel)]="preferencesForm.showCompletedMinis"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="subsection">
+                    <h3 class="section-title">Notifications</h3>
+                    <div class="form-grid">
+                      <div class="form-field toggle-field">
+                        <label for="emailNotifications">Email Notifications</label>
+                        <p-toggleSwitch
+                          id="emailNotifications"
+                          [(ngModel)]="preferencesForm.emailNotifications"
+                        />
+                      </div>
+
+                      <div class="form-field toggle-field">
+                        <label for="streakReminders">Streak Reminders</label>
+                        <p-toggleSwitch
+                          id="streakReminders"
+                          [(ngModel)]="preferencesForm.streakReminders"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-actions">
+                    <p-button
+                      label="Save Preferences"
+                      icon="pi pi-check"
+                      (click)="onSavePreferences()"
+                      [loading]="preferencesLoading()"
+                    />
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </p-tabpanel>
+
+        <!-- Account Tab -->
+        <p-tabpanel value="3">
+          <div class="tab-content">
+            <div class="section-card danger">
+              <div class="section-header danger">
+                <i class="pi pi-exclamation-triangle"></i>
+                <span>Danger Zone</span>
+              </div>
+              <div class="section-body">
+                <div class="danger-section">
+                  <div class="danger-info">
+                    <h4>Delete Account</h4>
+                    <p>
+                      Once you delete your account, there is no going back. All your data including
+                      miniatures, armies, paint collections, and progress will be permanently deleted.
+                    </p>
+                  </div>
+                  <p-button
+                    label="Delete Account"
+                    icon="pi pi-trash"
+                    severity="danger"
+                    (click)="openDeleteDialog()"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</div>
+
+<!-- Delete Account Dialog -->
+<p-dialog
+  header="Delete Account"
+  [(visible)]="showDeleteDialog"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '450px' }"
+>
+  <div class="delete-dialog-content">
+    <div class="warning-icon">
+      <i class="pi pi-exclamation-triangle"></i>
+    </div>
+    <p>
+      This action cannot be undone. All your data will be permanently deleted.
+      Please enter your password to confirm.
+    </p>
+    <div class="form-field">
+      <label for="deletePassword">Password</label>
+      <p-password
+        id="deletePassword"
+        [(ngModel)]="deleteAccountPassword"
+        [feedback]="false"
+        [toggleMask]="true"
+        placeholder="Enter your password"
+      />
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Cancel"
+      [text]="true"
+      (click)="closeDeleteDialog()"
+    />
+    <p-button
+      label="Delete Account"
+      severity="danger"
+      icon="pi pi-trash"
+      (click)="onDeleteAccount()"
+      [disabled]="!deleteAccountPassword"
+    />
+  </ng-template>
+</p-dialog>

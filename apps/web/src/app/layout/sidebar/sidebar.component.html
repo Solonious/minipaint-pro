@@ -88,17 +88,32 @@
           </div>
         </div>
       }
-      <button
-        pButton
-        pRipple
-        type="button"
-        [icon]="'pi pi-sign-out'"
-        [label]="expanded() ? 'Logout' : ''"
-        class="logout-btn p-button-text"
-        (click)="onLogout()"
-        [pTooltip]="expanded() ? '' : 'Logout'"
-        tooltipPosition="right"
-      ></button>
+      <div class="user-actions">
+        <a
+          routerLink="/settings"
+          routerLinkActive="active"
+          class="settings-btn"
+          pRipple
+          [pTooltip]="expanded() ? '' : 'Settings'"
+          tooltipPosition="right"
+        >
+          <i class="pi pi-cog"></i>
+          @if (expanded()) {
+            <span>Settings</span>
+          }
+        </a>
+        <button
+          pButton
+          pRipple
+          type="button"
+          [icon]="'pi pi-sign-out'"
+          [label]="expanded() ? 'Logout' : ''"
+          class="logout-btn p-button-text"
+          (click)="onLogout()"
+          [pTooltip]="expanded() ? '' : 'Logout'"
+          tooltipPosition="right"
+        ></button>
+      </div>
     } @else {
       <a
         routerLink="/auth/login"

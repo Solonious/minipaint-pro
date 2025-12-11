@@ -18,6 +18,7 @@ import { MiniatureImagesModule } from '../modules/miniature-images/miniature-ima
 import { TutorialsModule } from '../modules/tutorials/tutorials.module';
 import { ColorSchemesModule } from '../modules/color-schemes/color-schemes.module';
 import { UnitTemplatesModule } from '../modules/unit-templates/unit-templates.module';
+import { SettingsModule } from '../modules/settings/settings.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { UnitTemplatesModule } from '../modules/unit-templates/unit-templates.mo
     TutorialsModule,
     ColorSchemesModule,
     UnitTemplatesModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [

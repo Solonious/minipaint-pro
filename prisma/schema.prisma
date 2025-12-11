@@ -51,8 +51,49 @@ model User {
   savedRecipes             SavedRecipe[]
   progress                 UserProgress?
   unitTemplates            UnitTemplate[]
+  preferences              UserPreferences?
 
   @@map("users")
+}
+
+// ============================================
+// User Preferences
+// ============================================
+model UserPreferences {
+  id                    String      @id @default(uuid())
+  userId                String      @unique
+
+  // Display preferences
+  defaultGameSystem     GameSystem?
+  defaultPaintBrand     PaintBrand?
+  itemsPerPage          Int         @default(20)
+  defaultViewMode       ViewMode    @default(GRID)
+
+  // Dashboard preferences
+  showCompletedMinis    Boolean     @default(true)
+  defaultSortField      String      @default("updatedAt")
+  defaultSortOrder      SortOrder   @default(DESC)
+
+  // Notification preferences
+  emailNotifications    Boolean     @default(true)
+  streakReminders       Boolean     @default(true)
+
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  user                  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+enum ViewMode {
+  GRID
+  LIST
+}
+
+enum SortOrder {
+  ASC
+  DESC
 }
 
 // ============================================

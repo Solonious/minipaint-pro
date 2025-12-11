@@ -8,3 +8,4 @@ export * from './miniature-library.model';
 export * from './auth.model';
 export * from './unit-template.model';
 export * from './admin.model';
+export * from './settings.model';

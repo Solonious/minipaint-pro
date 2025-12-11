@@ -111,6 +111,13 @@ export const appRoutes: Routes = [
           ),
       },
       {
+        path: 'settings',
+        loadComponent: () =>
+          import('./features/settings/settings.component').then(
+            (m) => m.SettingsComponent
+          ),
+      },
+      {
         path: 'admin/images',
         canActivate: [adminGuard],
         loadComponent: () =>
