@@ -1,7 +1,7 @@
 <aside class="sidebar" [class.collapsed]="!expanded()">
   <div class="sidebar-header">
     <div class="logo">
-      <img class="logo-icon" src="assets/icons/logo.svg" alt="Liber Pigmentum" />
+      <img class="logo-icon" [src]="logoSrc()" alt="Liber Pigmentum" />
       @if (expanded()) {
         <span class="logo-text">Liber Pigmentum</span>
       }

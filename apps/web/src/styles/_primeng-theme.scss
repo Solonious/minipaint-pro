@@ -1,10 +1,11 @@
 // MiniPaint Pro PrimeNG Theme Overrides
 
 // Override PrimeNG CSS variables to match our design system
+// Light theme (default)
 :root {
   // Primary colors
   --p-primary-color: var(--gold);
-  --p-primary-contrast-color: var(--bg-void);
+  --p-primary-contrast-color: #ffffff;
   --p-primary-hover-color: var(--gold-bright);
   --p-primary-active-color: var(--gold);
 
@@ -18,8 +19,8 @@
   --p-surface-500: var(--text-dim);
   --p-surface-600: var(--text-secondary);
   --p-surface-700: var(--text-primary);
-  --p-surface-800: #f0ede8;
-  --p-surface-900: #ffffff;
+  --p-surface-800: #2a2a30;
+  --p-surface-900: #1a1a1f;
 
   // Text colors
   --p-text-color: var(--text-primary);
@@ -37,6 +38,14 @@
 
   // Misc
   --p-overlay-background: var(--bg-panel);
+  --p-mask-background: rgba(0, 0, 0, 0.4);
+}
+
+// Dark theme overrides
+:root.dark-mode {
+  --p-primary-contrast-color: var(--bg-void);
+  --p-surface-800: #f0ede8;
+  --p-surface-900: #ffffff;
   --p-mask-background: rgba(10, 10, 15, 0.8);
 }
 
@@ -126,6 +135,40 @@
   background: var(--bg-panel);
   border-color: var(--border-dim);
   border-radius: var(--radius-md);
+}
+
+// Select/Dropdown overlay overrides
+.p-select-overlay,
+.p-dropdown-panel,
+.p-multiselect-overlay {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+
+  .p-select-option,
+  .p-dropdown-item,
+  .p-multiselect-item {
+    color: var(--text-primary);
+    background: transparent;
+
+    &:hover,
+    &:focus {
+      background: var(--bg-elevated);
+    }
+
+    &.p-select-option-selected,
+    &.p-highlight {
+      background: rgba(201, 162, 39, 0.15);
+      color: var(--gold);
+    }
+  }
+
+  .p-select-list,
+  .p-dropdown-items,
+  .p-multiselect-items {
+    background: var(--bg-panel);
+  }
 }
 
 // Progress bar overrides

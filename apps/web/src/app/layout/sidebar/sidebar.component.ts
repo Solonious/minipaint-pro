@@ -4,6 +4,7 @@ import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { RippleModule } from 'primeng/ripple';
 import { AuthService } from '../../core/services/auth.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 interface NavItem {
   label: string;
@@ -21,9 +22,16 @@ interface NavItem {
 })
 export class SidebarComponent {
   readonly authService = inject(AuthService);
+  private readonly themeService = inject(ThemeService);
 
   expanded = input(true);
   toggleSidebar = output<void>();
+
+  readonly logoSrc = computed(() => {
+    return this.themeService.theme() === 'dark'
+      ? 'assets/icons/logo.svg'
+      : 'assets/icons/logo-dark.svg';
+  });
 
   private readonly allNavItems: NavItem[] = [
     { label: 'Pile of Shame', icon: 'pi pi-th-large', route: '/pile' },

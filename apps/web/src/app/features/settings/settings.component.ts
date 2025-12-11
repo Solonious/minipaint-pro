@@ -23,6 +23,7 @@ import { TabsModule } from 'primeng/tabs';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { SettingsService } from '../../core/services/settings.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ThemeService, Theme } from '../../core/services/theme.service';
 import {
   GameSystem,
   PaintBrand,
@@ -73,6 +74,11 @@ const ITEMS_PER_PAGE_OPTIONS: SelectOption<number>[] = [
   { label: '100', value: 100 },
 ];
 
+const THEME_OPTIONS: SelectOption<Theme>[] = [
+  { label: 'Dark', value: 'dark' },
+  { label: 'Light', value: 'light' },
+];
+
 @Component({
   selector: 'app-settings',
   standalone: true,
@@ -102,6 +108,7 @@ export class SettingsComponent implements OnInit {
   private readonly messageService = inject(MessageService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly router = inject(Router);
+  private readonly themeService = inject(ThemeService);
 
   // Options
   readonly gameSystemOptions = GAME_SYSTEM_OPTIONS;
@@ -109,6 +116,10 @@ export class SettingsComponent implements OnInit {
   readonly viewModeOptions = VIEW_MODE_OPTIONS;
   readonly sortOrderOptions = SORT_ORDER_OPTIONS;
   readonly itemsPerPageOptions = ITEMS_PER_PAGE_OPTIONS;
+  readonly themeOptions = THEME_OPTIONS;
+
+  // Theme
+  readonly currentTheme = this.themeService.theme;
 
   // Service signals
   readonly profile = this.settingsService.profile;
@@ -365,6 +376,12 @@ export class SettingsComponent implements OnInit {
         detail: result.message,
       });
     }
+  }
+
+  // ==================== Theme ====================
+
+  onThemeChange(theme: Theme): void {
+    this.themeService.setTheme(theme);
   }
 
   // ==================== Helpers ====================

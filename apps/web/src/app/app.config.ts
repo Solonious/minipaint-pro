@@ -2,6 +2,8 @@ import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
+  APP_INITIALIZER,
+  inject,
 } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -14,6 +16,15 @@ import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { appRoutes } from './app.routes';
+import { ThemeService } from './core/services/theme.service';
+
+function initializeTheme(): () => void {
+  const themeService = inject(ThemeService);
+  return () => {
+    // ThemeService initializes theme in constructor
+    themeService;
+  };
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -33,5 +44,10 @@ export const appConfig: ApplicationConfig = {
       },
       ripple: true,
     }),
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeTheme,
+      multi: true,
+    },
   ],
 };
