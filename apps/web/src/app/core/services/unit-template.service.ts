@@ -27,6 +27,8 @@ export class UnitTemplateService {
   readonly loading = this.loadingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
 
+  private readonly loadedSignal = signal(false);
+
   readonly sortedByUsage = computed(() => {
     return [...this.templatesSignal()].sort((a, b) => {
       if (b.usageCount !== a.usageCount) {
@@ -36,11 +38,12 @@ export class UnitTemplateService {
     });
   });
 
-  constructor() {
-    this.loadAll();
-  }
+  readonly loaded = this.loadedSignal.asReadonly();
 
   loadAll(): void {
+    if (this.loadedSignal() || this.loadingSignal()) {
+      return;
+    }
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
@@ -51,6 +54,7 @@ export class UnitTemplateService {
         tap((templates) => {
           this.templatesSignal.set(this.mapFromApi(templates));
           this.loadingSignal.set(false);
+          this.loadedSignal.set(true);
         }),
         catchError((error) => {
           console.error('Error loading unit templates:', error);

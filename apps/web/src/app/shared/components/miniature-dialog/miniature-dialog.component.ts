@@ -986,6 +986,9 @@ export class MiniatureDialogComponent {
   }
 
   private resetDialog(): void {
+    // Ensure unit templates are loaded for search
+    this.unitTemplateService.loadAll();
+
     const mini = this.miniature();
     if (mini) {
       this.currentStep.set('form');

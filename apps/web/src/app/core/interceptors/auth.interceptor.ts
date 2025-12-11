@@ -3,6 +3,21 @@ import { inject } from '@angular/core';
 import { catchError, from, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
+// Auth endpoints that should not trigger token refresh
+const AUTH_ENDPOINTS = [
+  '/auth/refresh',
+  '/auth/login',
+  '/auth/register',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/verify-email',
+  '/auth/me',
+];
+
+function isAuthEndpoint(url: string): boolean {
+  return AUTH_ENDPOINTS.some((endpoint) => url.includes(endpoint));
+}
+
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
@@ -17,11 +32,11 @@ export const authInterceptor: HttpInterceptorFn = (
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       // Handle 401 errors (unauthorized)
-      // Exclude only refresh and login endpoints to avoid infinite loops
+      // Skip token refresh for auth endpoints and when user is not yet authenticated
       if (
         error.status === 401 &&
-        !req.url.includes('/auth/refresh') &&
-        !req.url.includes('/auth/login')
+        !isAuthEndpoint(req.url) &&
+        authService.isAuthenticated()
       ) {
         // Attempt to refresh the token
         return from(authService.refreshToken()).pipe(
