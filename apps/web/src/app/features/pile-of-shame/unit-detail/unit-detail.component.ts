@@ -6,7 +6,7 @@ import {
   signal,
   computed,
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { TagModule } from 'primeng/tag';
@@ -25,6 +25,7 @@ import { PointsBadgeComponent } from '../../../shared/components/points-badge/po
     ButtonModule,
     TooltipModule,
     TagModule,
+    RouterLink,
     PageLoaderComponent,
     StatusBadgeComponent,
     PointsBadgeComponent,
@@ -118,6 +119,17 @@ import { PointsBadgeComponent } from '../../../shared/components/points-badge/po
                   <span class="value">{{ armyName() }}</span>
                 </div>
               }
+              <div class="detail-item library-link-item">
+                <span class="label">Library</span>
+                <a
+                  class="library-link"
+                  [routerLink]="['/library', miniature()!.id]"
+                  pTooltip="View in Library"
+                >
+                  <i class="pi pi-book"></i>
+                  View Library Item
+                </a>
+              </div>
             </div>
           </section>
 
@@ -289,6 +301,27 @@ import { PointsBadgeComponent } from '../../../shared/components/points-badge/po
         .value {
           font-size: 1rem;
           color: var(--text-primary);
+        }
+      }
+
+      .library-link-item {
+        .library-link {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-sm);
+          color: var(--gold);
+          text-decoration: none;
+          font-weight: 500;
+          transition: color 0.2s ease;
+
+          i {
+            font-size: 1rem;
+          }
+
+          &:hover {
+            color: var(--gold-bright);
+            text-decoration: underline;
+          }
         }
       }
     }
