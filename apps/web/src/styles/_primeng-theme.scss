@@ -187,6 +187,44 @@
   font-weight: var(--font-medium);
 }
 
+// Tag overrides
+.p-tag {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.75rem;
+
+  // Secondary severity (used for "Pending" status)
+  &.p-tag-secondary {
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-dim);
+  }
+
+  // Info severity
+  &.p-tag-info {
+    background: rgba(58, 123, 213, 0.15);
+    color: var(--info);
+  }
+
+  // Success severity
+  &.p-tag-success {
+    background: rgba(95, 166, 122, 0.15);
+    color: var(--success);
+  }
+
+  // Warning severity
+  &.p-tag-warn {
+    background: rgba(201, 162, 39, 0.15);
+    color: var(--gold);
+  }
+
+  // Danger severity
+  &.p-tag-danger {
+    background: rgba(217, 61, 92, 0.15);
+    color: var(--error);
+  }
+}
+
 // Tooltip overrides
 .p-tooltip {
   max-width: 300px !important;
@@ -201,6 +239,104 @@
     font-family: var(--font-body);
     white-space: nowrap;
     padding: var(--space-sm) var(--space-md);
+  }
+}
+
+// DataTable overrides
+.p-datatable {
+  background: var(--bg-card);
+
+  .p-datatable-table {
+    background: var(--bg-card);
+  }
+
+  .p-datatable-header {
+    background: var(--bg-elevated);
+    border-color: var(--border-dim);
+    color: var(--text-primary);
+  }
+
+  .p-datatable-thead > tr > th {
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    border-color: var(--border-dim);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .p-datatable-tbody > tr {
+    background: var(--bg-card);
+    color: var(--text-primary);
+
+    > td {
+      border-color: var(--border-dim);
+    }
+
+    &:hover {
+      background: var(--bg-elevated);
+    }
+
+    &:focus {
+      outline-color: var(--gold);
+    }
+  }
+
+  .p-datatable-footer {
+    background: var(--bg-elevated);
+    border-color: var(--border-dim);
+    color: var(--text-primary);
+  }
+
+  // Paginator inside datatable
+  .p-paginator {
+    background: var(--bg-elevated);
+    border-color: var(--border-dim);
+    color: var(--text-primary);
+
+    .p-paginator-element {
+      color: var(--text-secondary);
+
+      &:hover {
+        background: var(--bg-card);
+        color: var(--text-primary);
+      }
+
+      &.p-disabled {
+        color: var(--text-dim);
+      }
+    }
+
+    .p-paginator-current {
+      color: var(--text-secondary);
+    }
+  }
+
+  // Empty message
+  .p-datatable-emptymessage > td {
+    background: var(--bg-card);
+    color: var(--text-secondary);
+  }
+}
+
+// Standalone Paginator overrides
+.p-paginator {
+  background: var(--bg-elevated);
+  border-color: var(--border-dim);
+
+  .p-paginator-element {
+    color: var(--text-secondary);
+
+    &:hover {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+
+    &.p-highlight {
+      background: var(--gold);
+      color: var(--bg-void);
+    }
   }
 }
 
