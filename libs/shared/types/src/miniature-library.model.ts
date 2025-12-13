@@ -17,6 +17,7 @@ export interface MiniatureImage {
   caption?: string;
   imageType: MiniatureImageType;
   order: number;
+  imageUrl?: string; // External URL (when not uploading a file)
   createdAt: string;
   updatedAt: string;
 }
@@ -26,6 +27,7 @@ export interface CreateMiniatureImageDto {
   caption?: string;
   imageType?: MiniatureImageType;
   order?: number;
+  imageUrl?: string; // External URL (alternative to file upload)
 }
 
 export interface UpdateMiniatureImageDto {

@@ -74,6 +74,30 @@ export class MiniatureImagesService {
     });
   }
 
+  async createByUrl(userId: string, dto: CreateMiniatureImageDto): Promise<MiniatureImage> {
+    // Verify miniature belongs to user
+    await this.verifyMiniatureOwnership(userId, dto.miniatureId);
+
+    // Get current max order for this miniature
+    const maxOrder = await this.prisma.miniatureImage.aggregate({
+      where: { miniatureId: dto.miniatureId },
+      _max: { order: true },
+    });
+
+    const order = dto.order ?? (maxOrder._max.order ?? -1) + 1;
+
+    // Create record with external URL
+    return this.prisma.miniatureImage.create({
+      data: {
+        miniatureId: dto.miniatureId,
+        imageUrl: dto.imageUrl,
+        caption: dto.caption,
+        imageType: dto.imageType ?? MiniatureImageType.REFERENCE,
+        order,
+      },
+    });
+  }
+
   async findByMiniature(userId: string, miniatureId: string): Promise<MiniatureImage[]> {
     await this.verifyMiniatureOwnership(userId, miniatureId);
 
@@ -112,10 +136,12 @@ export class MiniatureImagesService {
   async remove(userId: string, id: string): Promise<void> {
     const image = await this.findOne(userId, id);
 
-    // Delete file
-    const filepath = path.join(this.uploadDir, image.filename);
-    if (fs.existsSync(filepath)) {
-      fs.unlinkSync(filepath);
+    // Delete local file if it exists (not for external URL images)
+    if (image.filename) {
+      const filepath = path.join(this.uploadDir, image.filename);
+      if (fs.existsSync(filepath)) {
+        fs.unlinkSync(filepath);
+      }
     }
 
     // Delete record

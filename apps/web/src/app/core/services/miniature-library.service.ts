@@ -86,6 +86,29 @@ export class MiniatureLibraryService {
       );
   }
 
+  // Add image via external URL (no file upload)
+  addImageByUrl(dto: CreateMiniatureImageDto): Observable<MiniatureImage> {
+    const payload = {
+      ...dto,
+      imageType: dto.imageType ? dto.imageType.toUpperCase() : 'REFERENCE',
+    };
+
+    return this.http
+      .post<ApiResponse<MiniatureImage>>(`${this.apiUrl}/miniature-images`, payload)
+      .pipe(
+        map((response) => this.mapImageFromApi(response.data)),
+        tap((image) => {
+          const current = this.currentMiniatureSignal();
+          if (current) {
+            this.currentMiniatureSignal.set({
+              ...current,
+              images: [...current.images, image],
+            });
+          }
+        })
+      );
+  }
+
   updateImage(id: string, dto: UpdateMiniatureImageDto): void {
     this.http
       .patch<ApiResponse<MiniatureImage>>(`${this.apiUrl}/miniature-images/${id}`, this.mapImageToApi(dto))
@@ -256,8 +279,14 @@ export class MiniatureLibraryService {
   }
 
   // Helper to get image URL
-  getImageUrl(filename: string): string {
+  getImageUrl(filename: string | null | undefined): string {
+    if (!filename) return '';
     return `${this.apiUrl}/miniature-images/file/${filename}`;
+  }
+
+  // Helper to get proxied external URL
+  getProxiedImageUrl(externalUrl: string): string {
+    return `${this.apiUrl}/miniature-images/proxy?url=${encodeURIComponent(externalUrl)}`;
   }
 
   // Clear current miniature

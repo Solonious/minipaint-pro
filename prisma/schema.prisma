@@ -480,10 +480,11 @@ enum ImageSource {
 model MiniatureImage {
   id           String             @id @default(uuid())
   miniatureId  String
-  filename     String
-  originalName String
-  mimeType     String
-  size         Int
+  filename     String?            // null when using external URL
+  originalName String?            // null when using external URL
+  mimeType     String?            // null when using external URL
+  size         Int?               // null when using external URL
+  imageUrl     String?            // External URL (alternative to file upload)
   caption      String?
   imageType    MiniatureImageType @default(REFERENCE)
   order        Int                @default(0)

@@ -6,16 +6,18 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseInterceptors,
   UploadedFile,
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
   Res,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { Response } from 'express';
 import { MiniatureImagesService } from './miniature-images.service';
 import {
@@ -40,6 +42,12 @@ interface MulterFile {
 @Controller('miniature-images')
 export class MiniatureImagesController {
   constructor(private readonly miniatureImagesService: MiniatureImagesService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Create an image record using external URL' })
+  async createByUrl(@CurrentUser('id') userId: string, @Body() dto: CreateMiniatureImageDto) {
+    return { data: await this.miniatureImagesService.createByUrl(userId, dto) };
+  }
 
   @Post('upload')
   @ApiOperation({ summary: 'Upload an image for a miniature' })
@@ -119,5 +127,46 @@ export class MiniatureImagesController {
   async serveImage(@Param('filename') filename: string, @Res() res: Response) {
     const filepath = this.miniatureImagesService.getImageFilePath(filename);
     return res.sendFile(filepath);
+  }
+
+  @Public()
+  @Get('proxy')
+  @ApiOperation({ summary: 'Proxy external image to avoid CORS issues' })
+  @ApiQuery({ name: 'url', required: true, description: 'External image URL to proxy' })
+  async proxyImage(@Query('url') url: string, @Res() res: Response) {
+    if (!url) {
+      throw new BadRequestException('URL is required');
+    }
+
+    try {
+      // Use a more browser-like User-Agent to avoid being blocked
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+          Referer: new URL(url).origin,
+        },
+        redirect: 'follow',
+      });
+
+      if (!response.ok) {
+        throw new BadRequestException(`Failed to fetch image: ${response.status}`);
+      }
+
+      const contentType = response.headers.get('content-type') || 'image/jpeg';
+      const buffer = Buffer.from(await response.arrayBuffer());
+
+      res.set({
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=86400',
+        'Access-Control-Allow-Origin': '*',
+      });
+
+      return res.send(buffer);
+    } catch (error) {
+      throw new BadRequestException(`Failed to proxy image: ${error}`);
+    }
   }
 }

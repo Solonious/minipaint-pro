@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsEnum, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEnum, IsNumber, IsUrl } from 'class-validator';
 import { MiniatureImageType } from '@prisma/client';
 
 export class CreateMiniatureImageDto {
@@ -7,6 +7,11 @@ export class CreateMiniatureImageDto {
   @IsString()
   @IsNotEmpty()
   miniatureId: string;
+
+  @ApiPropertyOptional({ description: 'External image URL (alternative to file upload)' })
+  @IsOptional()
+  @IsUrl()
+  imageUrl?: string;
 
   @ApiPropertyOptional({ description: 'Image caption' })
   @IsOptional()

@@ -185,3 +185,131 @@ select {
 .step-paint { display: inline-flex; align-items: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); background: var(--bg-elevated); border-radius: var(--radius-sm); margin-bottom: var(--space-xs); .paint-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--border-glow); } .paint-name { font-family: var(--font-body); font-size: 0.75rem; color: var(--text-secondary); } i { font-size: 0.625rem; } &.owned i { color: var(--success); } &:not(.owned) i { color: var(--error); } }
 .step-technique { display: inline-block; padding: 2px var(--space-sm); background: rgba(201,162,39,0.1); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 0.625rem; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; }
 .no-steps { font-family: var(--font-body); font-size: 0.875rem; color: var(--text-dim); text-align: center; padding: var(--space-lg); }
+
+// Quick search section in dialogs (used in miniature-detail and potentially elsewhere)
+.quick-search-section {
+  padding: var(--space-md);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-dim);
+  .quick-search-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+    i { color: var(--gold); }
+  }
+  .quick-search-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+  }
+  .quick-search-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-glow);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    &:hover { background: var(--bg-card); border-color: var(--gold); color: var(--gold); }
+    &.gw:hover { border-color: #c70000; color: #c70000; }
+    &.google:hover { border-color: #4285f4; color: #4285f4; }
+  }
+  .search-hint { color: var(--text-dim); font-size: 0.8rem; }
+}
+
+// URL preview in dialogs
+.url-preview {
+  padding: var(--space-sm);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  text-align: center;
+  img {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 4px;
+  }
+}
+
+// Fullscreen Galleria styles
+.p-galleria-mask {
+  background: rgba(0, 0, 0, 0.95) !important;
+
+  .p-galleria {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+  }
+  .p-galleria-content {
+    background: transparent !important;
+    width: 100%;
+    height: 100%;
+  }
+  .p-galleria-item-wrapper {
+    height: calc(100vh - 100px);
+  }
+  .p-galleria-item-container {
+    height: 100%;
+  }
+  .p-galleria-item {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .p-galleria-item img {
+    max-width: 95vw !important;
+    max-height: calc(100vh - 120px) !important;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+  .p-galleria-thumbnail-wrapper {
+    background: rgba(0, 0, 0, 0.8);
+  }
+  .p-galleria-thumbnail-container {
+    background: transparent;
+  }
+  .p-galleria-close,
+  .galleria-close-btn {
+    position: fixed !important;
+    top: 16px !important;
+    right: 16px !important;
+    z-index: 100001 !important;
+    color: #fff !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    border-radius: 50% !important;
+    border: none !important;
+    outline: none !important;
+    width: 48px !important;
+    height: 48px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer !important;
+    font-size: 1.25rem;
+    transition: background 0.2s ease;
+    &:hover,
+    &:focus {
+      background: rgba(255, 255, 255, 0.3) !important;
+      color: #fff !important;
+    }
+  }
+  .p-galleria-item-prev,
+  .p-galleria-item-next {
+    color: #fff !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    &:hover {
+      background: rgba(0, 0, 0, 0.8) !important;
+    }
+  }
+}

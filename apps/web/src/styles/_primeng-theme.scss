@@ -111,6 +111,11 @@
   .p-dialog-content {
     background: var(--bg-panel);
   }
+
+  .p-dialog-footer {
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border-dim);
+  }
 }
 
 // Input overrides
